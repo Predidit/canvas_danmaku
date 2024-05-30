@@ -1,4 +1,4 @@
-import 'package:canvas_danmaku/models/danmaku_options.dart';
+import 'models/danmaku_option.dart';
 
 class DanmakuController {
   final Function(String) onAddItems;

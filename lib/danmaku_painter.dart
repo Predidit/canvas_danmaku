@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:canvas_danmaku/models/danmaku_item.dart';
+import 'models/danmaku_item.dart';
 
 class DanmakuPainter extends CustomPainter {
   final double progress;

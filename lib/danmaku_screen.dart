@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:canvas_danmaku/models/danmaku_item.dart';
-import 'package:canvas_danmaku/danmaku_painter.dart';
-import 'package:canvas_danmaku/danmaku_controller.dart';
-import 'package:canvas_danmaku/models/danmaku_options.dart';
+import 'models/danmaku_item.dart';
+import 'danmaku_painter.dart';
+import 'danmaku_controller.dart';
+import 'models/danmaku_option.dart';
 
 class DanmakuScreen extends StatefulWidget {
   // 创建Screen后返回控制器
