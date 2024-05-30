@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:ui' as ui;
 import 'models/danmaku_item.dart';
 
 class DanmakuPainter extends CustomPainter {
@@ -12,6 +13,11 @@ class DanmakuPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    final Paint strokePaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2
+      ..color = Colors.black;
+
     for (var item in danmakuItems) {
       final elapsedTime = DateTime.now().difference(item.creationTime).inMilliseconds;
       final totalDuration = danmakuDurationInSeconds * 1000;
@@ -21,36 +27,40 @@ class DanmakuPainter extends CustomPainter {
 
       item.xPosition = startPosition - (elapsedTime / totalDuration) * distance;
 
+      // 合并文字布局
+      final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle(
+        textAlign: TextAlign.left,
+        fontSize: fontSize,
+        textDirection: TextDirection.ltr,
+      ))
+        ..pushStyle(ui.TextStyle(
+          color: Colors.white,
+        ))
+        ..addText(item.content);
+
+      final ui.Paragraph paragraph = builder.build()
+        ..layout(ui.ParagraphConstraints(width: size.width));
+
+      // 黑色部分
       if (showStroke) {
-        final strokePainter = TextPainter(
-          text: TextSpan(
-            text: item.content,
-            style: TextStyle(
-              fontSize: fontSize,
-              foreground: Paint()
-                ..style = PaintingStyle.stroke
-                ..strokeWidth = 2
-                ..color = Colors.black,
-            ),
-          ),
+        final ui.ParagraphBuilder strokeBuilder = ui.ParagraphBuilder(ui.ParagraphStyle(
+          textAlign: TextAlign.left,
+          fontSize: fontSize,
           textDirection: TextDirection.ltr,
-        );
-        strokePainter.layout();
-        strokePainter.paint(canvas, Offset(item.xPosition, item.yPosition));
+        ))
+          ..pushStyle(ui.TextStyle(
+            foreground: strokePaint,
+          ))
+          ..addText(item.content);
+
+        final ui.Paragraph strokeParagraph = strokeBuilder.build()
+          ..layout(ui.ParagraphConstraints(width: size.width));
+
+        canvas.drawParagraph(strokeParagraph, Offset(item.xPosition, item.yPosition));
       }
 
-      final textPainter = TextPainter(
-        text: TextSpan(
-          text: item.content,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: fontSize,
-          ),
-        ),
-        textDirection: TextDirection.ltr,
-      );
-      textPainter.layout();
-      textPainter.paint(canvas, Offset(item.xPosition, item.yPosition));
+      // 白色部分
+      canvas.drawParagraph(paragraph, Offset(item.xPosition, item.yPosition));
     }
   }
 

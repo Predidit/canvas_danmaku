@@ -90,9 +90,9 @@ class _DanmakuScreenState extends State<DanmakuScreen>
 
   void pauseResumeDanmakus() {
     if (_animationController.isAnimating) {
-      _animationController.stop();
+      _animationController.stop(canceled: false);
     } else {
-      _animationController.repeat();
+      _animationController.forward(from: _animationController.value);
     }
   }
 
@@ -131,26 +131,22 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       for (int i = 0; i < _trackCount; i++) {
         _trackYPositions.add(i * _danmakuHeight);
       }
-      return Stack(
-        children: [
-          RepaintBoundary(
-            child: AnimatedBuilder(
-              animation: _animationController,
-              builder: (context, child) {
-                return CustomPaint(
-                  painter: DanmakuPainter(
-                    _animationController.value,
-                    _danmakuItems,
-                    _option.duration,
-                    _option.fontSize,
-                    _option.showStroke,
-                  ),
-                  child: Container(),
-                );
-              },
-            ),
-          ),
-        ],
+      return RepaintBoundary(
+        child: AnimatedBuilder(
+          animation: _animationController,
+          builder: (context, child) {
+            return CustomPaint(
+              painter: DanmakuPainter(
+                _animationController.value,
+                _danmakuItems,
+                _option.duration,
+                _option.fontSize,
+                _option.showStroke,
+              ),
+              child: Container(),
+            );
+          },
+        ),
       );
     });
   }
