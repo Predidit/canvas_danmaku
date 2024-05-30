@@ -31,14 +31,12 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   @override
   void initState() {
     super.initState();
-
+    _option = widget.option;
     final textPainter = TextPainter(
       text: TextSpan(text: '弹幕', style: TextStyle(fontSize: _option.fontSize)),
       textDirection: TextDirection.ltr,
     )..layout();
     _danmakuHeight = textPainter.height;
-
-    _option = widget.option;
     _controller = DanmakuController(
       onAddItems: addDanmaku,
       onPause: pauseResumeDanmakus,
