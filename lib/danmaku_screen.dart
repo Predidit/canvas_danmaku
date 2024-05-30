@@ -32,6 +32,12 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   void initState() {
     super.initState();
 
+    final textPainter = TextPainter(
+      text: TextSpan(text: '弹幕', style: TextStyle(fontSize: _option.fontSize)),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    _danmakuHeight = textPainter.height;
+
     _option = widget.option;
     _controller = DanmakuController(
       onAddItems: addDanmaku,
@@ -49,24 +55,13 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       duration: Duration(seconds: _option.duration),
     )..repeat();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final textPainter = TextPainter(
-        text: TextSpan(text: '弹幕', style: TextStyle(fontSize: _option.fontSize)),
-        textDirection: TextDirection.ltr,
-      )..layout();
-      _danmakuHeight = textPainter.height;
-      _trackCount =
-          (MediaQuery.of(context).size.height / _danmakuHeight).floor();
-
-      for (int i = 0; i < _trackCount; i++) {
-        _trackYPositions.add(i * _danmakuHeight);
-      }
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {});
   }
 
   void addDanmaku([String content = '弹幕']) {
     final textPainter = TextPainter(
-      text: TextSpan(text: content, style: TextStyle(fontSize: _option.fontSize)),
+      text:
+          TextSpan(text: content, style: TextStyle(fontSize: _option.fontSize)),
       textDirection: TextDirection.ltr,
     )..layout();
 
@@ -88,16 +83,6 @@ class _DanmakuScreenState extends State<DanmakuScreen>
         isAdded = true;
         break;
       }
-    }
-
-    if (!isAdded && _danmakuItems.isNotEmpty) {
-      _danmakuItems.sort((a, b) => a.yPosition.compareTo(b.yPosition));
-      _danmakuItems.add(DanmakuItem(
-          _trackYPositions.last + _danmakuHeight,
-          MediaQuery.of(context).size.width,
-          danmakuWidth,
-          creationTime,
-          content));
     }
 
     _danmakuItems.removeWhere((item) => item.xPosition + item.width < 0);
@@ -138,26 +123,34 @@ class _DanmakuScreenState extends State<DanmakuScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        RepaintBoundary(
-          child: AnimatedBuilder(
-            animation: _animationController,
-            builder: (context, child) {
-              return CustomPaint(
-                painter: DanmakuPainter(
-                  _animationController.value,
-                  _danmakuItems,
-                  _option.duration,
-                  _option.fontSize,
-                  _option.showStroke,
-                ),
-                child: Container(),
-              );
-            },
+    return LayoutBuilder(builder: (context, constraints) {
+      // 为字幕留出余量
+      _trackCount = (constraints.maxHeight / _danmakuHeight).floor() - 1;
+
+      for (int i = 0; i < _trackCount; i++) {
+        _trackYPositions.add(i * _danmakuHeight);
+      }
+      return Stack(
+        children: [
+          RepaintBoundary(
+            child: AnimatedBuilder(
+              animation: _animationController,
+              builder: (context, child) {
+                return CustomPaint(
+                  painter: DanmakuPainter(
+                    _animationController.value,
+                    _danmakuItems,
+                    _option.duration,
+                    _option.fontSize,
+                    _option.showStroke,
+                  ),
+                  child: Container(),
+                );
+              },
+            ),
           ),
-        ),
-      ],
-    );
+        ],
+      );
+    });
   }
 }
