@@ -120,7 +120,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   bool _canAddToTrack(double yPosition, double newDanmakuWidth) {
     for (var item in _danmakuItems) {
       if (item.yPosition == yPosition) {
-        final existingEndPosition = item.xPosition;
+        final existingEndPosition = item.xPosition + item.width;
         if (MediaQuery.of(context).size.width - existingEndPosition <
             newDanmakuWidth) {
           return false;
