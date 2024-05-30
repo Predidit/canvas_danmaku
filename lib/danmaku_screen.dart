@@ -127,6 +127,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       // 为字幕留出余量
       _trackCount = (constraints.maxHeight / _danmakuHeight).floor() - 1;
 
+      _trackYPositions.clear();
       for (int i = 0; i < _trackCount; i++) {
         _trackYPositions.add(i * _danmakuHeight);
       }
