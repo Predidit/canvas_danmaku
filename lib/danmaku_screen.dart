@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'models/danmaku_item.dart';
 import 'danmaku_painter.dart';
 import 'danmaku_controller.dart';
+import 'dart:ui' as ui;
 import 'models/danmaku_option.dart';
 
 class DanmakuScreen extends StatefulWidget {
@@ -67,16 +68,53 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     final danmakuWidth = textPainter.width;
     final creationTime = DateTime.now();
 
+    final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle(
+      textAlign: TextAlign.left,
+      fontSize: _option.fontSize,
+      textDirection: TextDirection.ltr,
+    ))
+      ..pushStyle(ui.TextStyle(
+        color: Colors.white,
+      ))
+      ..addText(content);
+
+    final ui.Paragraph paragraph = builder.build()
+      ..layout(ui.ParagraphConstraints(width: danmakuWidth));
+
+    ui.Paragraph? strokeParagraph;
+    if (_option.showStroke) {
+      final Paint strokePaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2
+        ..color = Colors.black;
+
+      final ui.ParagraphBuilder strokeBuilder =
+          ui.ParagraphBuilder(ui.ParagraphStyle(
+        textAlign: TextAlign.left,
+        fontSize: _option.fontSize,
+        textDirection: TextDirection.ltr,
+      ))
+            ..pushStyle(ui.TextStyle(
+              foreground: strokePaint,
+            ))
+            ..addText(content);
+
+      strokeParagraph = strokeBuilder.build()
+        ..layout(ui.ParagraphConstraints(width: danmakuWidth));
+    }
+
     for (double yPosition in _trackYPositions) {
       bool canAddToTrack = _canAddToTrack(yPosition, danmakuWidth);
 
       if (canAddToTrack) {
         _danmakuItems.add(DanmakuItem(
-            yPosition,
-            MediaQuery.of(context).size.width,
-            danmakuWidth,
-            creationTime,
-            content));
+            yPosition: yPosition,
+            xPosition: MediaQuery.of(context).size.width,
+            width: danmakuWidth,
+            creationTime: creationTime,
+            content: content,
+            paragraph: paragraph,
+            strokeParagraph: strokeParagraph));
         break;
       }
     }
@@ -88,6 +126,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     setState(() {
       _running = !_running;
     });
+
     /// 弃用 此方法会导致恢复后动画无法正常刷新
     // if (_animationController.isAnimating) {
     //   _animationController.stop(canceled: false);
@@ -137,13 +176,12 @@ class _DanmakuScreenState extends State<DanmakuScreen>
           builder: (context, child) {
             return CustomPaint(
               painter: DanmakuPainter(
-                _animationController.value,
-                _danmakuItems,
-                _option.duration,
-                _option.fontSize,
-                _option.showStroke,
-                _running
-              ),
+                  _animationController.value,
+                  _danmakuItems,
+                  _option.duration,
+                  _option.fontSize,
+                  _option.showStroke,
+                  _running),
               child: Container(),
             );
           },

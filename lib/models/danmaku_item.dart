@@ -1,9 +1,22 @@
-class DanmakuItem {
-  final double yPosition;
-  final double width;
-  final DateTime creationTime;
-  final String content;
-  double xPosition;
+import 'dart:ui' as ui;
 
-  DanmakuItem(this.yPosition, this.xPosition, this.width, this.creationTime, this.content);
+class DanmakuItem {
+  final String content;
+  final DateTime creationTime;
+  final double width;
+  double xPosition;
+  double yPosition;
+
+  ui.Paragraph? paragraph;
+  ui.Paragraph? strokeParagraph;
+
+  DanmakuItem({
+    required this.content,
+    required this.creationTime,
+    required this.width,
+    this.xPosition = 0,
+    this.yPosition = 0,
+    this.paragraph,
+    this.strokeParagraph,
+  });
 }
