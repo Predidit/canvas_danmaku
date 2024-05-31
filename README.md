@@ -20,7 +20,7 @@ and the Flutter guide for
 ``` yaml
 dependencies: 
   # 请使用Git引用此包
-  ns_danmaku: 
+  canvas_danmaku: 
     git: 
         url: https://github.com/Predidit/canvas_danmaku.git
         ref: main
