@@ -38,9 +38,9 @@ class DanmakuPainter extends CustomPainter {
           textDirection: TextDirection.ltr,
         ))
           ..pushStyle(ui.TextStyle(
-            color: Colors.white,
+            color: item.content.color,
           ))
-          ..addText(item.content);
+          ..addText(item.content.text);
 
         item.paragraph = builder.build()
           ..layout(ui.ParagraphConstraints(width: size.width));
@@ -57,7 +57,7 @@ class DanmakuPainter extends CustomPainter {
             ..pushStyle(ui.TextStyle(
               foreground: strokePaint,
             ))
-            ..addText(item.content);
+            ..addText(item.content.text);
 
           item.strokeParagraph = strokeBuilder.build()
             ..layout(ui.ParagraphConstraints(width: size.width));

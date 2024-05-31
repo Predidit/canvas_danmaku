@@ -4,6 +4,7 @@ import 'danmaku_painter.dart';
 import 'danmaku_controller.dart';
 import 'dart:ui' as ui;
 import 'models/danmaku_option.dart';
+import '/models/danmaku_content_item.dart';
 
 class DanmakuScreen extends StatefulWidget {
   // 创建Screen后返回控制器
@@ -63,14 +64,14 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {});
   }
 
-  void addDanmaku([String content = '弹幕']) {
+  void addDanmaku(DanmakuContentItem content) {
     if (!_running) {
       return;
     }
     // 在这里提前创建 Paragraph 缓存防止卡顿
     final textPainter = TextPainter(
       text:
-          TextSpan(text: content, style: TextStyle(fontSize: _option.fontSize)),
+          TextSpan(text: content.text, style: TextStyle(fontSize: _option.fontSize)),
       textDirection: TextDirection.ltr,
     )..layout();
 
@@ -82,9 +83,9 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       textDirection: TextDirection.ltr,
     ))
       ..pushStyle(ui.TextStyle(
-        color: Colors.white,
+        color: content.color,
       ))
-      ..addText(content);
+      ..addText(content.text);
 
     final ui.Paragraph paragraph = builder.build()
       ..layout(ui.ParagraphConstraints(width: danmakuWidth));
@@ -105,7 +106,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
             ..pushStyle(ui.TextStyle(
               foreground: strokePaint,
             ))
-            ..addText(content);
+            ..addText(content.text);
 
       strokeParagraph = strokeBuilder.build()
         ..layout(ui.ParagraphConstraints(width: danmakuWidth));

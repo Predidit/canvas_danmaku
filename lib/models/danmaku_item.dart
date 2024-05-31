@@ -1,7 +1,8 @@
 import 'dart:ui' as ui;
+import '/models/danmaku_content_item.dart';
 
 class DanmakuItem {
-  final String content;
+  final DanmakuContentItem content;
   final int creationTime;
   final double width;
   double xPosition;

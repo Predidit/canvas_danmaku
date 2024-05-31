@@ -1,7 +1,8 @@
 import 'models/danmaku_option.dart';
+import '/models/danmaku_content_item.dart';
 
 class DanmakuController {
-  final Function(String) onAddItems;
+  final Function(DanmakuContentItem) onAddItems;
   final Function onPause;
   final Function onResume;
   final Function onClear;
@@ -43,7 +44,7 @@ class DanmakuController {
   }
 
   /// 添加弹幕
-  void addItems(String item) {
+  void addItems(DanmakuContentItem item) {
     onAddItems.call(item);
   }
 }
