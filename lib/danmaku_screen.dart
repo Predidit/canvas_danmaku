@@ -24,7 +24,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   late DanmakuController _controller;
   late AnimationController _animationController;
   DanmakuOption _option = DanmakuOption();
-  List<DanmakuItem> _danmakuItems = [];
+  final List<DanmakuItem> _danmakuItems = [];
   late double _danmakuHeight;
   late int _trackCount;
   final List<double> _trackYPositions = [];
@@ -59,6 +59,9 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   }
 
   void addDanmaku([String content = '弹幕']) {
+    if (!_running) {
+      return;
+    }
     final textPainter = TextPainter(
       text:
           TextSpan(text: content, style: TextStyle(fontSize: _option.fontSize)),
@@ -119,6 +122,10 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       }
     }
 
+    if (_danmakuItems.isNotEmpty && !_animationController.isAnimating) {
+      _animationController.repeat();
+    }
+
     _danmakuItems.removeWhere((item) => item.xPosition + item.width < 0);
   }
 
@@ -139,6 +146,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     setState(() {
       _danmakuItems.clear();
     });
+    _animationController.stop();
   }
 
   bool _canAddToTrack(double yPosition, double newDanmakuWidth) {
