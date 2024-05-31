@@ -27,6 +27,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   late double _danmakuHeight;
   late int _trackCount;
   final List<double> _trackYPositions = [];
+  bool _running = true;
 
   @override
   void initState() {
@@ -66,8 +67,6 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     final danmakuWidth = textPainter.width;
     final creationTime = DateTime.now();
 
-    bool isAdded = false;
-
     for (double yPosition in _trackYPositions) {
       bool canAddToTrack = _canAddToTrack(yPosition, danmakuWidth);
 
@@ -78,7 +77,6 @@ class _DanmakuScreenState extends State<DanmakuScreen>
             danmakuWidth,
             creationTime,
             content));
-        isAdded = true;
         break;
       }
     }
@@ -87,6 +85,9 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   }
 
   void pauseResumeDanmakus() {
+    setState(() {
+      _running = !_running;
+    });
     if (_animationController.isAnimating) {
       _animationController.stop(canceled: false);
     } else {
@@ -140,6 +141,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
                 _option.duration,
                 _option.fontSize,
                 _option.showStroke,
+                _running
               ),
               child: Container(),
             );

@@ -8,8 +8,9 @@ class DanmakuPainter extends CustomPainter {
   final int danmakuDurationInSeconds;
   final double fontSize;
   final bool showStroke;
+  final bool running;
 
-  DanmakuPainter(this.progress, this.danmakuItems, this.danmakuDurationInSeconds, this.fontSize, this.showStroke);
+  DanmakuPainter(this.progress, this.danmakuItems, this.danmakuDurationInSeconds, this.fontSize, this.showStroke, this.running);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -66,6 +67,6 @@ class DanmakuPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return true;
+    return running;
   }
 }
