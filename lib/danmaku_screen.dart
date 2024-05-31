@@ -143,12 +143,11 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       _startTick();
     }
 
-    /// 弃用 此方法会导致恢复后动画无法正常刷新
-    // if (_animationController.isAnimating) {
-    //   _animationController.stop(canceled: false);
-    // } else {
-    //   _animationController.forward(from: _animationController.value);
-    // }
+    if (_animationController.isAnimating) {
+      _animationController.stop();
+    } else {
+      _animationController.repeat();
+    }
   }
 
   void clearDanmakus() {
@@ -204,21 +203,24 @@ class _DanmakuScreenState extends State<DanmakuScreen>
         _trackYPositions.add(i * _danmakuHeight);
       }
       return RepaintBoundary(
-        child: AnimatedBuilder(
-          animation: _animationController,
-          builder: (context, child) {
-            return CustomPaint(
-              painter: DanmakuPainter(
-                  _animationController.value,
-                  _danmakuItems,
-                  _option.duration,
-                  _option.fontSize,
-                  _option.showStroke,
-                  _running,
-                  _tick),
-              child: Container(),
-            );
-          },
+        child: Opacity(
+          opacity: _option.opacity,
+          child: AnimatedBuilder(
+            animation: _animationController,
+            builder: (context, child) {
+              return CustomPaint(
+                painter: DanmakuPainter(
+                    _animationController.value,
+                    _danmakuItems,
+                    _option.duration,
+                    _option.fontSize,
+                    _option.showStroke,
+                    _running,
+                    _tick),
+                child: Container(),
+              );
+            },
+          ),
         ),
       );
     });
