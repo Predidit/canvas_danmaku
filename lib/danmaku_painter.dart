@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dart:ui' as ui;
 import 'models/danmaku_item.dart';
+import '/utils/utils.dart';
 
 class DanmakuPainter extends CustomPainter {
   final double progress;
@@ -11,15 +11,17 @@ class DanmakuPainter extends CustomPainter {
   final bool running;
   final int tick;
 
-  DanmakuPainter(this.progress, this.danmakuItems, this.danmakuDurationInSeconds, this.fontSize, this.showStroke, this.running, this.tick);
+  DanmakuPainter(
+      this.progress,
+      this.danmakuItems,
+      this.danmakuDurationInSeconds,
+      this.fontSize,
+      this.showStroke,
+      this.running,
+      this.tick);
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint strokePaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2
-      ..color = Colors.black;
-
     for (var item in danmakuItems) {
       // final elapsedTime = DateTime.now().difference(item.creationTime).inMilliseconds;
       final elapsedTime = tick - item.creationTime;
@@ -31,43 +33,21 @@ class DanmakuPainter extends CustomPainter {
       item.xPosition = startPosition - (elapsedTime / totalDuration) * distance;
 
       // 如果 Paragraph 没有缓存，则创建并缓存它
-      if (item.paragraph == null) {
-        final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle(
-          textAlign: TextAlign.left,
-          fontSize: fontSize,
-          textDirection: TextDirection.ltr,
-        ))
-          ..pushStyle(ui.TextStyle(
-            color: item.content.color,
-          ))
-          ..addText(item.content.text);
-
-        item.paragraph = builder.build()
-          ..layout(ui.ParagraphConstraints(width: size.width));
-      }
+      item.paragraph ??=
+          Utils.generateParagraph(item.content, size.width, fontSize);
 
       // 黑色部分
       if (showStroke) {
-        if (item.strokeParagraph == null) {
-          final ui.ParagraphBuilder strokeBuilder = ui.ParagraphBuilder(ui.ParagraphStyle(
-            textAlign: TextAlign.left,
-            fontSize: fontSize,
-            textDirection: TextDirection.ltr,
-          ))
-            ..pushStyle(ui.TextStyle(
-              foreground: strokePaint,
-            ))
-            ..addText(item.content.text);
+        item.strokeParagraph ??=
+            Utils.generateStrokeParagraph(item.content, size.width, fontSize);
 
-          item.strokeParagraph = strokeBuilder.build()
-            ..layout(ui.ParagraphConstraints(width: size.width));
-        }
-
-        canvas.drawParagraph(item.strokeParagraph!, Offset(item.xPosition, item.yPosition));
+        canvas.drawParagraph(
+            item.strokeParagraph!, Offset(item.xPosition, item.yPosition));
       }
 
       // 白色部分
-      canvas.drawParagraph(item.paragraph!, Offset(item.xPosition, item.yPosition));
+      canvas.drawParagraph(
+          item.paragraph!, Offset(item.xPosition, item.yPosition));
     }
   }
 

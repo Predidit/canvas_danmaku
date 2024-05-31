@@ -1,3 +1,4 @@
+import 'package:canvas_danmaku/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'models/danmaku_item.dart';
 import 'danmaku_painter.dart';
@@ -74,42 +75,13 @@ class _DanmakuScreenState extends State<DanmakuScreen>
           TextSpan(text: content.text, style: TextStyle(fontSize: _option.fontSize)),
       textDirection: TextDirection.ltr,
     )..layout();
-
     final danmakuWidth = textPainter.width;
-
-    final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle(
-      textAlign: TextAlign.left,
-      fontSize: _option.fontSize,
-      textDirection: TextDirection.ltr,
-    ))
-      ..pushStyle(ui.TextStyle(
-        color: content.color,
-      ))
-      ..addText(content.text);
-
-    final ui.Paragraph paragraph = builder.build()
-      ..layout(ui.ParagraphConstraints(width: danmakuWidth));
-
+    
+    final ui.Paragraph paragraph = Utils.generateParagraph(content, danmakuWidth, _option.fontSize);
+  
     ui.Paragraph? strokeParagraph;
     if (_option.showStroke) {
-      final Paint strokePaint = Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2
-        ..color = Colors.black;
-
-      final ui.ParagraphBuilder strokeBuilder =
-          ui.ParagraphBuilder(ui.ParagraphStyle(
-        textAlign: TextAlign.left,
-        fontSize: _option.fontSize,
-        textDirection: TextDirection.ltr,
-      ))
-            ..pushStyle(ui.TextStyle(
-              foreground: strokePaint,
-            ))
-            ..addText(content.text);
-
-      strokeParagraph = strokeBuilder.build()
-        ..layout(ui.ParagraphConstraints(width: danmakuWidth));
+      strokeParagraph = Utils.generateStrokeParagraph(content, danmakuWidth, _option.fontSize);
     }
 
     for (double yPosition in _trackYPositions) {
