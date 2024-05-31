@@ -88,11 +88,12 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     setState(() {
       _running = !_running;
     });
-    if (_animationController.isAnimating) {
-      _animationController.stop(canceled: false);
-    } else {
-      _animationController.forward(from: _animationController.value);
-    }
+    /// 弃用 此方法会导致恢复后动画无法正常刷新
+    // if (_animationController.isAnimating) {
+    //   _animationController.stop(canceled: false);
+    // } else {
+    //   _animationController.forward(from: _animationController.value);
+    // }
   }
 
   void clearDanmakus() {
