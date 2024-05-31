@@ -28,11 +28,16 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   late double _danmakuHeight;
   late int _trackCount;
   final List<double> _trackYPositions = [];
+  // 内部计时器
+  late int _tick;
   bool _running = true;
 
   @override
   void initState() {
     super.initState();
+    // 计时器初始化
+    _tick = 0;
+    _startTick();
     _option = widget.option;
     final textPainter = TextPainter(
       text: TextSpan(text: '弹幕', style: TextStyle(fontSize: _option.fontSize)),
@@ -62,6 +67,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     if (!_running) {
       return;
     }
+    // 在这里提前创建 Paragraph 缓存防止卡顿
     final textPainter = TextPainter(
       text:
           TextSpan(text: content, style: TextStyle(fontSize: _option.fontSize)),
@@ -69,7 +75,6 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     )..layout();
 
     final danmakuWidth = textPainter.width;
-    final creationTime = DateTime.now();
 
     final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle(
       textAlign: TextAlign.left,
@@ -114,7 +119,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
             yPosition: yPosition,
             xPosition: MediaQuery.of(context).size.width,
             width: danmakuWidth,
-            creationTime: creationTime,
+            creationTime: _tick,
             content: content,
             paragraph: paragraph,
             strokeParagraph: strokeParagraph));
@@ -133,6 +138,10 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     setState(() {
       _running = !_running;
     });
+    if (_running) {
+      // 重启计时器
+      _startTick();
+    }
 
     /// 弃用 此方法会导致恢复后动画无法正常刷新
     // if (_animationController.isAnimating) {
@@ -162,6 +171,22 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     return true;
   }
 
+  // 基于Stopwatch的计时器同步
+  void _startTick() async {
+    final stopwatch = Stopwatch()..start(); 
+    int lastElapsedTime = 0;
+
+    while (_running) {
+      await Future.delayed(const Duration(milliseconds: 1)); 
+      int currentElapsedTime = stopwatch.elapsedMilliseconds; // 获取当前的已用时间
+      int delta = currentElapsedTime - lastElapsedTime; // 计算自上次记录以来的时间差
+      _tick += delta; 
+      lastElapsedTime = currentElapsedTime; // 更新最后记录的时间
+    }
+
+    stopwatch.stop(); 
+  }
+
   @override
   void dispose() {
     _animationController.dispose();
@@ -189,7 +214,8 @@ class _DanmakuScreenState extends State<DanmakuScreen>
                   _option.duration,
                   _option.fontSize,
                   _option.showStroke,
-                  _running),
+                  _running,
+                  _tick),
               child: Container(),
             );
           },

@@ -2,7 +2,7 @@ import 'dart:ui' as ui;
 
 class DanmakuItem {
   final String content;
-  final DateTime creationTime;
+  final int creationTime;
   final double width;
   double xPosition;
   double yPosition;

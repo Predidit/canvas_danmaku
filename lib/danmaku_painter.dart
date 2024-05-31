@@ -9,8 +9,9 @@ class DanmakuPainter extends CustomPainter {
   final double fontSize;
   final bool showStroke;
   final bool running;
+  final int tick;
 
-  DanmakuPainter(this.progress, this.danmakuItems, this.danmakuDurationInSeconds, this.fontSize, this.showStroke, this.running);
+  DanmakuPainter(this.progress, this.danmakuItems, this.danmakuDurationInSeconds, this.fontSize, this.showStroke, this.running, this.tick);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -20,7 +21,8 @@ class DanmakuPainter extends CustomPainter {
       ..color = Colors.black;
 
     for (var item in danmakuItems) {
-      final elapsedTime = DateTime.now().difference(item.creationTime).inMilliseconds;
+      // final elapsedTime = DateTime.now().difference(item.creationTime).inMilliseconds;
+      final elapsedTime = tick - item.creationTime;
       final totalDuration = danmakuDurationInSeconds * 1000;
       final startPosition = size.width;
       final endPosition = -item.width;
