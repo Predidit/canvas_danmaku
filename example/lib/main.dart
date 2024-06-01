@@ -51,12 +51,32 @@ class _HomePageState extends State<HomePage> {
         actions: [
           IconButton(
             icon: Icon(Icons.add),
-            tooltip: 'Add',
+            tooltip: 'Add Scroll',
             onPressed: () {
               _controller.addDanmaku(
                 DanmakuContentItem(
                     "这是一条超长弹幕ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789这是一条超长的弹幕，这条弹幕会超出屏幕宽度",
                     color: getRandomColor()),
+              );
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.add),
+            tooltip: 'Add Top',
+            onPressed: () {
+              _controller.addDanmaku(
+                DanmakuContentItem("这是一条顶部弹幕",
+                    color: getRandomColor(), type: DanmakuItemType.top),
+              );
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.add),
+            tooltip: 'Add Bottom',
+            onPressed: () {
+              _controller.addDanmaku(
+                DanmakuContentItem("这是一条底部弹幕",
+                    color: getRandomColor(), type: DanmakuItemType.bottom),
               );
             },
           ),

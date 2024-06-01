@@ -1,7 +1,8 @@
 import 'package:canvas_danmaku/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'models/danmaku_item.dart';
-import 'danmaku_painter.dart';
+import 'scroll_danmaku_painter.dart';
+import 'static_danmaku_painter.dart';
 import 'danmaku_controller.dart';
 import 'dart:ui' as ui;
 import 'models/danmaku_option.dart';
@@ -24,9 +25,15 @@ class DanmakuScreen extends StatefulWidget {
 class _DanmakuScreenState extends State<DanmakuScreen>
     with SingleTickerProviderStateMixin {
   late DanmakuController _controller;
+  // 弹幕控制器
   late AnimationController _animationController;
   DanmakuOption _option = DanmakuOption();
-  final List<DanmakuItem> _danmakuItems = [];
+  // 滚动弹幕
+  final List<DanmakuItem> _scrollDanmakuItems = [];
+  // 顶部弹幕
+  final List<DanmakuItem> _topDanmakuItems = [];
+  // 底部弹幕
+  final List<DanmakuItem> _bottomDanmakuItems = [];
   late double _danmakuHeight;
   late int _trackCount;
   final List<double> _trackYPositions = [];
@@ -89,26 +96,70 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     }
 
     for (double yPosition in _trackYPositions) {
-      bool canAddToTrack = _canAddToTrack(yPosition, danmakuWidth);
+      if (content.type == DanmakuItemType.scroll) {
+        bool scrollCanAddToTrack =
+            _scrollCanAddToTrack(yPosition, danmakuWidth);
 
-      if (canAddToTrack) {
-        _danmakuItems.add(DanmakuItem(
-            yPosition: yPosition,
-            xPosition: MediaQuery.of(context).size.width,
-            width: danmakuWidth,
-            creationTime: _tick,
-            content: content,
-            paragraph: paragraph,
-            strokeParagraph: strokeParagraph));
-        break;
+        if (scrollCanAddToTrack) {
+          _scrollDanmakuItems.add(DanmakuItem(
+              yPosition: yPosition,
+              xPosition: MediaQuery.of(context).size.width,
+              width: danmakuWidth,
+              creationTime: _tick,
+              content: content,
+              paragraph: paragraph,
+              strokeParagraph: strokeParagraph));
+          break;
+        }
+      }
+
+      if (content.type == DanmakuItemType.top) {
+        bool topCanAddToTrack = _topCanAddToTrack(yPosition);
+
+        if (topCanAddToTrack) {
+          _topDanmakuItems.add(DanmakuItem(
+              yPosition: yPosition,
+              xPosition: MediaQuery.of(context).size.width,
+              width: danmakuWidth,
+              creationTime: _tick,
+              content: content,
+              paragraph: paragraph,
+              strokeParagraph: strokeParagraph));
+          break;
+        }
+      }
+
+      if (content.type == DanmakuItemType.bottom) {
+        bool bottomCanAddToTrack = _bottomCanAddToTrack(yPosition);
+
+        if (bottomCanAddToTrack) {
+          _bottomDanmakuItems.add(DanmakuItem(
+              yPosition: yPosition,
+              xPosition: MediaQuery.of(context).size.width,
+              width: danmakuWidth,
+              creationTime: _tick,
+              content: content,
+              paragraph: paragraph,
+              strokeParagraph: strokeParagraph));
+          break;
+        }
       }
     }
 
-    if (_danmakuItems.isNotEmpty && !_animationController.isAnimating) {
+    if ((_scrollDanmakuItems.isNotEmpty ||
+            _topDanmakuItems.isNotEmpty ||
+            _bottomDanmakuItems.isNotEmpty) &&
+        !_animationController.isAnimating) {
       _animationController.repeat();
     }
-
-    _danmakuItems.removeWhere((item) => item.xPosition + item.width < 0);
+    // 移除屏幕外滚动弹幕
+    _scrollDanmakuItems.removeWhere((item) => item.xPosition + item.width < 0);
+    // 移除顶部弹幕
+    _topDanmakuItems.removeWhere(
+        (item) => ((_tick - item.creationTime) > (_option.duration * 1000)));
+    // 移除底部弹幕
+    _bottomDanmakuItems.removeWhere(
+        (item) => ((_tick - item.creationTime) > (_option.duration * 1000)));
   }
 
   void pauseResumeDanmakus() {
@@ -134,7 +185,23 @@ class _DanmakuScreenState extends State<DanmakuScreen>
 
     /// 清理已经存在的 Paragraph 缓存
     _animationController.stop();
-    for (DanmakuItem item in _danmakuItems) {
+    for (DanmakuItem item in _scrollDanmakuItems) {
+      if (item.paragraph != null) {
+        item.paragraph = null;
+      }
+      if (item.strokeParagraph != null) {
+        item.strokeParagraph = null;
+      }
+    }
+    for (DanmakuItem item in _topDanmakuItems) {
+      if (item.paragraph != null) {
+        item.paragraph = null;
+      }
+      if (item.strokeParagraph != null) {
+        item.strokeParagraph = null;
+      }
+    }
+    for (DanmakuItem item in _bottomDanmakuItems) {
       if (item.paragraph != null) {
         item.paragraph = null;
       }
@@ -149,19 +216,42 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   /// 清空弹幕
   void clearDanmakus() {
     setState(() {
-      _danmakuItems.clear();
+      _scrollDanmakuItems.clear();
+      _topDanmakuItems.clear();
+      _bottomDanmakuItems.clear();
     });
     _animationController.stop();
   }
 
-  bool _canAddToTrack(double yPosition, double newDanmakuWidth) {
-    for (var item in _danmakuItems) {
+  /// 确定滚动弹幕是否可以添加
+  bool _scrollCanAddToTrack(double yPosition, double newDanmakuWidth) {
+    for (var item in _scrollDanmakuItems) {
       if (item.yPosition == yPosition) {
         final existingEndPosition = item.xPosition + item.width;
         if (MediaQuery.of(context).size.width - existingEndPosition <
             newDanmakuWidth) {
           return false;
         }
+      }
+    }
+    return true;
+  }
+
+  /// 确定顶部弹幕是否可以添加
+  bool _topCanAddToTrack(double yPosition) {
+    for (var item in _topDanmakuItems) {
+      if (item.yPosition == yPosition) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /// 确定底部弹幕是否可以添加
+  bool _bottomCanAddToTrack(double yPosition) {
+    for (var item in _bottomDanmakuItems) {
+      if (item.yPosition == yPosition) {
+        return false;
       }
     }
     return true;
@@ -199,26 +289,47 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       for (int i = 0; i < _trackCount; i++) {
         _trackYPositions.add(i * _danmakuHeight);
       }
-      return RepaintBoundary(
-        child: Opacity(
-          opacity: _option.opacity,
-          child: AnimatedBuilder(
+      return Opacity(
+        opacity: _option.opacity,
+        child: Stack(children: [
+          RepaintBoundary(
+              child: AnimatedBuilder(
             animation: _animationController,
             builder: (context, child) {
               return CustomPaint(
-                painter: DanmakuPainter(
+                painter: ScrollDanmakuPainter(
                     _animationController.value,
-                    _danmakuItems,
+                    _scrollDanmakuItems,
                     _option.duration,
                     _option.fontSize,
                     _option.showStroke,
+                    _danmakuHeight,
                     _running,
                     _tick),
                 child: Container(),
               );
             },
-          ),
-        ),
+          )),
+          RepaintBoundary(
+              child: AnimatedBuilder(
+            animation: _animationController,
+            builder: (context, child) {
+              return CustomPaint(
+                painter: StaticDanmakuPainter(
+                    _animationController.value,
+                    _topDanmakuItems,
+                    _bottomDanmakuItems,
+                    _option.duration,
+                    _option.fontSize,
+                    _option.showStroke,
+                    _danmakuHeight,
+                    _running,
+                    _tick),
+                child: Container(),
+              );
+            },
+          )),
+        ]),
       );
     });
   }

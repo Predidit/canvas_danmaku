@@ -2,27 +2,30 @@ import 'package:flutter/material.dart';
 import 'models/danmaku_item.dart';
 import '/utils/utils.dart';
 
-class DanmakuPainter extends CustomPainter {
+class ScrollDanmakuPainter extends CustomPainter {
   final double progress;
-  final List<DanmakuItem> danmakuItems;
+  final List<DanmakuItem> scrollDanmakuItems;
   final int danmakuDurationInSeconds;
   final double fontSize;
   final bool showStroke;
+  final double danmakuHeight;
   final bool running;
   final int tick;
 
-  DanmakuPainter(
+  ScrollDanmakuPainter(
       this.progress,
-      this.danmakuItems,
+      this.scrollDanmakuItems,
       this.danmakuDurationInSeconds,
       this.fontSize,
       this.showStroke,
+      this.danmakuHeight,
       this.running,
       this.tick);
 
   @override
   void paint(Canvas canvas, Size size) {
-    for (var item in danmakuItems) {
+    /// 绘制滚动弹幕
+    for (var item in scrollDanmakuItems) {
       // final elapsedTime = DateTime.now().difference(item.creationTime).inMilliseconds;
       final elapsedTime = tick - item.creationTime;
       final totalDuration = danmakuDurationInSeconds * 1000;

@@ -56,7 +56,7 @@ class _DanmakuPageState extends State<DanmakuPage> {
 
 ## 说明
 
-本项目接口设计参考 `ns_danmaku` ，支持 `ns_danmaku` 除顶部弹幕和底部弹幕的大部分功能。本项目与其的区别在于弹幕绘制原理。
+本项目接口设计参考 `ns_danmaku` ，支持 `ns_danmaku` 的大部分功能。本项目与其的区别在于弹幕绘制原理。
 
 `ns_danmaku` 将每条弹幕作为单个 `widget` 进行维护。这样较为灵活，但同时有着较高的性能开销。
 
