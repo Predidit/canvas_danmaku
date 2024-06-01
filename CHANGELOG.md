@@ -1,3 +1,6 @@
+## 0.0.5
+
+* Better performance
 ## 0.0.4
 
 * Add dartdoc comments

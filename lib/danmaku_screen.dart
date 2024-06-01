@@ -26,24 +26,37 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     with SingleTickerProviderStateMixin {
   /// 弹幕控制器
   late DanmakuController _controller;
+
   /// 弹幕动画控制器
   late AnimationController _animationController;
+
+  /// 静态弹幕动画控制器
+  late AnimationController _staticAnimationController;
+
   /// 弹幕配置
   DanmakuOption _option = DanmakuOption();
+
   /// 滚动弹幕
   final List<DanmakuItem> _scrollDanmakuItems = [];
+
   /// 顶部弹幕
   final List<DanmakuItem> _topDanmakuItems = [];
+
   /// 底部弹幕
   final List<DanmakuItem> _bottomDanmakuItems = [];
+
   /// 弹幕高度
   late double _danmakuHeight;
+
   /// 弹幕轨道数
   late int _trackCount;
+
   /// 弹幕轨道位置
   final List<double> _trackYPositions = [];
+
   /// 内部计时器
   late int _tick;
+
   /// 运行状态
   bool _running = true;
 
@@ -75,6 +88,11 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       vsync: this,
       duration: Duration(seconds: _option.duration),
     )..repeat();
+
+    _staticAnimationController = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: _option.duration),
+    );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {});
   }
@@ -150,6 +168,11 @@ class _DanmakuScreenState extends State<DanmakuScreen>
           break;
         }
       }
+
+      /// 重绘静态弹幕
+      setState(() {
+        _staticAnimationController.value = 0;
+      });
     }
 
     if ((_scrollDanmakuItems.isNotEmpty ||
@@ -319,11 +342,11 @@ class _DanmakuScreenState extends State<DanmakuScreen>
           )),
           RepaintBoundary(
               child: AnimatedBuilder(
-            animation: _animationController,
+            animation: _staticAnimationController,
             builder: (context, child) {
               return CustomPaint(
                 painter: StaticDanmakuPainter(
-                    _animationController.value,
+                    _staticAnimationController.value,
                     _topDanmakuItems,
                     _bottomDanmakuItems,
                     _option.duration,

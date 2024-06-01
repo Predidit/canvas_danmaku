@@ -9,8 +9,10 @@ enum DanmakuItemType {
 class DanmakuContentItem {
   /// 弹幕文本
   final String text;
+
   /// 弹幕颜色
   final Color color;
+
   /// 弹幕类型
   final DanmakuItemType type;
   DanmakuContentItem(
