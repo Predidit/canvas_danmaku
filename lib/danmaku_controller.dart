@@ -50,6 +50,7 @@ class DanmakuController {
     onAddDanmaku.call(item);
   }
 
+  /// 更新弹幕配置
   void updateOption(DanmakuOption option) {
     onUpdateOption.call(option);
   }

@@ -1,3 +1,6 @@
+## 0.0.4
+
+* Add dartdoc comments
 ## 0.0.3
 
 * Support topDanmaku and bottomDanmaku
