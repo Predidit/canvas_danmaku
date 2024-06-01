@@ -14,7 +14,6 @@ class DanmakuOption {
   /// 弹幕描边
   final bool showStroke;
 
-
   DanmakuOption({
     this.fontSize = 16,
     this.area = 1.0,

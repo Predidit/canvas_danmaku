@@ -55,7 +55,8 @@ class _HomePageState extends State<HomePage> {
             onPressed: () {
               _controller.addDanmaku(
                 DanmakuContentItem(
-                    "这是一条超长弹幕ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789这是一条超长的弹幕，这条弹幕会超出屏幕宽度", color: getRandomColor()),
+                    "这是一条超长弹幕ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789这是一条超长的弹幕，这条弹幕会超出屏幕宽度",
+                    color: getRandomColor()),
               );
             },
           ),

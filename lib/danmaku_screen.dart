@@ -73,17 +73,19 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     }
     // 在这里提前创建 Paragraph 缓存防止卡顿
     final textPainter = TextPainter(
-      text:
-          TextSpan(text: content.text, style: TextStyle(fontSize: _option.fontSize)),
+      text: TextSpan(
+          text: content.text, style: TextStyle(fontSize: _option.fontSize)),
       textDirection: TextDirection.ltr,
     )..layout();
     final danmakuWidth = textPainter.width;
-    
-    final ui.Paragraph paragraph = Utils.generateParagraph(content, danmakuWidth, _option.fontSize);
-  
+
+    final ui.Paragraph paragraph =
+        Utils.generateParagraph(content, danmakuWidth, _option.fontSize);
+
     ui.Paragraph? strokeParagraph;
     if (_option.showStroke) {
-      strokeParagraph = Utils.generateStrokeParagraph(content, danmakuWidth, _option.fontSize);
+      strokeParagraph = Utils.generateStrokeParagraph(
+          content, danmakuWidth, _option.fontSize);
     }
 
     for (double yPosition in _trackYPositions) {
@@ -129,6 +131,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   void updateOption(DanmakuOption option) {
     _option = option;
     _controller.option = _option;
+
     /// 清理已经存在的 Paragraph 缓存
     _animationController.stop();
     for (DanmakuItem item in _danmakuItems) {
@@ -166,18 +169,18 @@ class _DanmakuScreenState extends State<DanmakuScreen>
 
   // 基于Stopwatch的计时器同步
   void _startTick() async {
-    final stopwatch = Stopwatch()..start(); 
+    final stopwatch = Stopwatch()..start();
     int lastElapsedTime = 0;
 
     while (_running) {
-      await Future.delayed(const Duration(milliseconds: 1)); 
+      await Future.delayed(const Duration(milliseconds: 1));
       int currentElapsedTime = stopwatch.elapsedMilliseconds; // 获取当前的已用时间
       int delta = currentElapsedTime - lastElapsedTime; // 计算自上次记录以来的时间差
-      _tick += delta; 
+      _tick += delta;
       lastElapsedTime = currentElapsedTime; // 更新最后记录的时间
     }
 
-    stopwatch.stop(); 
+    stopwatch.stop();
   }
 
   @override
