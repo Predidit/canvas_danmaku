@@ -2,12 +2,14 @@ import 'models/danmaku_option.dart';
 import '/models/danmaku_content_item.dart';
 
 class DanmakuController {
-  final Function(DanmakuContentItem) onAddItems;
+  final Function(DanmakuContentItem) onAddDanmaku;
+  final Function(DanmakuOption) onUpdateOption;
   final Function onPause;
   final Function onResume;
   final Function onClear;
   DanmakuController({
-    required this.onAddItems,
+    required this.onAddDanmaku,
+    required this.onUpdateOption,
     required this.onPause,
     required this.onResume,
     required this.onClear,
@@ -44,7 +46,11 @@ class DanmakuController {
   }
 
   /// 添加弹幕
-  void addItems(DanmakuContentItem item) {
-    onAddItems.call(item);
+  void addDanmaku(DanmakuContentItem item) {
+    onAddDanmaku.call(item);
+  }
+
+  void updateOption(DanmakuOption option) {
+    onUpdateOption.call(option);
   }
 }

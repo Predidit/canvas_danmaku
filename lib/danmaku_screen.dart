@@ -47,7 +47,8 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     )..layout();
     _danmakuHeight = textPainter.height;
     _controller = DanmakuController(
-      onAddItems: addDanmaku,
+      onAddDanmaku: addDanmaku,
+      onUpdateOption: updateOption,
       onPause: pauseResumeDanmakus,
       onResume: pauseResumeDanmakus,
       onClear: clearDanmakus,
@@ -65,6 +66,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {});
   }
 
+  /// 添加弹幕
   void addDanmaku(DanmakuContentItem content) {
     if (!_running) {
       return;
@@ -123,6 +125,25 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     }
   }
 
+  /// 更新弹幕设置
+  void updateOption(DanmakuOption option) {
+    _option = option;
+    _controller.option = _option;
+    /// 清理已经存在的 Paragraph 缓存
+    _animationController.stop();
+    for (DanmakuItem item in _danmakuItems) {
+      if (item.paragraph != null) {
+        item.paragraph = null;
+      }
+      if (item.strokeParagraph != null) {
+        item.strokeParagraph = null;
+      }
+    }
+    _animationController.repeat();
+    setState(() {});
+  }
+
+  /// 清空弹幕
   void clearDanmakus() {
     setState(() {
       _danmakuItems.clear();
