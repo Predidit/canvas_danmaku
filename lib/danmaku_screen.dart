@@ -24,27 +24,27 @@ class DanmakuScreen extends StatefulWidget {
 
 class _DanmakuScreenState extends State<DanmakuScreen>
     with SingleTickerProviderStateMixin {
-  // 弹幕控制器
+  /// 弹幕控制器
   late DanmakuController _controller;
-  // 弹幕动画控制器
+  /// 弹幕动画控制器
   late AnimationController _animationController;
-  // 弹幕配置
+  /// 弹幕配置
   DanmakuOption _option = DanmakuOption();
-  // 滚动弹幕
+  /// 滚动弹幕
   final List<DanmakuItem> _scrollDanmakuItems = [];
-  // 顶部弹幕
+  /// 顶部弹幕
   final List<DanmakuItem> _topDanmakuItems = [];
-  // 底部弹幕
+  /// 底部弹幕
   final List<DanmakuItem> _bottomDanmakuItems = [];
-  // 弹幕高度
+  /// 弹幕高度
   late double _danmakuHeight;
-  // 弹幕轨道数
+  /// 弹幕轨道数
   late int _trackCount;
-  // 弹幕轨道位置
+  /// 弹幕轨道位置
   final List<double> _trackYPositions = [];
-  // 内部计时器
+  /// 内部计时器
   late int _tick;
-  // 运行状态
+  /// 运行状态
   bool _running = true;
 
   @override
