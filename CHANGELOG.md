@@ -1,3 +1,6 @@
+## 0.0.6
+
+* Add option for hide danmaku
 ## 0.0.5
 
 * Better performance

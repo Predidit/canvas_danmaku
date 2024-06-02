@@ -17,6 +17,7 @@ class DanmakuItem {
   /// 弹幕竖直方向位置
   double yPosition;
 
+  /// 弹幕布局缓存
   ui.Paragraph? paragraph;
   ui.Paragraph? strokeParagraph;
 

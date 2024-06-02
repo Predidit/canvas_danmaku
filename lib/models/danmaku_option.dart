@@ -11,6 +11,15 @@ class DanmakuOption {
   /// 不透明度，0.1-1.0
   final double opacity;
 
+  /// 隐藏顶部弹幕
+  final bool hideTop;
+
+  /// 隐藏底部弹幕
+  final bool hideBottom;
+
+  /// 隐藏滚动弹幕
+  final bool hideScroll;
+
   /// 弹幕描边
   final bool showStroke;
 
@@ -19,6 +28,9 @@ class DanmakuOption {
     this.area = 1.0,
     this.duration = 10,
     this.opacity = 1.0,
+    this.hideBottom = false,
+    this.hideScroll = false,
+    this.hideTop = false,
     this.showStroke = true,
   });
 
@@ -27,6 +39,9 @@ class DanmakuOption {
     double? area,
     int? duration,
     double? opacity,
+    bool? hideTop,
+    bool? hideBottom,
+    bool? hideScroll,
     bool? showStroke,
   }) {
     return DanmakuOption(
@@ -34,6 +49,9 @@ class DanmakuOption {
       fontSize: fontSize ?? this.fontSize,
       duration: duration ?? this.duration,
       opacity: opacity ?? this.opacity,
+      hideTop: hideTop ?? this.hideTop,
+      hideBottom: hideBottom ?? this.hideBottom,
+      hideScroll: hideScroll ?? this.hideScroll,
       showStroke: showStroke ?? this.showStroke,
     );
   }

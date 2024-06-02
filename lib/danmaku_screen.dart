@@ -120,7 +120,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     }
 
     for (double yPosition in _trackYPositions) {
-      if (content.type == DanmakuItemType.scroll) {
+      if (content.type == DanmakuItemType.scroll && !_option.hideScroll) {
         bool scrollCanAddToTrack =
             _scrollCanAddToTrack(yPosition, danmakuWidth);
 
@@ -137,7 +137,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
         }
       }
 
-      if (content.type == DanmakuItemType.top) {
+      if (content.type == DanmakuItemType.top && !_option.hideTop) {
         bool topCanAddToTrack = _topCanAddToTrack(yPosition);
 
         if (topCanAddToTrack) {
@@ -153,7 +153,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
         }
       }
 
-      if (content.type == DanmakuItemType.bottom) {
+      if (content.type == DanmakuItemType.bottom && !_option.hideBottom) {
         bool bottomCanAddToTrack = _bottomCanAddToTrack(yPosition);
 
         if (bottomCanAddToTrack) {
@@ -168,11 +168,6 @@ class _DanmakuScreenState extends State<DanmakuScreen>
           break;
         }
       }
-
-      /// 重绘静态弹幕
-      setState(() {
-        _staticAnimationController.value = 0;
-      });
     }
 
     if ((_scrollDanmakuItems.isNotEmpty ||
@@ -189,6 +184,11 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     // 移除底部弹幕
     _bottomDanmakuItems.removeWhere(
         (item) => ((_tick - item.creationTime) > (_option.duration * 1000)));
+
+    /// 重绘静态弹幕
+    setState(() {
+      _staticAnimationController.value = 0;
+    });
   }
 
   /// 暂停与恢复
