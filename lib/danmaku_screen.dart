@@ -67,11 +67,6 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     _tick = 0;
     _startTick();
     _option = widget.option;
-    final textPainter = TextPainter(
-      text: TextSpan(text: '弹幕', style: TextStyle(fontSize: _option.fontSize)),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    _danmakuHeight = textPainter.height;
     _controller = DanmakuController(
       onAddDanmaku: addDanmaku,
       onUpdateOption: updateOption,
@@ -258,9 +253,18 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     for (var item in _scrollDanmakuItems) {
       if (item.yPosition == yPosition) {
         final existingEndPosition = item.xPosition + item.width;
-        if (MediaQuery.of(context).size.width - existingEndPosition <
-            newDanmakuWidth) {
+        // 首先保证进入屏幕时不发生重叠，其次保证知道移出屏幕前不与速度慢的弹幕(弹幕宽度较小)发生重叠
+        if (MediaQuery.of(context).size.width - existingEndPosition < 0) {
           return false;
+        }
+        if (item.width < newDanmakuWidth) {
+          if ((1 -
+                  ((MediaQuery.of(context).size.width - item.xPosition) /
+                      (item.width + MediaQuery.of(context).size.width))) >
+              ((MediaQuery.of(context).size.width) /
+                  (MediaQuery.of(context).size.width + newDanmakuWidth))) {
+            return false;
+          }
         }
       }
     }
@@ -311,8 +315,14 @@ class _DanmakuScreenState extends State<DanmakuScreen>
 
   @override
   Widget build(BuildContext context) {
+    /// 计算弹幕轨道
+    final textPainter = TextPainter(
+      text: TextSpan(text: '弹幕', style: TextStyle(fontSize: _option.fontSize)),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    _danmakuHeight = textPainter.height;
     return LayoutBuilder(builder: (context, constraints) {
-      // 为字幕留出余量
+      /// 为字幕留出余量
       _trackCount = (constraints.maxHeight / _danmakuHeight).floor() - 1;
 
       _trackYPositions.clear();

@@ -1,3 +1,6 @@
+## 0.0.7
+
+* Improved collision detection
 ## 0.0.6
 
 * Add option for hide danmaku

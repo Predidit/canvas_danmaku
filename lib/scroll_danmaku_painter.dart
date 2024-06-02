@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:ui' as ui;
 import 'models/danmaku_item.dart';
 import '/utils/utils.dart';
 
@@ -11,46 +12,86 @@ class ScrollDanmakuPainter extends CustomPainter {
   final double danmakuHeight;
   final bool running;
   final int tick;
+  final int batchThreshold;
+
+  final double totalDuration;
 
   ScrollDanmakuPainter(
-      this.progress,
-      this.scrollDanmakuItems,
-      this.danmakuDurationInSeconds,
-      this.fontSize,
-      this.showStroke,
-      this.danmakuHeight,
-      this.running,
-      this.tick);
+    this.progress,
+    this.scrollDanmakuItems,
+    this.danmakuDurationInSeconds,
+    this.fontSize,
+    this.showStroke,
+    this.danmakuHeight,
+    this.running,
+    this.tick, {
+    this.batchThreshold = 10, // 默认值为10，可以自行调整
+  }) : totalDuration = danmakuDurationInSeconds * 1000;
 
   @override
   void paint(Canvas canvas, Size size) {
-    /// 绘制滚动弹幕
-    for (var item in scrollDanmakuItems) {
-      // final elapsedTime = DateTime.now().difference(item.creationTime).inMilliseconds;
-      final elapsedTime = tick - item.creationTime;
-      final totalDuration = danmakuDurationInSeconds * 1000;
-      final startPosition = size.width;
-      final endPosition = -item.width;
-      final distance = startPosition - endPosition;
+    final startPosition = size.width;
 
-      item.xPosition = startPosition - (elapsedTime / totalDuration) * distance;
+    if (scrollDanmakuItems.length > batchThreshold) {
+      // 弹幕数量超过阈值时使用批量绘制
+      final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
+      final Canvas pictureCanvas = Canvas(pictureRecorder);
 
-      // 如果 Paragraph 没有缓存，则创建并缓存它
-      item.paragraph ??=
-          Utils.generateParagraph(item.content, size.width, fontSize);
+      for (var item in scrollDanmakuItems) {
+        final elapsedTime = tick - item.creationTime;
+        final endPosition = -item.width;
+        final distance = startPosition - endPosition;
 
-      // 黑色部分
-      if (showStroke) {
-        item.strokeParagraph ??=
-            Utils.generateStrokeParagraph(item.content, size.width, fontSize);
+        item.xPosition =
+            startPosition - (elapsedTime / totalDuration) * distance;
 
-        canvas.drawParagraph(
-            item.strokeParagraph!, Offset(item.xPosition, item.yPosition));
+        if (item.xPosition < -item.width || item.xPosition > size.width) {
+          continue;
+        }
+
+        item.paragraph ??=
+            Utils.generateParagraph(item.content, size.width, fontSize);
+
+        if (showStroke) {
+          item.strokeParagraph ??=
+              Utils.generateStrokeParagraph(item.content, size.width, fontSize);
+          pictureCanvas.drawParagraph(
+              item.strokeParagraph!, Offset(item.xPosition, item.yPosition));
+        }
+
+        pictureCanvas.drawParagraph(
+            item.paragraph!, Offset(item.xPosition, item.yPosition));
       }
 
-      // 白色部分
-      canvas.drawParagraph(
-          item.paragraph!, Offset(item.xPosition, item.yPosition));
+      final ui.Picture picture = pictureRecorder.endRecording();
+      canvas.drawPicture(picture);
+    } else {
+      // 弹幕数量较少时直接绘制 (节约创建 canvas 的开销)
+      for (var item in scrollDanmakuItems) {
+        final elapsedTime = tick - item.creationTime;
+        final endPosition = -item.width;
+        final distance = startPosition - endPosition;
+
+        item.xPosition =
+            startPosition - (elapsedTime / totalDuration) * distance;
+
+        if (item.xPosition < -item.width || item.xPosition > size.width) {
+          continue;
+        }
+
+        item.paragraph ??=
+            Utils.generateParagraph(item.content, size.width, fontSize);
+
+        if (showStroke) {
+          item.strokeParagraph ??=
+              Utils.generateStrokeParagraph(item.content, size.width, fontSize);
+          canvas.drawParagraph(
+              item.strokeParagraph!, Offset(item.xPosition, item.yPosition));
+        }
+
+        canvas.drawParagraph(
+            item.paragraph!, Offset(item.xPosition, item.yPosition));
+      }
     }
   }
 
