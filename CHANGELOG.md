@@ -1,3 +1,6 @@
+## 0.0.8
+
+* Fixed problem that animation cannot continue after sleeping on android/ios platform
 ## 0.0.7
 
 * Improved collision detection

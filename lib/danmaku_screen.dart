@@ -23,7 +23,7 @@ class DanmakuScreen extends StatefulWidget {
 }
 
 class _DanmakuScreenState extends State<DanmakuScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   /// 弹幕控制器
   late DanmakuController _controller;
 
@@ -89,7 +89,22 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       duration: Duration(seconds: _option.duration),
     );
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {});
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  /// 处理 Android/iOS 应用后台或熄屏导致的动画问题
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      pauseResumeDanmakus();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _animationController.dispose();
+    super.dispose();
   }
 
   /// 添加弹幕
@@ -305,12 +320,6 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     }
 
     stopwatch.stop();
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
   }
 
   @override
