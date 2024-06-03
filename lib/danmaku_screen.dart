@@ -7,6 +7,7 @@ import 'danmaku_controller.dart';
 import 'dart:ui' as ui;
 import 'models/danmaku_option.dart';
 import '/models/danmaku_content_item.dart';
+import 'dart:math';
 
 class DanmakuScreen extends StatefulWidget {
   // 创建Screen后返回控制器
@@ -129,6 +130,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
           content, danmakuWidth, _option.fontSize);
     }
 
+    int idx = 1;
     for (double yPosition in _trackYPositions) {
       if (content.type == DanmakuItemType.scroll && !_option.hideScroll) {
         bool scrollCanAddToTrack =
@@ -137,6 +139,21 @@ class _DanmakuScreenState extends State<DanmakuScreen>
         if (scrollCanAddToTrack) {
           _scrollDanmakuItems.add(DanmakuItem(
               yPosition: yPosition,
+              xPosition: MediaQuery.of(context).size.width,
+              width: danmakuWidth,
+              creationTime: _tick,
+              content: content,
+              paragraph: paragraph,
+              strokeParagraph: strokeParagraph));
+          break;
+        }
+
+        /// 海量弹幕启用时进行随机添加
+        if (_option.massiveMode && idx == _trackCount) {
+          final random = Random();
+          var randomYPosition = _trackYPositions[random.nextInt(_trackYPositions.length)];
+          _scrollDanmakuItems.add(DanmakuItem(
+              yPosition: randomYPosition,
               xPosition: MediaQuery.of(context).size.width,
               width: danmakuWidth,
               creationTime: _tick,
@@ -178,6 +195,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
           break;
         }
       }
+      idx++;
     }
 
     if ((_scrollDanmakuItems.isNotEmpty ||
