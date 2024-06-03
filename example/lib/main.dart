@@ -37,10 +37,30 @@ class _HomePageState extends State<HomePage> {
   final _danmuKey = GlobalKey();
 
   bool _running = true;
+
+  /// 弹幕描边
   bool _showStroke = true;
+
+  /// 弹幕海量模式(弹幕轨道填满时继续绘制)
+  bool _massiveMode = false;
+
+  /// 弹幕透明度
   double _opacity = 1.0;
+
+  /// 弹幕持续时间
   int _duration = 8;
+
+  /// 弹幕字号
   double _fontSize = (Platform.isIOS || Platform.isAndroid) ? 16 : 25;
+
+  /// 隐藏滚动弹幕
+  bool _hideScroll = false;
+
+  /// 隐藏顶部弹幕
+  bool _hideTop = false;
+
+  /// 隐藏底部弹幕
+  bool _hideBottom = false;
 
   @override
   Widget build(BuildContext context) {
@@ -139,6 +159,10 @@ class _HomePageState extends State<HomePage> {
           fontSize: _fontSize,
           duration: _duration,
           showStroke: _showStroke,
+          massiveMode: _massiveMode,
+          hideScroll: _hideScroll,
+          hideTop: _hideTop,
+          hideBottom: _hideBottom,
         ),
       ),
       endDrawer: Drawer(
@@ -187,7 +211,17 @@ class _HomePageState extends State<HomePage> {
                   _controller.updateOption(
                       _controller.option.copyWith(duration: e.toInt()));
                 },
-              )
+              ),
+              SwitchListTile(
+                  title: Text('MassiveMode'),
+                  value: _massiveMode,
+                  onChanged: (e) {
+                    setState(() {
+                      _massiveMode = e;
+                    });
+                    _controller.updateOption(
+                        _controller.option.copyWith(massiveMode: e));
+                  })
             ],
           ),
         ),

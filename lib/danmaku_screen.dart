@@ -151,7 +151,8 @@ class _DanmakuScreenState extends State<DanmakuScreen>
         /// 海量弹幕启用时进行随机添加
         if (_option.massiveMode && idx == _trackCount) {
           final random = Random();
-          var randomYPosition = _trackYPositions[random.nextInt(_trackYPositions.length)];
+          var randomYPosition =
+              _trackYPositions[random.nextInt(_trackYPositions.length)];
           _scrollDanmakuItems.add(DanmakuItem(
               yPosition: randomYPosition,
               xPosition: MediaQuery.of(context).size.width,
