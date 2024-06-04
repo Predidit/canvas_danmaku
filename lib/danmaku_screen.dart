@@ -24,7 +24,7 @@ class DanmakuScreen extends StatefulWidget {
 }
 
 class _DanmakuScreenState extends State<DanmakuScreen>
-    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   /// 弹幕控制器
   late DanmakuController _controller;
 
