@@ -96,7 +96,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   /// 处理 Android/iOS 应用后台或熄屏导致的动画问题
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused) {
+    if (state == AppLifecycleState.paused && _running) {
       pauseResumeDanmakus();
     }
   }
