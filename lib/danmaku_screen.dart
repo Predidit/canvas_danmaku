@@ -239,7 +239,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     if (!_animationController.isAnimating) {
       _animationController.repeat();
       // 重启计时器
-    _startTick();
+      _startTick();
     }
   }
 
