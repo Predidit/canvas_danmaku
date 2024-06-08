@@ -71,8 +71,8 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     _controller = DanmakuController(
       onAddDanmaku: addDanmaku,
       onUpdateOption: updateOption,
-      onPause: pauseResumeDanmakus,
-      onResume: pauseResumeDanmakus,
+      onPause: pause,
+      onResume: resume,
       onClear: clearDanmakus,
     );
     _controller.option = _option;
@@ -96,8 +96,8 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   /// 处理 Android/iOS 应用后台或熄屏导致的动画问题
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused && _running) {
-      pauseResumeDanmakus();
+    if (state == AppLifecycleState.paused) {
+      pause();
     }
   }
 
@@ -221,20 +221,25 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     });
   }
 
-  /// 暂停与恢复
-  void pauseResumeDanmakus() {
+  /// 暂停
+  void pause() {
     setState(() {
-      _running = !_running;
+      _running = false;
     });
-    if (_running) {
-      // 重启计时器
-      _startTick();
-    }
-
     if (_animationController.isAnimating) {
       _animationController.stop();
-    } else {
+    }
+  }
+
+  /// 恢复
+  void resume() {
+    setState(() {
+      _running = true;
+    });
+    if (!_animationController.isAnimating) {
       _animationController.repeat();
+      // 重启计时器
+    _startTick();
     }
   }
 

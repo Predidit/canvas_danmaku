@@ -1,3 +1,6 @@
+## 0.1.3
+
+* stopResume improve
 ## 0.1.2
 
 * Bug fix
