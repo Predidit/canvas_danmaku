@@ -1,3 +1,6 @@
+## 0.1.4
+
+* add IgnorePointer
 ## 0.1.3
 
 * stopResume improve

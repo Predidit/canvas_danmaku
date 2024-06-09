@@ -103,6 +103,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
 
   @override
   void dispose() {
+    _running = false;
     WidgetsBinding.instance.removeObserver(this);
     _animationController.dispose();
     _staticAnimationController.dispose();
@@ -111,7 +112,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
 
   /// 添加弹幕
   void addDanmaku(DanmakuContentItem content) {
-    if (!_running) {
+    if (!_running || !mounted) {
       return;
     }
     // 在这里提前创建 Paragraph 缓存防止卡顿
@@ -364,47 +365,49 @@ class _DanmakuScreenState extends State<DanmakuScreen>
         _trackYPositions.add(i * _danmakuHeight);
       }
       return ClipRect(
-        child: Opacity(
-          opacity: _option.opacity,
-          child: Stack(children: [
-            RepaintBoundary(
-                child: AnimatedBuilder(
-              animation: _animationController,
-              builder: (context, child) {
-                return CustomPaint(
-                  painter: ScrollDanmakuPainter(
-                      _animationController.value,
-                      _scrollDanmakuItems,
-                      _option.duration,
-                      _option.fontSize,
-                      _option.showStroke,
-                      _danmakuHeight,
-                      _running,
-                      _tick),
-                  child: Container(),
-                );
-              },
-            )),
-            RepaintBoundary(
-                child: AnimatedBuilder(
-              animation: _staticAnimationController,
-              builder: (context, child) {
-                return CustomPaint(
-                  painter: StaticDanmakuPainter(
-                      _staticAnimationController.value,
-                      _topDanmakuItems,
-                      _bottomDanmakuItems,
-                      _option.duration,
-                      _option.fontSize,
-                      _option.showStroke,
-                      _danmakuHeight,
-                      _running,
-                      _tick),
-                  child: Container(),
-                );
-              },
-            )),
-          ]),
+        child: IgnorePointer(
+          child: Opacity(
+            opacity: _option.opacity,
+            child: Stack(children: [
+              RepaintBoundary(
+                  child: AnimatedBuilder(
+                animation: _animationController,
+                builder: (context, child) {
+                  return CustomPaint(
+                    painter: ScrollDanmakuPainter(
+                        _animationController.value,
+                        _scrollDanmakuItems,
+                        _option.duration,
+                        _option.fontSize,
+                        _option.showStroke,
+                        _danmakuHeight,
+                        _running,
+                        _tick),
+                    child: Container(),
+                  );
+                },
+              )),
+              RepaintBoundary(
+                  child: AnimatedBuilder(
+                animation: _staticAnimationController,
+                builder: (context, child) {
+                  return CustomPaint(
+                    painter: StaticDanmakuPainter(
+                        _staticAnimationController.value,
+                        _topDanmakuItems,
+                        _bottomDanmakuItems,
+                        _option.duration,
+                        _option.fontSize,
+                        _option.showStroke,
+                        _danmakuHeight,
+                        _running,
+                        _tick),
+                    child: Container(),
+                  );
+                },
+              )),
+            ]),
+          ),
         ),
       );
     });
