@@ -1,6 +1,5 @@
 import 'package:canvas_danmaku/utils/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'models/danmaku_item.dart';
 import 'scroll_danmaku_painter.dart';
 import 'static_danmaku_painter.dart';

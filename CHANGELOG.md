@@ -1,3 +1,6 @@
+## 0.1.6
+
+* Pass static analysis
 ## 0.1.5
 
 * fix Layout
