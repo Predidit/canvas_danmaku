@@ -1,3 +1,6 @@
+## 0.1.5
+
+* fix Layout
 ## 0.1.4
 
 * add IgnorePointer

@@ -1,5 +1,6 @@
 import 'package:canvas_danmaku/utils/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'models/danmaku_item.dart';
 import 'scroll_danmaku_painter.dart';
 import 'static_danmaku_painter.dart';
@@ -13,11 +14,12 @@ class DanmakuScreen extends StatefulWidget {
   // 创建Screen后返回控制器
   final Function(DanmakuController) createdController;
   final DanmakuOption option;
+
   const DanmakuScreen({
     required this.createdController,
     required this.option,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<DanmakuScreen> createState() => _DanmakuScreenState();
@@ -25,6 +27,9 @@ class DanmakuScreen extends StatefulWidget {
 
 class _DanmakuScreenState extends State<DanmakuScreen>
     with TickerProviderStateMixin, WidgetsBindingObserver {
+  /// 视图宽度
+  double _viewWidth = 0;
+
   /// 弹幕控制器
   late DanmakuController _controller;
 
@@ -141,7 +146,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
         if (scrollCanAddToTrack) {
           _scrollDanmakuItems.add(DanmakuItem(
               yPosition: yPosition,
-              xPosition: MediaQuery.of(context).size.width,
+              xPosition: _viewWidth,
               width: danmakuWidth,
               creationTime: _tick,
               content: content,
@@ -157,7 +162,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
               _trackYPositions[random.nextInt(_trackYPositions.length)];
           _scrollDanmakuItems.add(DanmakuItem(
               yPosition: randomYPosition,
-              xPosition: MediaQuery.of(context).size.width,
+              xPosition: _viewWidth,
               width: danmakuWidth,
               creationTime: _tick,
               content: content,
@@ -173,7 +178,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
         if (topCanAddToTrack) {
           _topDanmakuItems.add(DanmakuItem(
               yPosition: yPosition,
-              xPosition: MediaQuery.of(context).size.width,
+              xPosition: _viewWidth,
               width: danmakuWidth,
               creationTime: _tick,
               content: content,
@@ -189,7 +194,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
         if (bottomCanAddToTrack) {
           _bottomDanmakuItems.add(DanmakuItem(
               yPosition: yPosition,
-              xPosition: MediaQuery.of(context).size.width,
+              xPosition: _viewWidth,
               width: danmakuWidth,
               creationTime: _tick,
               content: content,
@@ -295,15 +300,13 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       if (item.yPosition == yPosition) {
         final existingEndPosition = item.xPosition + item.width;
         // 首先保证进入屏幕时不发生重叠，其次保证知道移出屏幕前不与速度慢的弹幕(弹幕宽度较小)发生重叠
-        if (MediaQuery.of(context).size.width - existingEndPosition < 0) {
+        if (_viewWidth - existingEndPosition < 0) {
           return false;
         }
         if (item.width < newDanmakuWidth) {
           if ((1 -
-                  ((MediaQuery.of(context).size.width - item.xPosition) /
-                      (item.width + MediaQuery.of(context).size.width))) >
-              ((MediaQuery.of(context).size.width) /
-                  (MediaQuery.of(context).size.width + newDanmakuWidth))) {
+                  ((_viewWidth - item.xPosition) / (item.width + _viewWidth))) >
+              ((_viewWidth) / (_viewWidth + newDanmakuWidth))) {
             return false;
           }
         }
@@ -337,7 +340,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     final stopwatch = Stopwatch()..start();
     int lastElapsedTime = 0;
 
-    while (_running) {
+    while (_running && mounted) {
       await Future.delayed(const Duration(milliseconds: 1));
       int currentElapsedTime = stopwatch.elapsedMilliseconds; // 获取当前的已用时间
       int delta = currentElapsedTime - lastElapsedTime; // 计算自上次记录以来的时间差
@@ -357,6 +360,11 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     )..layout();
     _danmakuHeight = textPainter.height;
     return LayoutBuilder(builder: (context, constraints) {
+      /// 计算视图宽度
+      if (constraints.maxWidth != _viewWidth) {
+        _viewWidth = constraints.maxWidth;
+      }
+
       /// 为字幕留出余量
       _trackCount = (constraints.maxHeight / _danmakuHeight).floor() - 1;
 
