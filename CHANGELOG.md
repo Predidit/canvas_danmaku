@@ -1,3 +1,6 @@
+## 0.1.7
+
+* Bug fix (resume danmaku when danmaku is running leads to stopwatch error)
 ## 0.1.6
 
 * Pass static analysis

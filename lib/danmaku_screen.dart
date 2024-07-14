@@ -228,23 +228,27 @@ class _DanmakuScreenState extends State<DanmakuScreen>
 
   /// 暂停
   void pause() {
-    setState(() {
-      _running = false;
-    });
-    if (_animationController.isAnimating) {
-      _animationController.stop();
+    if (_running) {
+      setState(() {
+        _running = false;
+      });
+      if (_animationController.isAnimating) {
+        _animationController.stop();
+      }
     }
   }
 
   /// 恢复
   void resume() {
-    setState(() {
-      _running = true;
-    });
-    if (!_animationController.isAnimating) {
-      _animationController.repeat();
-      // 重启计时器
-      _startTick();
+    if (!_running) {
+      setState(() {
+        _running = true;
+      });
+      if (!_animationController.isAnimating) {
+        _animationController.repeat();
+        // 重启计时器
+        _startTick();
+      }
     }
   }
 
