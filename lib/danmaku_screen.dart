@@ -254,11 +254,22 @@ class _DanmakuScreenState extends State<DanmakuScreen>
 
   /// 更新弹幕设置
   void updateOption(DanmakuOption option) {
+    _animationController.stop();
+
+    /// 需要隐藏弹幕时清理已有弹幕
+    if (option.hideScroll && !_option.hideScroll) {
+      _scrollDanmakuItems.clear();
+    }
+    if (option.hideTop && !_option.hideTop) {
+      _topDanmakuItems.clear();
+    }
+    if (option.hideBottom && !_option.hideBottom) {
+      _bottomDanmakuItems.clear();
+    }
     _option = option;
     _controller.option = _option;
 
     /// 清理已经存在的 Paragraph 缓存
-    _animationController.stop();
     for (DanmakuItem item in _scrollDanmakuItems) {
       if (item.paragraph != null) {
         item.paragraph = null;

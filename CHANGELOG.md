@@ -1,3 +1,6 @@
+## 0.1.8
+
+* When the updateOption() function is called to hide a specified type of danmaku, this type of danmaku will be cleared immediately.
 ## 0.1.7
 
 * Bug fix (resume danmaku when danmaku is running leads to stopwatch error)
