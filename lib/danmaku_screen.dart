@@ -254,7 +254,11 @@ class _DanmakuScreenState extends State<DanmakuScreen>
 
   /// 更新弹幕设置
   void updateOption(DanmakuOption option) {
-    _animationController.stop();
+    bool needRestart = false;
+    if (_animationController.isAnimating) {
+      _animationController.stop();
+      needRestart = true;
+    }
 
     /// 需要隐藏弹幕时清理已有弹幕
     if (option.hideScroll && !_option.hideScroll) {
@@ -294,7 +298,9 @@ class _DanmakuScreenState extends State<DanmakuScreen>
         item.strokeParagraph = null;
       }
     }
-    _animationController.repeat();
+    if (needRestart) {
+      _animationController.repeat();
+    }
     setState(() {});
   }
 
@@ -380,7 +386,8 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       }
 
       /// 为字幕留出余量
-      _trackCount = (constraints.maxHeight / _danmakuHeight).floor() - 1;
+      _trackCount =
+          (constraints.maxHeight * _option.area / _danmakuHeight).floor() - 1;
 
       _trackYPositions.clear();
       for (int i = 0; i < _trackCount; i++) {
