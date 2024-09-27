@@ -126,6 +126,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       textDirection: TextDirection.ltr,
     )..layout();
     final danmakuWidth = textPainter.width;
+    final danmakuHeight = textPainter.height;
 
     final ui.Paragraph paragraph =
         Utils.generateParagraph(content, danmakuWidth, _option.fontSize);
@@ -147,6 +148,21 @@ class _DanmakuScreenState extends State<DanmakuScreen>
               yPosition: yPosition,
               xPosition: _viewWidth,
               width: danmakuWidth,
+              height: danmakuHeight,
+              creationTime: _tick,
+              content: content,
+              paragraph: paragraph,
+              strokeParagraph: strokeParagraph));
+          break;
+        }
+
+        /// 无法填充自己发送的弹幕时强制添加
+        if (content.selfSend && idx == _trackCount) {
+          _scrollDanmakuItems.add(DanmakuItem(
+              yPosition: _trackYPositions[0],
+              xPosition: _viewWidth,
+              width: danmakuWidth,
+              height: danmakuHeight,
               creationTime: _tick,
               content: content,
               paragraph: paragraph,
@@ -163,6 +179,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
               yPosition: randomYPosition,
               xPosition: _viewWidth,
               width: danmakuWidth,
+              height: danmakuHeight,
               creationTime: _tick,
               content: content,
               paragraph: paragraph,
@@ -179,6 +196,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
               yPosition: yPosition,
               xPosition: _viewWidth,
               width: danmakuWidth,
+              height: danmakuHeight,
               creationTime: _tick,
               content: content,
               paragraph: paragraph,
@@ -195,6 +213,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
               yPosition: yPosition,
               xPosition: _viewWidth,
               width: danmakuWidth,
+              height: danmakuHeight,
               creationTime: _tick,
               content: content,
               paragraph: paragraph,

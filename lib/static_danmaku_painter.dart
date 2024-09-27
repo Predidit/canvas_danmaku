@@ -12,6 +12,10 @@ class StaticDanmakuPainter extends CustomPainter {
   final double danmakuHeight;
   final bool running;
   final int tick;
+  final Paint selfSendPaint = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1.5
+    ..color = Colors.green;
 
   StaticDanmakuPainter(
       this.progress,
@@ -42,6 +46,9 @@ class StaticDanmakuPainter extends CustomPainter {
             item.strokeParagraph!, Offset(item.xPosition, item.yPosition));
       }
 
+      if(item.content.selfSend){
+        canvas.drawRect(Offset(item.xPosition, item.yPosition).translate(-2, 2) & (Size(item.width, item.height) + Offset(4,0)), selfSendPaint);
+      }
       // 白色部分
       canvas.drawParagraph(
           item.paragraph!, Offset(item.xPosition, item.yPosition));
@@ -62,6 +69,11 @@ class StaticDanmakuPainter extends CustomPainter {
             item.strokeParagraph!,
             Offset(item.xPosition,
                 (size.height - item.yPosition - danmakuHeight)));
+      }
+
+      if(item.content.selfSend){
+        canvas.drawRect(Offset(item.xPosition,
+            (size.height - item.yPosition - danmakuHeight)).translate(-2, 2) & (Size(item.width, item.height) + Offset(4,0)), selfSendPaint);
       }
 
       // 白色部分
