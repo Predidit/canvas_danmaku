@@ -1,3 +1,6 @@
+## 0.2.0
+
+* Add rect to your own danmaku.
 ## 0.1.9
 
 * Fix danmaku area option.

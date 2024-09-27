@@ -63,8 +63,11 @@ class ScrollDanmakuPainter extends CustomPainter {
               item.strokeParagraph!, Offset(item.xPosition, item.yPosition));
         }
 
-        if(item.content.selfSend){
-          pictureCanvas.drawRect(Offset(item.xPosition, item.yPosition).translate(-2, 2) & (Size(item.width, item.height) + Offset(4,0)), selfSendPaint);
+        if (item.content.selfSend) {
+          pictureCanvas.drawRect(
+              Offset(item.xPosition, item.yPosition).translate(-2, 2) &
+                  (Size(item.width, item.height) + const Offset(4, 0)),
+              selfSendPaint);
         }
 
         pictureCanvas.drawParagraph(
@@ -97,8 +100,11 @@ class ScrollDanmakuPainter extends CustomPainter {
               item.strokeParagraph!, Offset(item.xPosition, item.yPosition));
         }
 
-        if(item.content.selfSend){
-          canvas.drawRect(Offset(item.xPosition, item.yPosition).translate(-2, 2) & (Size(item.width, item.height) + Offset(4,0)), selfSendPaint);
+        if (item.content.selfSend) {
+          canvas.drawRect(
+              Offset(item.xPosition, item.yPosition).translate(-2, 2) &
+                  (Size(item.width, item.height) + const Offset(4, 0)),
+              selfSendPaint);
         }
 
         canvas.drawParagraph(

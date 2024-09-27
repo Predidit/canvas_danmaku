@@ -109,7 +109,9 @@ class _HomePageState extends State<HomePage> {
                 onPressed: () {
                   _controller.addDanmaku(
                     DanmakuContentItem("这是一条自己发的弹幕",
-                        color: getRandomColor(), type: DanmakuItemType.scroll, selfSend: true),
+                        color: getRandomColor(),
+                        type: DanmakuItemType.scroll,
+                        selfSend: true),
                   );
                 },
               ),
@@ -155,26 +157,25 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
           Expanded(
-            child: Container(
-              color: Colors.grey,
-              child: DanmakuScreen(
-                key: _danmuKey,
-                createdController: (DanmakuController e) {
-                  _controller = e;
-                },
-                option: DanmakuOption(
-                  opacity: _opacity,
-                  fontSize: _fontSize,
-                  duration: _duration,
-                  showStroke: _showStroke,
-                  massiveMode: _massiveMode,
-                  hideScroll: _hideScroll,
-                  hideTop: _hideTop,
-                  hideBottom: _hideBottom,
-                ),
+              child: Container(
+            color: Colors.grey,
+            child: DanmakuScreen(
+              key: _danmuKey,
+              createdController: (DanmakuController e) {
+                _controller = e;
+              },
+              option: DanmakuOption(
+                opacity: _opacity,
+                fontSize: _fontSize,
+                duration: _duration,
+                showStroke: _showStroke,
+                massiveMode: _massiveMode,
+                hideScroll: _hideScroll,
+                hideTop: _hideTop,
+                hideBottom: _hideBottom,
               ),
-            )
-          ),
+            ),
+          )),
         ],
       ),
       endDrawer: Drawer(

@@ -46,8 +46,11 @@ class StaticDanmakuPainter extends CustomPainter {
             item.strokeParagraph!, Offset(item.xPosition, item.yPosition));
       }
 
-      if(item.content.selfSend){
-        canvas.drawRect(Offset(item.xPosition, item.yPosition).translate(-2, 2) & (Size(item.width, item.height) + Offset(4,0)), selfSendPaint);
+      if (item.content.selfSend) {
+        canvas.drawRect(
+            Offset(item.xPosition, item.yPosition).translate(-2, 2) &
+                (Size(item.width, item.height) + const Offset(4, 0)),
+            selfSendPaint);
       }
       // 白色部分
       canvas.drawParagraph(
@@ -71,9 +74,13 @@ class StaticDanmakuPainter extends CustomPainter {
                 (size.height - item.yPosition - danmakuHeight)));
       }
 
-      if(item.content.selfSend){
-        canvas.drawRect(Offset(item.xPosition,
-            (size.height - item.yPosition - danmakuHeight)).translate(-2, 2) & (Size(item.width, item.height) + Offset(4,0)), selfSendPaint);
+      if (item.content.selfSend) {
+        canvas.drawRect(
+            Offset(item.xPosition,
+                        (size.height - item.yPosition - danmakuHeight))
+                    .translate(-2, 2) &
+                (Size(item.width, item.height) + const Offset(4, 0)),
+            selfSendPaint);
       }
 
       // 白色部分
