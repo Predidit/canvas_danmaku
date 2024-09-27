@@ -15,6 +15,10 @@ class ScrollDanmakuPainter extends CustomPainter {
   final int batchThreshold;
 
   final double totalDuration;
+  final Paint selfSendPaint = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1.5
+    ..color = Colors.green;
 
   ScrollDanmakuPainter(
     this.progress,
@@ -59,6 +63,10 @@ class ScrollDanmakuPainter extends CustomPainter {
               item.strokeParagraph!, Offset(item.xPosition, item.yPosition));
         }
 
+        if(item.content.selfSend){
+          pictureCanvas.drawRect(Offset(item.xPosition, item.yPosition).translate(-2, 2) & (Size(item.width, item.height) + Offset(4,0)), selfSendPaint);
+        }
+
         pictureCanvas.drawParagraph(
             item.paragraph!, Offset(item.xPosition, item.yPosition));
       }
@@ -87,6 +95,10 @@ class ScrollDanmakuPainter extends CustomPainter {
               Utils.generateStrokeParagraph(item.content, size.width, fontSize);
           canvas.drawParagraph(
               item.strokeParagraph!, Offset(item.xPosition, item.yPosition));
+        }
+
+        if(item.content.selfSend){
+          canvas.drawRect(Offset(item.xPosition, item.yPosition).translate(-2, 2) & (Size(item.width, item.height) + Offset(4,0)), selfSendPaint);
         }
 
         canvas.drawParagraph(

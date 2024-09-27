@@ -67,102 +67,115 @@ class _HomePageState extends State<HomePage> {
       key: _key,
       appBar: AppBar(
         title: Text('CanvasDanmaku Demo'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.add),
-            tooltip: 'Add Scroll',
-            onPressed: () {
-              _controller.addDanmaku(
-                DanmakuContentItem(
-                    "这是一条超长弹幕ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789这是一条超长的弹幕，这条弹幕会超出屏幕宽度",
-                    color: getRandomColor()),
-              );
-            },
+      ),
+      body: Column(
+        children: [
+          Wrap(
+            children: [
+              IconButton(
+                icon: Icon(Icons.add),
+                tooltip: 'Add Scroll',
+                onPressed: () {
+                  _controller.addDanmaku(
+                    DanmakuContentItem(
+                        "这是一条超长弹幕ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789这是一条超长的弹幕，这条弹幕会超出屏幕宽度",
+                        color: getRandomColor()),
+                  );
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.add),
+                tooltip: 'Add Top',
+                onPressed: () {
+                  _controller.addDanmaku(
+                    DanmakuContentItem("这是一条顶部弹幕",
+                        color: getRandomColor(), type: DanmakuItemType.top),
+                  );
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.add),
+                tooltip: 'Add Bottom',
+                onPressed: () {
+                  _controller.addDanmaku(
+                    DanmakuContentItem("这是一条底部弹幕",
+                        color: getRandomColor(), type: DanmakuItemType.bottom),
+                  );
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.add),
+                tooltip: 'Add Bottom',
+                onPressed: () {
+                  _controller.addDanmaku(
+                    DanmakuContentItem("这是一条自己发的弹幕",
+                        color: getRandomColor(), type: DanmakuItemType.scroll, selfSend: true),
+                  );
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.play_circle_outline_outlined),
+                onPressed: startPlay,
+                tooltip: 'Start Player',
+              ),
+              IconButton(
+                icon: Icon(_running ? Icons.pause : Icons.play_arrow),
+                onPressed: () {
+                  if (_running) {
+                    _controller.pause();
+                  } else {
+                    _controller.resume();
+                  }
+                  setState(() {
+                    _running = !_running;
+                  });
+                },
+                tooltip: 'Play Resume',
+              ),
+              IconButton(
+                icon: Icon(_showStroke
+                    ? Icons.font_download
+                    : Icons.font_download_rounded),
+                onPressed: () {
+                  _controller.updateOption(
+                      _controller.option.copyWith(showStroke: !_showStroke));
+                  setState(() {
+                    _showStroke = !_showStroke;
+                  });
+                },
+                tooltip: 'Stroke',
+              ),
+              IconButton(
+                icon: Icon(Icons.clear),
+                onPressed: () {
+                  _controller.clear();
+                },
+                tooltip: 'Clear',
+              ),
+            ],
           ),
-          IconButton(
-            icon: Icon(Icons.add),
-            tooltip: 'Add Top',
-            onPressed: () {
-              _controller.addDanmaku(
-                DanmakuContentItem("这是一条顶部弹幕",
-                    color: getRandomColor(), type: DanmakuItemType.top),
-              );
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.add),
-            tooltip: 'Add Bottom',
-            onPressed: () {
-              _controller.addDanmaku(
-                DanmakuContentItem("这是一条底部弹幕",
-                    color: getRandomColor(), type: DanmakuItemType.bottom),
-              );
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.play_circle_outline_outlined),
-            onPressed: startPlay,
-            tooltip: 'Start Player',
-          ),
-          IconButton(
-            icon: Icon(_running ? Icons.pause : Icons.play_arrow),
-            onPressed: () {
-              if (_running) {
-                _controller.pause();
-              } else {
-                _controller.resume();
-              }
-              setState(() {
-                _running = !_running;
-              });
-            },
-            tooltip: 'Play Resume',
-          ),
-          IconButton(
-            icon: Icon(_showStroke
-                ? Icons.font_download
-                : Icons.font_download_rounded),
-            onPressed: () {
-              _controller.updateOption(
-                  _controller.option.copyWith(showStroke: !_showStroke));
-              setState(() {
-                _showStroke = !_showStroke;
-              });
-            },
-            tooltip: 'Stroke',
-          ),
-          IconButton(
-            icon: Icon(Icons.clear),
-            onPressed: () {
-              _controller.clear();
-            },
-            tooltip: 'Clear',
-          ),
-          IconButton(
-            icon: Icon(Icons.settings),
-            onPressed: () {
-              _key.currentState?.openEndDrawer();
-            },
-            tooltip: 'Settings',
+          Expanded(
+            child: Container(
+              color: Colors.grey,
+              child: DanmakuScreen(
+                key: _danmuKey,
+                createdController: (DanmakuController e) {
+                  _controller = e;
+                },
+                option: DanmakuOption(
+                  opacity: _opacity,
+                  fontSize: _fontSize,
+                  duration: _duration,
+                  showStroke: _showStroke,
+                  massiveMode: _massiveMode,
+                  hideScroll: _hideScroll,
+                  hideTop: _hideTop,
+                  hideBottom: _hideBottom,
+                ),
+              ),
+            )
           ),
         ],
-      ),
-      backgroundColor: Colors.grey,
-      body: DanmakuScreen(
-        key: _danmuKey,
-        createdController: (DanmakuController e) {
-          _controller = e;
-        },
-        option: DanmakuOption(
-          opacity: _opacity,
-          fontSize: _fontSize,
-          duration: _duration,
-          showStroke: _showStroke,
-          massiveMode: _massiveMode,
-          hideScroll: _hideScroll,
-          hideTop: _hideTop,
-          hideBottom: _hideBottom,
-        ),
       ),
       endDrawer: Drawer(
         child: SafeArea(

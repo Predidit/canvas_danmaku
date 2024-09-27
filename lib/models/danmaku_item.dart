@@ -11,6 +11,9 @@ class DanmakuItem {
   /// 弹幕宽度
   final double width;
 
+  /// 弹幕高度
+  final double height;
+
   /// 弹幕水平方向位置
   double xPosition;
 
@@ -24,6 +27,7 @@ class DanmakuItem {
   DanmakuItem({
     required this.content,
     required this.creationTime,
+    required this.height,
     required this.width,
     this.xPosition = 0,
     this.yPosition = 0,
