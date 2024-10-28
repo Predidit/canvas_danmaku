@@ -20,6 +20,9 @@ class DanmakuItem {
   /// 弹幕竖直方向位置
   double yPosition;
 
+  /// 上次绘制时间
+  int? lastDrawTick;
+
   /// 弹幕布局缓存
   ui.Paragraph? paragraph;
   ui.Paragraph? strokeParagraph;
@@ -33,5 +36,6 @@ class DanmakuItem {
     this.yPosition = 0,
     this.paragraph,
     this.strokeParagraph,
+    this.lastDrawTick,
   });
 }

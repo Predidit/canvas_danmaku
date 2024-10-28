@@ -274,9 +274,14 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   /// 更新弹幕设置
   void updateOption(DanmakuOption option) {
     bool needRestart = false;
+    bool needClearParagraph = false;
     if (_animationController.isAnimating) {
       _animationController.stop();
       needRestart = true;
+    }
+
+    if (option.fontSize != _option.fontSize) {
+      needClearParagraph = true;
     }
 
     /// 需要隐藏弹幕时清理已有弹幕
@@ -293,28 +298,30 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     _controller.option = _option;
 
     /// 清理已经存在的 Paragraph 缓存
-    for (DanmakuItem item in _scrollDanmakuItems) {
-      if (item.paragraph != null) {
-        item.paragraph = null;
+    if (needClearParagraph) {
+      for (DanmakuItem item in _scrollDanmakuItems) {
+        if (item.paragraph != null) {
+          item.paragraph = null;
+        }
+        if (item.strokeParagraph != null) {
+          item.strokeParagraph = null;
+        }
       }
-      if (item.strokeParagraph != null) {
-        item.strokeParagraph = null;
+      for (DanmakuItem item in _topDanmakuItems) {
+        if (item.paragraph != null) {
+          item.paragraph = null;
+        }
+        if (item.strokeParagraph != null) {
+          item.strokeParagraph = null;
+        }
       }
-    }
-    for (DanmakuItem item in _topDanmakuItems) {
-      if (item.paragraph != null) {
-        item.paragraph = null;
-      }
-      if (item.strokeParagraph != null) {
-        item.strokeParagraph = null;
-      }
-    }
-    for (DanmakuItem item in _bottomDanmakuItems) {
-      if (item.paragraph != null) {
-        item.paragraph = null;
-      }
-      if (item.strokeParagraph != null) {
-        item.strokeParagraph = null;
+      for (DanmakuItem item in _bottomDanmakuItems) {
+        if (item.paragraph != null) {
+          item.paragraph = null;
+        }
+        if (item.strokeParagraph != null) {
+          item.strokeParagraph = null;
+        }
       }
     }
     if (needRestart) {
