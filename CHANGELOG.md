@@ -1,3 +1,6 @@
+## 0.2.1
+
+* Fix flick when danmaku speed was changed.
 ## 0.2.0
 
 * Add rect to your own danmaku.
