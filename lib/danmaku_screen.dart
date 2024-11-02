@@ -106,10 +106,12 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     if ([
           AppLifecycleState.paused,
           AppLifecycleState.detached,
-        ].contains(state) && _pauseInBackground && _running) {
+        ].contains(state) &&
+        _pauseInBackground &&
+        _running) {
       _pauseInBackground = true;
       pause();
-    } else if (_pauseInBackground){
+    } else if (_pauseInBackground) {
       _pauseInBackground = false;
       resume();
     }
@@ -142,13 +144,13 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     final danmakuWidth = textPainter.width;
     final danmakuHeight = textPainter.height;
 
-    final ui.Paragraph paragraph =
-        Utils.generateParagraph(content, danmakuWidth, _option.fontSize, _option.fontWeight);
+    final ui.Paragraph paragraph = Utils.generateParagraph(
+        content, danmakuWidth, _option.fontSize, _option.fontWeight, _option.opacity);
 
     ui.Paragraph? strokeParagraph;
     if (_option.strokeWidth > 0) {
       strokeParagraph = Utils.generateStrokeParagraph(content, danmakuWidth,
-          _option.fontSize, _option.fontWeight, _option.strokeWidth);
+          _option.fontSize, _option.fontWeight, _option.strokeWidth, _option.opacity);
     }
 
     int idx = 1;
@@ -438,50 +440,49 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       }
       return ClipRect(
         child: IgnorePointer(
-          child: Opacity(
-            opacity: _option.opacity,
-            child: Stack(children: [
-              RepaintBoundary(
-                  child: AnimatedBuilder(
-                animation: _animationController,
-                builder: (context, child) {
-                  return CustomPaint(
-                    painter: ScrollDanmakuPainter(
-                        _animationController.value,
-                        _scrollDanmakuItems,
-                        _option.duration,
-                        _option.fontSize,
-                        _option.fontWeight,
-                        _option.strokeWidth,
-                        _danmakuHeight,
-                        _running,
-                        _tick),
-                    child: Container(),
-                  );
-                },
-              )),
-              RepaintBoundary(
-                  child: AnimatedBuilder(
-                animation: _staticAnimationController,
-                builder: (context, child) {
-                  return CustomPaint(
-                    painter: StaticDanmakuPainter(
-                        _staticAnimationController.value,
-                        _topDanmakuItems,
-                        _bottomDanmakuItems,
-                        _option.duration,
-                        _option.fontSize,
-                        _option.fontWeight,
-                        _option.strokeWidth,
-                        _danmakuHeight,
-                        _running,
-                        _tick),
-                    child: Container(),
-                  );
-                },
-              )),
-            ]),
-          ),
+          child: Stack(children: [
+            RepaintBoundary(
+                child: AnimatedBuilder(
+              animation: _animationController,
+              builder: (context, child) {
+                return CustomPaint(
+                  painter: ScrollDanmakuPainter(
+                      _animationController.value,
+                      _scrollDanmakuItems,
+                      _option.duration,
+                      _option.fontSize,
+                      _option.fontWeight,
+                      _option.strokeWidth,
+                      _option.opacity,
+                      _danmakuHeight,
+                      _running,
+                      _tick),
+                  child: Container(),
+                );
+              },
+            )),
+            RepaintBoundary(
+                child: AnimatedBuilder(
+              animation: _staticAnimationController,
+              builder: (context, child) {
+                return CustomPaint(
+                  painter: StaticDanmakuPainter(
+                      _staticAnimationController.value,
+                      _topDanmakuItems,
+                      _bottomDanmakuItems,
+                      _option.duration,
+                      _option.fontSize,
+                      _option.fontWeight,
+                      _option.strokeWidth,
+                      _option.opacity,
+                      _danmakuHeight,
+                      _running,
+                      _tick),
+                  child: Container(),
+                );
+              },
+            )),
+          ]),
         ),
       );
     });

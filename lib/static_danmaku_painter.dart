@@ -10,6 +10,7 @@ class StaticDanmakuPainter extends CustomPainter {
   final double fontSize;
   final int fontWeight;
   final double strokeWidth;
+  final double opacity;
   final double danmakuHeight;
   final bool running;
   final int tick;
@@ -26,6 +27,7 @@ class StaticDanmakuPainter extends CustomPainter {
       this.fontSize,
       this.fontWeight,
       this.strokeWidth,
+      this.opacity,
       this.danmakuHeight,
       this.running,
       this.tick);
@@ -37,12 +39,12 @@ class StaticDanmakuPainter extends CustomPainter {
       item.xPosition = (size.width - item.width) / 2;
       // 如果 Paragraph 没有缓存，则创建并缓存它
       item.paragraph ??= Utils.generateParagraph(
-          item.content, size.width, fontSize, fontWeight);
+          item.content, size.width, fontSize, fontWeight, opacity);
 
       // 黑色部分
       if (strokeWidth > 0) {
         item.strokeParagraph ??= Utils.generateStrokeParagraph(
-            item.content, size.width, fontSize, fontWeight, strokeWidth);
+            item.content, size.width, fontSize, fontWeight, strokeWidth, opacity);
 
         canvas.drawParagraph(
             item.strokeParagraph!, Offset(item.xPosition, item.yPosition));
@@ -63,12 +65,12 @@ class StaticDanmakuPainter extends CustomPainter {
       item.xPosition = (size.width - item.width) / 2;
       // 如果 Paragraph 没有缓存，则创建并缓存它
       item.paragraph ??= Utils.generateParagraph(
-          item.content, size.width, fontSize, fontWeight);
+          item.content, size.width, fontSize, fontWeight, opacity);
 
       // 黑色部分
       if (strokeWidth > 0) {
         item.strokeParagraph ??= Utils.generateStrokeParagraph(
-            item.content, size.width, fontSize, fontWeight, strokeWidth);
+            item.content, size.width, fontSize, fontWeight, strokeWidth, opacity);
 
         canvas.drawParagraph(
             item.strokeParagraph!,
