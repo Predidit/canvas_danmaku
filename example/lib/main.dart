@@ -38,7 +38,7 @@ class _HomePageState extends State<HomePage> {
   bool _running = true;
 
   /// 弹幕描边
-  bool _showStroke = true;
+  double _strokeWidth = 1.5;
 
   /// 弹幕海量模式(弹幕轨道填满时继续绘制)
   bool _massiveMode = false;
@@ -51,6 +51,9 @@ class _HomePageState extends State<HomePage> {
 
   /// 弹幕字号
   double _fontSize = (Platform.isIOS || Platform.isAndroid) ? 16 : 25;
+
+  /// 弹幕粗细
+  int _fontWeight = 5;
 
   /// 隐藏滚动弹幕
   bool _hideScroll = false;
@@ -135,15 +138,14 @@ class _HomePageState extends State<HomePage> {
                 tooltip: 'Play Resume',
               ),
               IconButton(
-                icon: Icon(_showStroke
+                icon: Icon(_strokeWidth
                     ? Icons.font_download
                     : Icons.font_download_rounded),
                 onPressed: () {
+                  _strokeWidth = _strokeWidth == 0 ? 1.5 : 0;
                   _controller.updateOption(
-                      _controller.option.copyWith(showStroke: !_showStroke));
-                  setState(() {
-                    _showStroke = !_showStroke;
-                  });
+                      _controller.option.copyWith(_strokeWidth: _strokeWidth));
+                  setState(() {});
                 },
                 tooltip: 'Stroke',
               ),
@@ -167,8 +169,9 @@ class _HomePageState extends State<HomePage> {
               option: DanmakuOption(
                 opacity: _opacity,
                 fontSize: _fontSize,
+                fontWeight: _fontWeight,
                 duration: _duration,
-                showStroke: _showStroke,
+                strokeWidth: _strokeWidth,
                 massiveMode: _massiveMode,
                 hideScroll: _hideScroll,
                 hideTop: _hideTop,

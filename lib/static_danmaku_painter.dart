@@ -8,7 +8,8 @@ class StaticDanmakuPainter extends CustomPainter {
   final List<DanmakuItem> buttomDanmakuItems;
   final int danmakuDurationInSeconds;
   final double fontSize;
-  final bool showStroke;
+  final int fontWeight;
+  final double strokeWidth;
   final double danmakuHeight;
   final bool running;
   final int tick;
@@ -23,7 +24,8 @@ class StaticDanmakuPainter extends CustomPainter {
       this.buttomDanmakuItems,
       this.danmakuDurationInSeconds,
       this.fontSize,
-      this.showStroke,
+      this.fontWeight,
+      this.strokeWidth,
       this.danmakuHeight,
       this.running,
       this.tick);
@@ -34,13 +36,13 @@ class StaticDanmakuPainter extends CustomPainter {
     for (var item in topDanmakuItems) {
       item.xPosition = (size.width - item.width) / 2;
       // 如果 Paragraph 没有缓存，则创建并缓存它
-      item.paragraph ??=
-          Utils.generateParagraph(item.content, size.width, fontSize);
+      item.paragraph ??= Utils.generateParagraph(
+          item.content, size.width, fontSize, fontWeight);
 
       // 黑色部分
-      if (showStroke) {
-        item.strokeParagraph ??=
-            Utils.generateStrokeParagraph(item.content, size.width, fontSize);
+      if (strokeWidth > 0) {
+        item.strokeParagraph ??= Utils.generateStrokeParagraph(
+            item.content, size.width, fontSize, fontWeight, strokeWidth);
 
         canvas.drawParagraph(
             item.strokeParagraph!, Offset(item.xPosition, item.yPosition));
@@ -60,13 +62,13 @@ class StaticDanmakuPainter extends CustomPainter {
     for (var item in buttomDanmakuItems) {
       item.xPosition = (size.width - item.width) / 2;
       // 如果 Paragraph 没有缓存，则创建并缓存它
-      item.paragraph ??=
-          Utils.generateParagraph(item.content, size.width, fontSize);
+      item.paragraph ??= Utils.generateParagraph(
+          item.content, size.width, fontSize, fontWeight);
 
       // 黑色部分
-      if (showStroke) {
-        item.strokeParagraph ??=
-            Utils.generateStrokeParagraph(item.content, size.width, fontSize);
+      if (strokeWidth > 0) {
+        item.strokeParagraph ??= Utils.generateStrokeParagraph(
+            item.content, size.width, fontSize, fontWeight, strokeWidth);
 
         canvas.drawParagraph(
             item.strokeParagraph!,

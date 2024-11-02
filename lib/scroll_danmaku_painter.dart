@@ -8,7 +8,8 @@ class ScrollDanmakuPainter extends CustomPainter {
   final List<DanmakuItem> scrollDanmakuItems;
   final int danmakuDurationInSeconds;
   final double fontSize;
-  final bool showStroke;
+  final int fontWeight;
+  final double strokeWidth;
   final double danmakuHeight;
   final bool running;
   final int tick;
@@ -25,7 +26,8 @@ class ScrollDanmakuPainter extends CustomPainter {
     this.scrollDanmakuItems,
     this.danmakuDurationInSeconds,
     this.fontSize,
-    this.showStroke,
+    this.fontWeight,
+    this.strokeWidth,
     this.danmakuHeight,
     this.running,
     this.tick, {
@@ -52,12 +54,12 @@ class ScrollDanmakuPainter extends CustomPainter {
           continue;
         }
 
-        item.paragraph ??=
-            Utils.generateParagraph(item.content, size.width, fontSize);
+        item.paragraph ??= Utils.generateParagraph(
+            item.content, size.width, fontSize, fontWeight);
 
-        if (showStroke) {
-          item.strokeParagraph ??=
-              Utils.generateStrokeParagraph(item.content, size.width, fontSize);
+        if (strokeWidth > 0) {
+          item.strokeParagraph ??= Utils.generateStrokeParagraph(
+              item.content, size.width, fontSize, fontWeight, strokeWidth);
           pictureCanvas.drawParagraph(
               item.strokeParagraph!, Offset(item.xPosition, item.yPosition));
         }
@@ -89,12 +91,12 @@ class ScrollDanmakuPainter extends CustomPainter {
           continue;
         }
 
-        item.paragraph ??=
-            Utils.generateParagraph(item.content, size.width, fontSize);
+        item.paragraph ??= Utils.generateParagraph(
+            item.content, size.width, fontSize, fontWeight);
 
-        if (showStroke) {
-          item.strokeParagraph ??=
-              Utils.generateStrokeParagraph(item.content, size.width, fontSize);
+        if (strokeWidth > 0) {
+          item.strokeParagraph ??= Utils.generateStrokeParagraph(
+              item.content, size.width, fontSize, fontWeight, strokeWidth);
           canvas.drawParagraph(
               item.strokeParagraph!, Offset(item.xPosition, item.yPosition));
         }
