@@ -65,6 +65,9 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   /// 运行状态
   bool _running = true;
 
+  /// 因进入后台而暂停
+  bool _pauseInBackground = false;
+
   @override
   void initState() {
     super.initState();
@@ -100,9 +103,17 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   /// 处理 Android/iOS 应用后台或熄屏导致的动画问题
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused) {
+    if ([
+          AppLifecycleState.paused,
+          AppLifecycleState.detached,
+        ].contains(state) && _pauseInBackground && _running) {
+      _pauseInBackground = true;
       pause();
+    } else if (_pauseInBackground){
+      _pauseInBackground = false;
+      resume();
     }
+    super.didChangeAppLifecycleState(state);
   }
 
   @override
