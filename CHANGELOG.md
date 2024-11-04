@@ -1,3 +1,6 @@
+## 0.2.2
+
+* Better danamku cleaner.
 ## 0.2.1
 
 * Fix flick when danmaku speed was changed.
