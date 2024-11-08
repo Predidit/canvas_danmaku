@@ -138,7 +138,7 @@ class _HomePageState extends State<HomePage> {
                 tooltip: 'Play Resume',
               ),
               IconButton(
-                icon: Icon(_strokeWidth
+                icon: Icon(_strokeWidth > 0
                     ? Icons.font_download
                     : Icons.font_download_rounded),
                 onPressed: () {
