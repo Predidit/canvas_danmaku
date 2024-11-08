@@ -52,6 +52,9 @@ class _HomePageState extends State<HomePage> {
   /// 弹幕字号
   double _fontSize = (Platform.isIOS || Platform.isAndroid) ? 16 : 25;
 
+  /// 弹幕粗细
+  int _fontWeight = 5;
+
   /// 隐藏滚动弹幕
   bool _hideScroll = false;
 
@@ -167,6 +170,7 @@ class _HomePageState extends State<HomePage> {
               option: DanmakuOption(
                 opacity: _opacity,
                 fontSize: _fontSize,
+                fontWeight: _fontWeight,
                 duration: _duration,
                 showStroke: _showStroke,
                 massiveMode: _massiveMode,

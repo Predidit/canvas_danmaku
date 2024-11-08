@@ -122,19 +122,22 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     // 在这里提前创建 Paragraph 缓存防止卡顿
     final textPainter = TextPainter(
       text: TextSpan(
-          text: content.text, style: TextStyle(fontSize: _option.fontSize)),
+          text: content.text,
+          style: TextStyle(
+              fontSize: _option.fontSize,
+              fontWeight: FontWeight.values[_option.fontWeight])),
       textDirection: TextDirection.ltr,
     )..layout();
     final danmakuWidth = textPainter.width;
     final danmakuHeight = textPainter.height;
 
     final ui.Paragraph paragraph =
-        Utils.generateParagraph(content, danmakuWidth, _option.fontSize);
+        Utils.generateParagraph(content, danmakuWidth, _option.fontSize, _option.fontWeight);
 
     ui.Paragraph? strokeParagraph;
     if (_option.showStroke) {
       strokeParagraph = Utils.generateStrokeParagraph(
-          content, danmakuWidth, _option.fontSize);
+          content, danmakuWidth, _option.fontSize, _option.fontWeight);
     }
 
     int idx = 1;
@@ -239,6 +242,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
 
   /// 暂停
   void pause() {
+    if (!mounted) return;
     if (_running) {
       setState(() {
         _running = false;
@@ -251,6 +255,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
 
   /// 恢复
   void resume() {
+    if (!mounted) return;
     if (!_running) {
       setState(() {
         _running = true;
@@ -324,6 +329,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
 
   /// 清空弹幕
   void clearDanmakus() {
+    if (!mounted) return;
     setState(() {
       _scrollDanmakuItems.clear();
       _topDanmakuItems.clear();
@@ -444,6 +450,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
                         _scrollDanmakuItems,
                         _option.duration,
                         _option.fontSize,
+                        _option.fontWeight,
                         _option.showStroke,
                         _danmakuHeight,
                         _running,
@@ -463,6 +470,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
                         _bottomDanmakuItems,
                         _option.duration,
                         _option.fontSize,
+                        _option.fontWeight,
                         _option.showStroke,
                         _danmakuHeight,
                         _running,

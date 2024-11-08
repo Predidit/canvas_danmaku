@@ -2,6 +2,9 @@ class DanmakuOption {
   /// 默认的字体大小
   final double fontSize;
 
+  /// 字体粗细
+  final int fontWeight;
+
   /// 显示区域，0.1-1.0
   final double area;
 
@@ -28,6 +31,7 @@ class DanmakuOption {
 
   DanmakuOption({
     this.fontSize = 16,
+    this.fontWeight = 5,
     this.area = 1.0,
     this.duration = 10,
     this.opacity = 1.0,
@@ -40,6 +44,7 @@ class DanmakuOption {
 
   DanmakuOption copyWith({
     double? fontSize,
+    int? fontWeight,
     double? area,
     int? duration,
     double? opacity,
@@ -52,6 +57,7 @@ class DanmakuOption {
     return DanmakuOption(
       area: area ?? this.area,
       fontSize: fontSize ?? this.fontSize,
+      fontWeight: fontWeight ?? this.fontWeight,
       duration: duration ?? this.duration,
       opacity: opacity ?? this.opacity,
       hideTop: hideTop ?? this.hideTop,
