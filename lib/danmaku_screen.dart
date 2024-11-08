@@ -135,9 +135,9 @@ class _DanmakuScreenState extends State<DanmakuScreen>
         Utils.generateParagraph(content, danmakuWidth, _option.fontSize, _option.fontWeight);
 
     ui.Paragraph? strokeParagraph;
-    if (_option.strokeWidth > 0) {
-      strokeParagraph = Utils.generateStrokeParagraph(content, danmakuWidth,
-          _option.fontSize, _option.fontWeight, _option.strokeWidth);
+    if (_option.showStroke) {
+      strokeParagraph = Utils.generateStrokeParagraph(
+          content, danmakuWidth, _option.fontSize, _option.fontWeight);
     }
 
     int idx = 1;
@@ -451,7 +451,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
                         _option.duration,
                         _option.fontSize,
                         _option.fontWeight,
-                        _option.strokeWidth,
+                        _option.showStroke,
                         _danmakuHeight,
                         _running,
                         _tick),
@@ -471,7 +471,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
                         _option.duration,
                         _option.fontSize,
                         _option.fontWeight,
-                        _option.strokeWidth,
+                        _option.showStroke,
                         _danmakuHeight,
                         _running,
                         _tick),

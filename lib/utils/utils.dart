@@ -20,10 +20,10 @@ class Utils {
   }
 
   static generateStrokeParagraph(
-      DanmakuContentItem content, double danmakuWidth, double fontSize, int fontWeight, double strokeWidth) {
+      DanmakuContentItem content, double danmakuWidth, double fontSize, int fontWeight) {
     final Paint strokePaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
+      ..strokeWidth = 2
       ..color = Colors.black;
 
     final ui.ParagraphBuilder strokeBuilder =
