@@ -246,14 +246,6 @@ class _DanmakuScreenState extends State<DanmakuScreen>
         !_animationController.isAnimating) {
       _animationController.repeat();
     }
-    // 移除屏幕外滚动弹幕
-    _scrollDanmakuItems.removeWhere((item) => item.xPosition + item.width < 0);
-    // 移除顶部弹幕
-    _topDanmakuItems.removeWhere(
-        (item) => ((_tick - item.creationTime) > (_option.duration * 1000)));
-    // 移除底部弹幕
-    _bottomDanmakuItems.removeWhere(
-        (item) => ((_tick - item.creationTime) > (_option.duration * 1000)));
 
     /// 重绘静态弹幕
     setState(() {
@@ -411,6 +403,24 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       int delta = currentElapsedTime - lastElapsedTime; // 计算自上次记录以来的时间差
       _tick += delta;
       lastElapsedTime = currentElapsedTime; // 更新最后记录的时间
+      if (lastElapsedTime % 100 == 0) {
+        // 移除屏幕外滚动弹幕
+        _scrollDanmakuItems
+            .removeWhere((item) => item.xPosition + item.width < 0);
+        // 移除顶部弹幕
+        _topDanmakuItems.removeWhere((item) =>
+            ((_tick - item.creationTime) > (_option.duration * 1000)));
+        // 移除底部弹幕
+        _bottomDanmakuItems.removeWhere((item) =>
+            ((_tick - item.creationTime) > (_option.duration * 1000)));
+
+        /// 重绘静态弹幕
+        if (mounted) {
+          setState(() {
+            _staticAnimationController.value = 0;
+          });
+        }
+      }
     }
 
     stopwatch.stop();
