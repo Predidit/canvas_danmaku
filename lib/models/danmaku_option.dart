@@ -31,7 +31,7 @@ class DanmakuOption {
 
   DanmakuOption({
     this.fontSize = 16,
-    this.fontWeight = 5,
+    this.fontWeight = 4,
     this.area = 1.0,
     this.duration = 10,
     this.opacity = 1.0,

@@ -19,8 +19,8 @@ class Utils {
       ..layout(ui.ParagraphConstraints(width: danmakuWidth));
   }
 
-  static generateStrokeParagraph(
-      DanmakuContentItem content, double danmakuWidth, double fontSize, int fontWeight) {
+  static generateStrokeParagraph(DanmakuContentItem content,
+      double danmakuWidth, double fontSize, int fontWeight) {
     final Paint strokePaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2

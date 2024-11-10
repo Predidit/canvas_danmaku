@@ -1,3 +1,6 @@
+## 0.2.3
+
+* Add customize font weight support.
 ## 0.2.2
 
 * Better danamku cleaner.

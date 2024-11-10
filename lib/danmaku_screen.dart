@@ -131,8 +131,8 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     final danmakuWidth = textPainter.width;
     final danmakuHeight = textPainter.height;
 
-    final ui.Paragraph paragraph =
-        Utils.generateParagraph(content, danmakuWidth, _option.fontSize, _option.fontWeight);
+    final ui.Paragraph paragraph = Utils.generateParagraph(
+        content, danmakuWidth, _option.fontSize, _option.fontWeight);
 
     ui.Paragraph? strokeParagraph;
     if (_option.showStroke) {
