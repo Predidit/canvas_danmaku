@@ -19,7 +19,7 @@ and the Flutter guide for
 
 ``` yaml
 dependencies: 
-  canvas_danmaku: ^0.2.3
+  canvas_danmaku: ^0.2.4
 ```
 
 Example:

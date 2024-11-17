@@ -250,8 +250,8 @@ class _HomePageState extends State<HomePage> {
                     setState(() {
                       _safeArea = e;
                     });
-                    _controller.updateOption(
-                        _controller.option.copyWith(safeArea: e));
+                    _controller
+                        .updateOption(_controller.option.copyWith(safeArea: e));
                   })
             ],
           ),

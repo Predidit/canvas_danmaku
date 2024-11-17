@@ -1,3 +1,6 @@
+## 0.2.4
+
+* Add safe area option.
 ## 0.2.3
 
 * Add customize font weight support.
