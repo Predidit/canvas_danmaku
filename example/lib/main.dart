@@ -64,6 +64,9 @@ class _HomePageState extends State<HomePage> {
   /// 隐藏底部弹幕
   bool _hideBottom = false;
 
+  /// 为字幕预留空间
+  bool _safeArea = true;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -177,6 +180,7 @@ class _HomePageState extends State<HomePage> {
                 hideScroll: _hideScroll,
                 hideTop: _hideTop,
                 hideBottom: _hideBottom,
+                safeArea: _safeArea,
               ),
             ),
           )),
@@ -230,7 +234,7 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
               SwitchListTile(
-                  title: Text('MassiveMode'),
+                  title: const Text('MassiveMode'),
                   value: _massiveMode,
                   onChanged: (e) {
                     setState(() {
@@ -238,6 +242,16 @@ class _HomePageState extends State<HomePage> {
                     });
                     _controller.updateOption(
                         _controller.option.copyWith(massiveMode: e));
+                  }),
+              SwitchListTile(
+                  title: const Text('SafeArea'),
+                  value: _safeArea,
+                  onChanged: (e) {
+                    setState(() {
+                      _safeArea = e;
+                    });
+                    _controller.updateOption(
+                        _controller.option.copyWith(safeArea: e));
                   })
             ],
           ),

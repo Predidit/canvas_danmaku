@@ -29,6 +29,9 @@ class DanmakuOption {
   /// 海量弹幕模式 (弹幕轨道占满时进行叠加)
   final bool massiveMode;
 
+  /// 为字幕预留空间
+  final bool safeArea;
+
   DanmakuOption({
     this.fontSize = 16,
     this.fontWeight = 4,
@@ -40,6 +43,7 @@ class DanmakuOption {
     this.hideTop = false,
     this.showStroke = true,
     this.massiveMode = false,
+    this.safeArea = true,
   });
 
   DanmakuOption copyWith({
@@ -53,6 +57,7 @@ class DanmakuOption {
     bool? hideScroll,
     bool? showStroke,
     bool? massiveMode,
+    bool? safeArea,
   }) {
     return DanmakuOption(
       area: area ?? this.area,
@@ -65,6 +70,7 @@ class DanmakuOption {
       hideScroll: hideScroll ?? this.hideScroll,
       showStroke: showStroke ?? this.showStroke,
       massiveMode: massiveMode ?? this.massiveMode,
+      safeArea: safeArea ?? this.safeArea,
     );
   }
 }
