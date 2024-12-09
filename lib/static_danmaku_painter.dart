@@ -93,6 +93,6 @@ class StaticDanmakuPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant StaticDanmakuPainter oldDelegate) {
-    return running;
+    return true;
   }
 }
