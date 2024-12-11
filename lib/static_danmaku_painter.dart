@@ -5,7 +5,7 @@ import '/utils/utils.dart';
 class StaticDanmakuPainter extends CustomPainter {
   final double progress;
   final List<DanmakuItem> topDanmakuItems;
-  final List<DanmakuItem> buttomDanmakuItems;
+  final List<DanmakuItem> bottomDanmakuItems;
   final int danmakuDurationInSeconds;
   final double fontSize;
   final int fontWeight;
@@ -21,7 +21,7 @@ class StaticDanmakuPainter extends CustomPainter {
   StaticDanmakuPainter(
       this.progress,
       this.topDanmakuItems,
-      this.buttomDanmakuItems,
+      this.bottomDanmakuItems,
       this.danmakuDurationInSeconds,
       this.fontSize,
       this.fontWeight,
@@ -59,7 +59,7 @@ class StaticDanmakuPainter extends CustomPainter {
           item.paragraph!, Offset(item.xPosition, item.yPosition));
     }
     // 绘制底部弹幕 (翻转绘制)
-    for (var item in buttomDanmakuItems) {
+    for (var item in bottomDanmakuItems) {
       item.xPosition = (size.width - item.width) / 2;
       // 如果 Paragraph 没有缓存，则创建并缓存它
       item.paragraph ??= Utils.generateParagraph(
