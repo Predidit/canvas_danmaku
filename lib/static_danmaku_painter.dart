@@ -93,6 +93,8 @@ class StaticDanmakuPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant StaticDanmakuPainter oldDelegate) {
-    return true;
+    return running ||
+        oldDelegate.bottomDanmakuItems.length != bottomDanmakuItems.length ||
+        oldDelegate.topDanmakuItems.length != topDanmakuItems.length;
   }
 }

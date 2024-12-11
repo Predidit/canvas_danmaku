@@ -42,13 +42,13 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   DanmakuOption _option = DanmakuOption();
 
   /// 滚动弹幕
-  final List<DanmakuItem> _scrollDanmakuItems = [];
+  List<DanmakuItem> _scrollDanmakuItems = [];
 
   /// 顶部弹幕
-  final List<DanmakuItem> _topDanmakuItems = [];
+  List<DanmakuItem> _topDanmakuItems = [];
 
   /// 底部弹幕
-  final List<DanmakuItem> _bottomDanmakuItems = [];
+  List<DanmakuItem> _bottomDanmakuItems = [];
 
   /// 弹幕高度
   late double _danmakuHeight;
@@ -283,13 +283,13 @@ class _DanmakuScreenState extends State<DanmakuScreen>
 
     /// 需要隐藏弹幕时清理已有弹幕
     if (option.hideScroll && !_option.hideScroll) {
-      _scrollDanmakuItems.clear();
+      _scrollDanmakuItems = [];
     }
     if (option.hideTop && !_option.hideTop) {
-      _topDanmakuItems.clear();
+      _topDanmakuItems = [];
     }
     if (option.hideBottom && !_option.hideBottom) {
-      _bottomDanmakuItems.clear();
+      _bottomDanmakuItems = [];
     }
     _option = option;
     _controller.option = _option;
@@ -331,9 +331,9 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   void clearDanmakus() {
     if (!mounted) return;
     setState(() {
-      _scrollDanmakuItems.clear();
-      _topDanmakuItems.clear();
-      _bottomDanmakuItems.clear();
+      _scrollDanmakuItems = [];
+      _topDanmakuItems = [];
+      _bottomDanmakuItems = [];
     });
     _animationController.stop();
   }
@@ -459,7 +459,6 @@ class _DanmakuScreenState extends State<DanmakuScreen>
                         _danmakuHeight,
                         _running,
                         _tick),
-                    child: Container(),
                   );
                 },
               )),
@@ -479,7 +478,6 @@ class _DanmakuScreenState extends State<DanmakuScreen>
                         _danmakuHeight,
                         _running,
                         _tick),
-                    child: Container(),
                   );
                 },
               )),
