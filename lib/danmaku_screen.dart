@@ -122,22 +122,35 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     // 在这里提前创建 Paragraph 缓存防止卡顿
     final textPainter = TextPainter(
       text: TextSpan(
-          text: content.text,
-          style: TextStyle(
-              fontSize: _option.fontSize,
-              fontWeight: FontWeight.values[_option.fontWeight])),
+        text: content.text,
+        style: TextStyle(
+          fontSize: _option.fontSize,
+          fontWeight: FontWeight.values[_option.fontWeight],
+        ),
+      ),
       textDirection: TextDirection.ltr,
     )..layout();
     final danmakuWidth = textPainter.width;
     final danmakuHeight = textPainter.height;
 
     final ui.Paragraph paragraph = Utils.generateParagraph(
-        content, danmakuWidth, _option.fontSize, _option.fontWeight);
+      content: content,
+      danmakuWidth: danmakuWidth,
+      fontSize: _option.fontSize,
+      fontWeight: _option.fontWeight,
+      opacity: _option.opacity,
+    );
 
     ui.Paragraph? strokeParagraph;
-    if (_option.showStroke) {
+    if (_option.strokeWidth > 0) {
       strokeParagraph = Utils.generateStrokeParagraph(
-          content, danmakuWidth, _option.fontSize, _option.fontWeight);
+        content: content,
+        danmakuWidth: danmakuWidth,
+        fontSize: _option.fontSize,
+        fontWeight: _option.fontWeight,
+        strokeWidth: _option.strokeWidth,
+        opacity: _option.opacity,
+      );
     }
 
     int idx = 1;
@@ -147,7 +160,8 @@ class _DanmakuScreenState extends State<DanmakuScreen>
             _scrollCanAddToTrack(yPosition, danmakuWidth);
 
         if (scrollCanAddToTrack) {
-          _scrollDanmakuItems.add(DanmakuItem(
+          _scrollDanmakuItems.add(
+            DanmakuItem(
               yPosition: yPosition,
               xPosition: _viewWidth,
               width: danmakuWidth,
@@ -155,13 +169,16 @@ class _DanmakuScreenState extends State<DanmakuScreen>
               creationTime: _tick,
               content: content,
               paragraph: paragraph,
-              strokeParagraph: strokeParagraph));
+              strokeParagraph: strokeParagraph,
+            ),
+          );
           break;
         }
 
         /// 无法填充自己发送的弹幕时强制添加
         if (content.selfSend && idx == _trackCount) {
-          _scrollDanmakuItems.add(DanmakuItem(
+          _scrollDanmakuItems.add(
+            DanmakuItem(
               yPosition: _trackYPositions[0],
               xPosition: _viewWidth,
               width: danmakuWidth,
@@ -169,16 +186,19 @@ class _DanmakuScreenState extends State<DanmakuScreen>
               creationTime: _tick,
               content: content,
               paragraph: paragraph,
-              strokeParagraph: strokeParagraph));
+              strokeParagraph: strokeParagraph,
+            ),
+          );
           break;
         }
 
         /// 海量弹幕启用时进行随机添加
         if (_option.massiveMode && idx == _trackCount) {
           final random = Random();
-          var randomYPosition =
+          double randomYPosition =
               _trackYPositions[random.nextInt(_trackYPositions.length)];
-          _scrollDanmakuItems.add(DanmakuItem(
+          _scrollDanmakuItems.add(
+            DanmakuItem(
               yPosition: randomYPosition,
               xPosition: _viewWidth,
               width: danmakuWidth,
@@ -186,7 +206,9 @@ class _DanmakuScreenState extends State<DanmakuScreen>
               creationTime: _tick,
               content: content,
               paragraph: paragraph,
-              strokeParagraph: strokeParagraph));
+              strokeParagraph: strokeParagraph,
+            ),
+          );
           break;
         }
       }
@@ -195,7 +217,8 @@ class _DanmakuScreenState extends State<DanmakuScreen>
         bool topCanAddToTrack = _topCanAddToTrack(yPosition);
 
         if (topCanAddToTrack) {
-          _topDanmakuItems.add(DanmakuItem(
+          _topDanmakuItems.add(
+            DanmakuItem(
               yPosition: yPosition,
               xPosition: _viewWidth,
               width: danmakuWidth,
@@ -203,7 +226,9 @@ class _DanmakuScreenState extends State<DanmakuScreen>
               creationTime: _tick,
               content: content,
               paragraph: paragraph,
-              strokeParagraph: strokeParagraph));
+              strokeParagraph: strokeParagraph,
+            ),
+          );
           break;
         }
       }
@@ -212,7 +237,8 @@ class _DanmakuScreenState extends State<DanmakuScreen>
         bool bottomCanAddToTrack = _bottomCanAddToTrack(yPosition);
 
         if (bottomCanAddToTrack) {
-          _bottomDanmakuItems.add(DanmakuItem(
+          _bottomDanmakuItems.add(
+            DanmakuItem(
               yPosition: yPosition,
               xPosition: _viewWidth,
               width: danmakuWidth,
@@ -220,7 +246,9 @@ class _DanmakuScreenState extends State<DanmakuScreen>
               creationTime: _tick,
               content: content,
               paragraph: paragraph,
-              strokeParagraph: strokeParagraph));
+              strokeParagraph: strokeParagraph,
+            ),
+          );
           break;
         }
       }
@@ -277,7 +305,10 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       needRestart = true;
     }
 
-    if (option.fontSize != _option.fontSize) {
+    if (option.fontSize != _option.fontSize ||
+        option.fontWeight != _option.fontWeight ||
+        option.opacity != _option.opacity ||
+        option.strokeWidth != _option.strokeWidth) {
       needClearParagraph = true;
     }
 
@@ -324,7 +355,9 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     if (needRestart) {
       _animationController.repeat();
     }
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   /// 清空弹幕
@@ -340,7 +373,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
 
   /// 确定滚动弹幕是否可以添加
   bool _scrollCanAddToTrack(double yPosition, double newDanmakuWidth) {
-    for (var item in _scrollDanmakuItems) {
+    for (DanmakuItem item in _scrollDanmakuItems) {
       if (item.yPosition == yPosition) {
         final existingEndPosition = item.xPosition + item.width;
         // 首先保证进入屏幕时不发生重叠，其次保证知道移出屏幕前不与速度慢的弹幕(弹幕宽度较小)发生重叠
@@ -361,7 +394,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
 
   /// 确定顶部弹幕是否可以添加
   bool _topCanAddToTrack(double yPosition) {
-    for (var item in _topDanmakuItems) {
+    for (DanmakuItem item in _topDanmakuItems) {
       if (item.yPosition == yPosition) {
         return false;
       }
@@ -371,7 +404,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
 
   /// 确定底部弹幕是否可以添加
   bool _bottomCanAddToTrack(double yPosition) {
-    for (var item in _bottomDanmakuItems) {
+    for (DanmakuItem item in _bottomDanmakuItems) {
       if (item.yPosition == yPosition) {
         return false;
       }
@@ -417,78 +450,86 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   Widget build(BuildContext context) {
     /// 计算弹幕轨道
     final textPainter = TextPainter(
-      text: TextSpan(text: '弹幕', style: TextStyle(fontSize: _option.fontSize)),
+      text: TextSpan(
+        text: '弹幕',
+        style: TextStyle(fontSize: _option.fontSize),
+      ),
       textDirection: TextDirection.ltr,
     )..layout();
     _danmakuHeight = textPainter.height;
-    return LayoutBuilder(builder: (context, constraints) {
-      /// 计算视图宽度
-      if (constraints.maxWidth != _viewWidth) {
-        _viewWidth = constraints.maxWidth;
-      }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        /// 计算视图宽度
+        if (constraints.maxWidth != _viewWidth) {
+          _viewWidth = constraints.maxWidth;
+        }
 
-      _trackCount =
-          (constraints.maxHeight * _option.area / _danmakuHeight).floor();
+        _trackCount =
+            (constraints.maxHeight * _option.area / _danmakuHeight).floor();
 
-      /// 为字幕留出余量
-      if (_option.safeArea && _option.area == 1.0) {
-        _trackCount = _trackCount - 1;
-      }
+        /// 为字幕留出余量
+        if (_option.safeArea && _option.area == 1.0) {
+          _trackCount = _trackCount - 1;
+        }
 
-      _trackYPositions.clear();
-      for (int i = 0; i < _trackCount; i++) {
-        _trackYPositions.add(i * _danmakuHeight);
-      }
-      return ClipRect(
-        child: IgnorePointer(
-          child: Opacity(
-            opacity: _option.opacity,
-            child: Stack(children: [
-              RepaintBoundary(
+        _trackYPositions.clear();
+        for (int i = 0; i < _trackCount; i++) {
+          _trackYPositions.add(i * _danmakuHeight);
+        }
+        return ClipRect(
+          child: IgnorePointer(
+            child: Stack(
+              children: [
+                RepaintBoundary(
                   child: AnimatedBuilder(
-                animation: _animationController,
-                builder: (context, child) {
-                  return CustomPaint(
-                    painter: ScrollDanmakuPainter(
-                      _animationController.value,
-                      _scrollDanmakuItems,
-                      _option.duration,
-                      _option.fontSize,
-                      _option.fontWeight,
-                      _option.showStroke,
-                      _danmakuHeight,
-                      _running,
-                      _tick,
-                    ),
-                    child: Container(),
-                  );
-                },
-              )),
-              RepaintBoundary(
+                    animation: _animationController,
+                    builder: (context, child) {
+                      return CustomPaint(
+                        painter: ScrollDanmakuPainter(
+                          progress: _animationController.value,
+                          scrollDanmakuItems: _scrollDanmakuItems,
+                          danmakuDurationInSeconds: _option.duration,
+                          fontSize: _option.fontSize,
+                          fontWeight: _option.fontWeight,
+                          strokeWidth: _option.strokeWidth,
+                          opacity: _option.opacity,
+                          danmakuHeight: _danmakuHeight,
+                          running: _running,
+                          tick: _tick,
+                        ),
+                        size: const Size(double.infinity, double.infinity),
+                      );
+                    },
+                  ),
+                ),
+                RepaintBoundary(
                   child: AnimatedBuilder(
-                animation: _staticAnimationController,
-                builder: (context, child) {
-                  return CustomPaint(
-                    painter: StaticDanmakuPainter(
-                      _staticAnimationController.value,
-                      _topDanmakuItems,
-                      _bottomDanmakuItems,
-                      _option.duration,
-                      _option.fontSize,
-                      _option.fontWeight,
-                      _option.showStroke,
-                      _danmakuHeight,
-                      _running,
-                      _tick,
-                    ),
-                    child: Container(),
-                  );
-                },
-              )),
-            ]),
+                    animation: _staticAnimationController,
+                    builder: (context, child) {
+                      return CustomPaint(
+                        painter: StaticDanmakuPainter(
+                          progress: _staticAnimationController.value,
+                          topDanmakuItems: _topDanmakuItems,
+                          bottomDanmakuItems: _bottomDanmakuItems,
+                          danmakuDurationInSeconds: _option.duration,
+                          fontSize: _option.fontSize,
+                          fontWeight: _option.fontWeight,
+                          strokeWidth: _option.strokeWidth,
+                          opacity: _option.opacity,
+                          danmakuHeight: _danmakuHeight,
+                          running: _running,
+                          tick: _tick,
+                        ),
+                        size: const Size(double.infinity, double.infinity),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      );
-    });
+        );
+      },
+    );
   }
 }

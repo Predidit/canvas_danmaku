@@ -24,7 +24,7 @@ class DanmakuOption {
   final bool hideScroll;
 
   /// 弹幕描边
-  final bool showStroke;
+  final double strokeWidth;
 
   /// 海量弹幕模式 (弹幕轨道占满时进行叠加)
   final bool massiveMode;
@@ -41,7 +41,7 @@ class DanmakuOption {
     this.hideBottom = false,
     this.hideScroll = false,
     this.hideTop = false,
-    this.showStroke = true,
+    this.strokeWidth = 1.5,
     this.massiveMode = false,
     this.safeArea = true,
   });
@@ -55,7 +55,7 @@ class DanmakuOption {
     bool? hideTop,
     bool? hideBottom,
     bool? hideScroll,
-    bool? showStroke,
+    double? strokeWidth,
     bool? massiveMode,
     bool? safeArea,
   }) {
@@ -68,7 +68,7 @@ class DanmakuOption {
       hideTop: hideTop ?? this.hideTop,
       hideBottom: hideBottom ?? this.hideBottom,
       hideScroll: hideScroll ?? this.hideScroll,
-      showStroke: showStroke ?? this.showStroke,
+      strokeWidth: strokeWidth ?? this.strokeWidth,
       massiveMode: massiveMode ?? this.massiveMode,
       safeArea: safeArea ?? this.safeArea,
     );

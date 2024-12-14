@@ -1,12 +1,15 @@
+import 'package:flutter/material.dart';
+
 import 'models/danmaku_option.dart';
 import '/models/danmaku_content_item.dart';
 
 class DanmakuController {
-  final Function(DanmakuContentItem) onAddDanmaku;
-  final Function(DanmakuOption) onUpdateOption;
-  final Function onPause;
-  final Function onResume;
-  final Function onClear;
+  final ValueChanged<DanmakuContentItem> onAddDanmaku;
+  final ValueChanged<DanmakuOption> onUpdateOption;
+  final VoidCallback onPause;
+  final VoidCallback onResume;
+  final VoidCallback onClear;
+
   DanmakuController({
     required this.onAddDanmaku,
     required this.onUpdateOption,

@@ -9,13 +9,15 @@ import 'package:flutter/services.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       title: 'CanvasDanmaku Demo',
       home: HomePage(),
     );
@@ -23,22 +25,21 @@ class MyApp extends StatelessWidget {
 }
 
 class HomePage extends StatefulWidget {
-  HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
-  _HomePageState createState() => _HomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  late DanmakuController _controller;
-  var _key = new GlobalKey<ScaffoldState>();
+  DanmakuController? _controller;
 
   final _danmuKey = GlobalKey();
 
   bool _running = true;
 
   /// 弹幕描边
-  bool _showStroke = true;
+  double _strokeWidth = 1.5;
 
   /// 弹幕海量模式(弹幕轨道填满时继续绘制)
   bool _massiveMode = false;
@@ -56,13 +57,13 @@ class _HomePageState extends State<HomePage> {
   int _fontWeight = 4;
 
   /// 隐藏滚动弹幕
-  bool _hideScroll = false;
+  final bool _hideScroll = false;
 
   /// 隐藏顶部弹幕
-  bool _hideTop = false;
+  final bool _hideTop = false;
 
   /// 隐藏底部弹幕
-  bool _hideBottom = false;
+  final bool _hideBottom = false;
 
   /// 为字幕预留空间
   bool _safeArea = true;
@@ -70,59 +71,67 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _key,
       appBar: AppBar(
-        title: Text('CanvasDanmaku Demo'),
+        title: const Text('CanvasDanmaku Demo'),
       ),
       body: Column(
         children: [
           Wrap(
             children: [
               IconButton(
-                icon: Icon(Icons.add),
+                icon: const Icon(Icons.add),
                 tooltip: 'Add Scroll',
                 onPressed: () {
-                  _controller.addDanmaku(
+                  _controller?.addDanmaku(
                     DanmakuContentItem(
-                        "这是一条超长弹幕ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789这是一条超长的弹幕，这条弹幕会超出屏幕宽度",
-                        color: getRandomColor()),
+                      "这是一条超长弹幕ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789这是一条超长的弹幕，这条弹幕会超出屏幕宽度",
+                      color: getRandomColor(),
+                    ),
                   );
                 },
               ),
               IconButton(
-                icon: Icon(Icons.add),
+                icon: const Icon(Icons.add),
                 tooltip: 'Add Top',
                 onPressed: () {
-                  _controller.addDanmaku(
-                    DanmakuContentItem("这是一条顶部弹幕",
-                        color: getRandomColor(), type: DanmakuItemType.top),
+                  _controller?.addDanmaku(
+                    DanmakuContentItem(
+                      "这是一条顶部弹幕",
+                      color: getRandomColor(),
+                      type: DanmakuItemType.top,
+                    ),
                   );
                 },
               ),
               IconButton(
-                icon: Icon(Icons.add),
+                icon: const Icon(Icons.add),
                 tooltip: 'Add Bottom',
                 onPressed: () {
-                  _controller.addDanmaku(
-                    DanmakuContentItem("这是一条底部弹幕",
-                        color: getRandomColor(), type: DanmakuItemType.bottom),
+                  _controller?.addDanmaku(
+                    DanmakuContentItem(
+                      "这是一条底部弹幕",
+                      color: getRandomColor(),
+                      type: DanmakuItemType.bottom,
+                    ),
                   );
                 },
               ),
               IconButton(
-                icon: Icon(Icons.add),
+                icon: const Icon(Icons.add),
                 tooltip: 'Add Bottom',
                 onPressed: () {
-                  _controller.addDanmaku(
-                    DanmakuContentItem("这是一条自己发的弹幕",
-                        color: getRandomColor(),
-                        type: DanmakuItemType.scroll,
-                        selfSend: true),
+                  _controller?.addDanmaku(
+                    DanmakuContentItem(
+                      "这是一条自己发的弹幕",
+                      color: getRandomColor(),
+                      type: DanmakuItemType.scroll,
+                      selfSend: true,
+                    ),
                   );
                 },
               ),
               IconButton(
-                icon: Icon(Icons.play_circle_outline_outlined),
+                icon: const Icon(Icons.play_circle_outline_outlined),
                 onPressed: startPlay,
                 tooltip: 'Start Player',
               ),
@@ -130,9 +139,9 @@ class _HomePageState extends State<HomePage> {
                 icon: Icon(_running ? Icons.pause : Icons.play_arrow),
                 onPressed: () {
                   if (_running) {
-                    _controller.pause();
+                    _controller?.pause();
                   } else {
-                    _controller.resume();
+                    _controller?.resume();
                   }
                   setState(() {
                     _running = !_running;
@@ -141,71 +150,88 @@ class _HomePageState extends State<HomePage> {
                 tooltip: 'Play Resume',
               ),
               IconButton(
-                icon: Icon(_showStroke
-                    ? Icons.font_download
-                    : Icons.font_download_rounded),
-                onPressed: () {
-                  _controller.updateOption(
-                      _controller.option.copyWith(showStroke: !_showStroke));
-                  setState(() {
-                    _showStroke = !_showStroke;
-                  });
-                },
-                tooltip: 'Stroke',
-              ),
-              IconButton(
-                icon: Icon(Icons.clear),
-                onPressed: () {
-                  _controller.clear();
-                },
+                icon: const Icon(Icons.clear),
+                onPressed: _controller?.clear,
                 tooltip: 'Clear',
               ),
             ],
           ),
           Expanded(
-              child: Container(
-            color: Colors.grey,
-            child: DanmakuScreen(
-              key: _danmuKey,
-              createdController: (DanmakuController e) {
-                _controller = e;
-              },
-              option: DanmakuOption(
-                opacity: _opacity,
-                fontSize: _fontSize,
-                fontWeight: _fontWeight,
-                duration: _duration,
-                showStroke: _showStroke,
-                massiveMode: _massiveMode,
-                hideScroll: _hideScroll,
-                hideTop: _hideTop,
-                hideBottom: _hideBottom,
-                safeArea: _safeArea,
+            child: Container(
+              color: Colors.grey,
+              child: DanmakuScreen(
+                key: _danmuKey,
+                createdController: (DanmakuController e) {
+                  _controller = e;
+                },
+                option: DanmakuOption(
+                  opacity: _opacity,
+                  fontSize: _fontSize,
+                  fontWeight: _fontWeight,
+                  duration: _duration,
+                  strokeWidth: _strokeWidth,
+                  massiveMode: _massiveMode,
+                  hideScroll: _hideScroll,
+                  hideTop: _hideTop,
+                  hideBottom: _hideBottom,
+                  safeArea: _safeArea,
+                ),
               ),
             ),
-          )),
+          ),
         ],
       ),
       endDrawer: Drawer(
         child: SafeArea(
           child: ListView(
-            padding: EdgeInsets.all(8),
+            padding: const EdgeInsets.all(8),
             children: [
+              Text("Stroke Width : $_strokeWidth"),
+              Slider(
+                value: _strokeWidth,
+                min: 0,
+                max: 10,
+                divisions: 20,
+                onChanged: (e) {
+                  setState(() {
+                    _strokeWidth = e;
+                  });
+                  _controller?.updateOption(
+                    _controller!.option.copyWith(strokeWidth: _strokeWidth),
+                  );
+                },
+              ),
+              Text("Font Weight : $_fontWeight"),
+              Slider(
+                value: _fontWeight.toDouble(),
+                min: 0,
+                max: 8,
+                divisions: 8,
+                onChanged: (e) {
+                  setState(() {
+                    _fontWeight = e.toInt();
+                  });
+                  _controller?.updateOption(
+                    _controller!.option.copyWith(fontWeight: _fontWeight),
+                  );
+                },
+              ),
               Text("Opacity : $_opacity"),
               Slider(
                 value: _opacity,
-                max: 1.0,
                 min: 0.1,
+                max: 1.0,
                 divisions: 9,
                 onChanged: (e) {
                   setState(() {
-                    _opacity = e;
+                    _opacity = double.parse(e.toStringAsFixed(1));
                   });
-                  _controller
-                      .updateOption(_controller.option.copyWith(opacity: e));
+                  _controller?.updateOption(
+                    _controller!.option.copyWith(opacity: e),
+                  );
                 },
               ),
-              Text("FontSize : $_fontSize"),
+              Text("Font Size : $_fontSize"),
               Slider(
                 value: _fontSize,
                 min: 8,
@@ -215,8 +241,9 @@ class _HomePageState extends State<HomePage> {
                   setState(() {
                     _fontSize = e;
                   });
-                  _controller
-                      .updateOption(_controller.option.copyWith(fontSize: e));
+                  _controller?.updateOption(
+                    _controller!.option.copyWith(fontSize: e),
+                  );
                 },
               ),
               Text("Duration : $_duration"),
@@ -229,8 +256,9 @@ class _HomePageState extends State<HomePage> {
                   setState(() {
                     _duration = e.toInt();
                   });
-                  _controller.updateOption(
-                      _controller.option.copyWith(duration: e.toInt()));
+                  _controller?.updateOption(
+                    _controller!.option.copyWith(duration: e.toInt()),
+                  );
                 },
               ),
               SwitchListTile(
@@ -240,19 +268,22 @@ class _HomePageState extends State<HomePage> {
                     setState(() {
                       _massiveMode = e;
                     });
-                    _controller.updateOption(
-                        _controller.option.copyWith(massiveMode: e));
+                    _controller?.updateOption(
+                      _controller!.option.copyWith(massiveMode: e),
+                    );
                   }),
               SwitchListTile(
-                  title: const Text('SafeArea'),
-                  value: _safeArea,
-                  onChanged: (e) {
-                    setState(() {
-                      _safeArea = e;
-                    });
-                    _controller
-                        .updateOption(_controller.option.copyWith(safeArea: e));
-                  })
+                title: const Text('SafeArea'),
+                value: _safeArea,
+                onChanged: (e) {
+                  setState(() {
+                    _safeArea = e;
+                  });
+                  _controller?.updateOption(
+                    _controller!.option.copyWith(safeArea: e),
+                  );
+                },
+              )
             ],
           ),
         ),
@@ -264,21 +295,21 @@ class _HomePageState extends State<HomePage> {
   int sec = 0;
   void startPlay() async {
     String data = await rootBundle.loadString('assets/132590001.json');
-    List<DanmakuContentItem> _items = [];
-    var jsonMap = json.decode(data);
-    for (var item in jsonMap['comments']) {
-      _items.add(DanmakuContentItem(
-        item['m'],
-        color: Colors.white,
-      ));
+    List<DanmakuContentItem> items = [];
+    Map jsonMap = json.decode(data);
+    for (Map item in jsonMap['comments']) {
+      items.add(
+        DanmakuContentItem(
+          item['m'],
+          color: Colors.white,
+        ),
+      );
     }
-    if (timer == null) {
-      timer = Timer.periodic(Duration(seconds: 1), (timer) {
-        if (!_controller.running) return;
-        _controller.addDanmaku(_items[sec]);
-        sec++;
-      });
-    }
+    timer ??= Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_controller == null || _controller?.running == false) return;
+      _controller?.addDanmaku(items[sec]);
+      sec++;
+    });
   }
 
   // 生成随机颜色
