@@ -25,7 +25,7 @@ class DanmakuScreen extends StatefulWidget {
 }
 
 class _DanmakuScreenState extends State<DanmakuScreen>
-    with TickerProviderStateMixin, WidgetsBindingObserver {
+    with TickerProviderStateMixin{
   /// 视图宽度
   double _viewWidth = 0;
 
@@ -94,21 +94,21 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       duration: Duration(seconds: _option.duration),
     );
 
-    WidgetsBinding.instance.addObserver(this);
+    // WidgetsBinding.instance.addObserver(this);
   }
 
   /// 处理 Android/iOS 应用后台或熄屏导致的动画问题
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused) {
-      pause();
-    }
-  }
+  // @override
+  // void didChangeAppLifecycleState(AppLifecycleState state) {
+  //   if (state == AppLifecycleState.paused) {
+  //     pause();
+  //   }
+  // }
 
   @override
   void dispose() {
     _running = false;
-    WidgetsBinding.instance.removeObserver(this);
+    // WidgetsBinding.instance.removeObserver(this);
     _animationController.dispose();
     _staticAnimationController.dispose();
     super.dispose();
@@ -452,7 +452,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     final textPainter = TextPainter(
       text: TextSpan(
         text: '弹幕',
-        style: TextStyle(fontSize: _option.fontSize, height: 1.75),
+        style: TextStyle(fontSize: _option.fontSize, height: 1.6),
       ),
       textDirection: TextDirection.ltr,
     )..layout();
