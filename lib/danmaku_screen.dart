@@ -452,7 +452,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     final textPainter = TextPainter(
       text: TextSpan(
         text: '弹幕',
-        style: TextStyle(fontSize: _option.fontSize),
+        style: TextStyle(fontSize: _option.fontSize, height: 1.75),
       ),
       textDirection: TextDirection.ltr,
     )..layout();
