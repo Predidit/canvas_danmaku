@@ -25,7 +25,7 @@ class DanmakuScreen extends StatefulWidget {
 }
 
 class _DanmakuScreenState extends State<DanmakuScreen>
-    with TickerProviderStateMixin{
+    with TickerProviderStateMixin {
   /// 视图宽度
   double _viewWidth = 0;
 
@@ -298,6 +298,10 @@ class _DanmakuScreenState extends State<DanmakuScreen>
 
   /// 更新弹幕设置
   void updateOption(DanmakuOption option) {
+    if (_option.lineHeight != option.lineHeight) {
+      _option = option;
+      return;
+    }
     bool needRestart = false;
     bool needClearParagraph = false;
     if (_animationController.isAnimating) {
@@ -452,7 +456,10 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     final textPainter = TextPainter(
       text: TextSpan(
         text: '弹幕',
-        style: TextStyle(fontSize: _option.fontSize, height: 1.6),
+        style: TextStyle(
+          fontSize: _option.fontSize,
+          height: _option.lineHeight,
+        ),
       ),
       textDirection: TextDirection.ltr,
     )..layout();

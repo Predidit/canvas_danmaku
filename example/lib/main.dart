@@ -38,6 +38,9 @@ class _HomePageState extends State<HomePage> {
 
   bool _running = true;
 
+  /// 弹幕行高
+  double _lineHeight = 1.6;
+
   /// 弹幕描边
   double _strokeWidth = 1.5;
 
@@ -175,6 +178,7 @@ class _HomePageState extends State<HomePage> {
                   hideTop: _hideTop,
                   hideBottom: _hideBottom,
                   safeArea: _safeArea,
+                  lineHeight: _lineHeight,
                 ),
               ),
             ),
@@ -186,6 +190,20 @@ class _HomePageState extends State<HomePage> {
           child: ListView(
             padding: const EdgeInsets.all(8),
             children: [
+              Text("Line Height : $_lineHeight"),
+              Slider(
+                value: _lineHeight,
+                min: 1.0,
+                max: 3.0,
+                onChanged: (e) {
+                  setState(() {
+                    _lineHeight = double.parse(e.toStringAsFixed(1));
+                  });
+                  _controller?.updateOption(
+                    _controller!.option.copyWith(lineHeight: _lineHeight),
+                  );
+                },
+              ),
               Text("Stroke Width : $_strokeWidth"),
               Slider(
                 value: _strokeWidth,

@@ -32,6 +32,9 @@ class DanmakuOption {
   /// 为字幕预留空间
   final bool safeArea;
 
+  /// 弹幕行高
+  final double lineHeight;
+
   DanmakuOption({
     this.fontSize = 16,
     this.fontWeight = 4,
@@ -44,6 +47,7 @@ class DanmakuOption {
     this.strokeWidth = 1.5,
     this.massiveMode = false,
     this.safeArea = true,
+    this.lineHeight = 1.6,
   });
 
   DanmakuOption copyWith({
@@ -58,6 +62,7 @@ class DanmakuOption {
     double? strokeWidth,
     bool? massiveMode,
     bool? safeArea,
+    double? lineHeight,
   }) {
     return DanmakuOption(
       area: area ?? this.area,
@@ -71,6 +76,7 @@ class DanmakuOption {
       strokeWidth: strokeWidth ?? this.strokeWidth,
       massiveMode: massiveMode ?? this.massiveMode,
       safeArea: safeArea ?? this.safeArea,
+      lineHeight: lineHeight ?? this.lineHeight,
     );
   }
 }
