@@ -62,6 +62,8 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   /// 内部计时器
   late int _tick;
 
+  final _stopwatch = Stopwatch();
+
   /// 运行状态
   bool _running = true;
 
@@ -70,7 +72,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     super.initState();
     // 计时器初始化
     _tick = 0;
-    _startTick();
+    // _startTick(); // start when adding danmaku
     _option = widget.option;
     _controller = DanmakuController(
       onAddDanmaku: addDanmaku,
@@ -95,7 +97,22 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     );
 
     // WidgetsBinding.instance.addObserver(this);
+
+     /// 计算弹幕轨道
+    _danmakuHeight = _textPainter.height;
   }
+
+  // only layout when fontSize or lineHeight is changed
+  TextPainter get _textPainter => TextPainter(
+      text: TextSpan(
+        text: '弹幕',
+        style: TextStyle(
+          fontSize: _option.fontSize,
+          height: _option.lineHeight,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
 
   /// 处理 Android/iOS 应用后台或熄屏导致的动画问题
   // @override
@@ -111,6 +128,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     // WidgetsBinding.instance.removeObserver(this);
     _animationController.dispose();
     _staticAnimationController.dispose();
+    _stopwatch.stop();
     super.dispose();
   }
 
@@ -119,6 +137,11 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     if (!_running || !mounted) {
       return;
     }
+
+    if(!_stopwatch.isRunning) {
+      _startTick();
+    }
+
     // 在这里提前创建 Paragraph 缓存防止卡顿
     final textPainter = TextPainter(
       text: TextSpan(
@@ -278,6 +301,9 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       if (_animationController.isAnimating) {
         _animationController.stop();
       }
+      if(_stopwatch.isRunning) {
+        _stopwatch.stop();
+      }
     }
   }
 
@@ -290,18 +316,27 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       });
       if (!_animationController.isAnimating) {
         _animationController.repeat();
+      }
+      if(!_stopwatch.isRunning) {
         // 重启计时器
         _startTick();
       }
     }
   }
 
+  void _updateOption(DanmakuOption option) {
+    _option = option;
+    _controller.option = _option;
+  }
+
   /// 更新弹幕设置
   void updateOption(DanmakuOption option) {
     if (_option.lineHeight != option.lineHeight) {
-      _option = option;
+      _updateOption(option);
+      _danmakuHeight = _textPainter.height; // resize _danmakuHeight
       return;
     }
+
     bool needRestart = false;
     bool needClearParagraph = false;
     if (_animationController.isAnimating) {
@@ -326,8 +361,13 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     if (option.hideBottom && !_option.hideBottom) {
       _bottomDanmakuItems = [];
     }
-    _option = option;
-    _controller.option = _option;
+
+    if (option.fontSize != _option.fontSize) {
+      _updateOption(option);
+      _danmakuHeight = _textPainter.height; // resize _danmakuHeight
+    } else {
+      _updateOption(option);
+    }
 
     /// 清理已经存在的 Paragraph 缓存
     if (needClearParagraph) {
@@ -418,12 +458,14 @@ class _DanmakuScreenState extends State<DanmakuScreen>
 
   // 基于Stopwatch的计时器同步
   void _startTick() async {
-    final stopwatch = Stopwatch()..start();
+    _stopwatch.reset();
+    _stopwatch.start();
+
     int lastElapsedTime = 0;
 
     while (_running && mounted) {
       await Future.delayed(const Duration(milliseconds: 1));
-      int currentElapsedTime = stopwatch.elapsedMilliseconds; // 获取当前的已用时间
+      int currentElapsedTime = _stopwatch.elapsedMilliseconds; // 获取当前的已用时间
       int delta = currentElapsedTime - lastElapsedTime; // 计算自上次记录以来的时间差
       _tick += delta;
       lastElapsedTime = currentElapsedTime; // 更新最后记录的时间
@@ -447,23 +489,11 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       }
     }
 
-    stopwatch.stop();
+    _stopwatch.stop();
   }
 
   @override
   Widget build(BuildContext context) {
-    /// 计算弹幕轨道
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: '弹幕',
-        style: TextStyle(
-          fontSize: _option.fontSize,
-          height: _option.lineHeight,
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    _danmakuHeight = textPainter.height;
     return LayoutBuilder(
       builder: (context, constraints) {
         /// 计算视图宽度
