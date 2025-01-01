@@ -45,7 +45,7 @@ class StaticDanmakuPainter extends CustomPainter {
         danmakuWidth: size.width,
         fontSize: fontSize,
         fontWeight: fontWeight,
-        opacity: opacity,
+        // opacity: opacity,
       );
 
       // 黑色部分
@@ -56,7 +56,7 @@ class StaticDanmakuPainter extends CustomPainter {
           fontSize: fontSize,
           fontWeight: fontWeight,
           strokeWidth: strokeWidth,
-          opacity: opacity,
+          // opacity: opacity,
         );
 
         canvas.drawParagraph(
@@ -87,7 +87,7 @@ class StaticDanmakuPainter extends CustomPainter {
         danmakuWidth: size.width,
         fontSize: fontSize,
         fontWeight: fontWeight,
-        opacity: opacity,
+        // opacity: opacity,
       );
 
       // 黑色部分
@@ -98,7 +98,7 @@ class StaticDanmakuPainter extends CustomPainter {
           fontSize: fontSize,
           fontWeight: fontWeight,
           strokeWidth: strokeWidth,
-          opacity: opacity,
+          // opacity: opacity,
         );
 
         canvas.drawParagraph(

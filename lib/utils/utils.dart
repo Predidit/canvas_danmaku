@@ -8,7 +8,7 @@ class Utils {
     required double danmakuWidth,
     required double fontSize,
     required int fontWeight,
-    required double opacity,
+    // required double opacity,
   }) {
     final ui.ParagraphBuilder builder = ui.ParagraphBuilder(
       ui.ParagraphStyle(
@@ -19,7 +19,7 @@ class Utils {
       ),
     )
       ..pushStyle(
-        ui.TextStyle(color: content.color.withOpacity(opacity)),
+        ui.TextStyle(color: content.color),
       )
       ..addText(content.text);
     return builder.build()
@@ -32,12 +32,12 @@ class Utils {
     required double fontSize,
     required int fontWeight,
     required double strokeWidth,
-    required double opacity,
+    // required double opacity,
   }) {
     final Paint strokePaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
-      ..color = Colors.black.withOpacity(opacity);
+      ..color = Colors.black;
 
     final ui.ParagraphBuilder strokeBuilder = ui.ParagraphBuilder(
       ui.ParagraphStyle(

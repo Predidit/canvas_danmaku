@@ -61,7 +61,7 @@ class ScrollDanmakuPainter extends CustomPainter {
           danmakuWidth: size.width,
           fontSize: fontSize,
           fontWeight: fontWeight,
-          opacity: opacity,
+          // opacity: opacity,
         );
 
         if (strokeWidth > 0) {
@@ -71,7 +71,7 @@ class ScrollDanmakuPainter extends CustomPainter {
             fontSize: fontSize,
             fontWeight: fontWeight,
             strokeWidth: strokeWidth,
-            opacity: opacity,
+            // opacity: opacity,
           );
           pictureCanvas.drawParagraph(
             item.strokeParagraph!,
@@ -114,7 +114,7 @@ class ScrollDanmakuPainter extends CustomPainter {
           danmakuWidth: size.width,
           fontSize: fontSize,
           fontWeight: fontWeight,
-          opacity: opacity,
+          // opacity: opacity,
         );
 
         if (strokeWidth > 0) {
@@ -124,7 +124,7 @@ class ScrollDanmakuPainter extends CustomPainter {
             fontSize: fontSize,
             fontWeight: fontWeight,
             strokeWidth: strokeWidth,
-            opacity: opacity,
+            // opacity: opacity,
           );
           canvas.drawParagraph(
             item.strokeParagraph!,

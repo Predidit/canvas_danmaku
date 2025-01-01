@@ -98,21 +98,21 @@ class _DanmakuScreenState extends State<DanmakuScreen>
 
     // WidgetsBinding.instance.addObserver(this);
 
-     /// 计算弹幕轨道
+    /// 计算弹幕轨道
     _danmakuHeight = _textPainter.height;
   }
 
   // only layout when fontSize or lineHeight is changed
   TextPainter get _textPainter => TextPainter(
-      text: TextSpan(
-        text: '弹幕',
-        style: TextStyle(
-          fontSize: _option.fontSize,
-          height: _option.lineHeight,
+        text: TextSpan(
+          text: '弹幕',
+          style: TextStyle(
+            fontSize: _option.fontSize,
+            height: _option.lineHeight,
+          ),
         ),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
+        textDirection: TextDirection.ltr,
+      )..layout();
 
   /// 处理 Android/iOS 应用后台或熄屏导致的动画问题
   // @override
@@ -138,7 +138,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       return;
     }
 
-    if(!_stopwatch.isRunning) {
+    if (!_stopwatch.isRunning) {
       _startTick();
     }
 
@@ -161,7 +161,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       danmakuWidth: danmakuWidth,
       fontSize: _option.fontSize,
       fontWeight: _option.fontWeight,
-      opacity: _option.opacity,
+      // opacity: _option.opacity,
     );
 
     ui.Paragraph? strokeParagraph;
@@ -172,7 +172,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
         fontSize: _option.fontSize,
         fontWeight: _option.fontWeight,
         strokeWidth: _option.strokeWidth,
-        opacity: _option.opacity,
+        // opacity: _option.opacity,
       );
     }
 
@@ -301,7 +301,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       if (_animationController.isAnimating) {
         _animationController.stop();
       }
-      if(_stopwatch.isRunning) {
+      if (_stopwatch.isRunning) {
         _stopwatch.stop();
       }
     }
@@ -317,7 +317,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       if (!_animationController.isAnimating) {
         _animationController.repeat();
       }
-      if(!_stopwatch.isRunning) {
+      if (!_stopwatch.isRunning) {
         // 重启计时器
         _startTick();
       }
@@ -515,54 +515,57 @@ class _DanmakuScreenState extends State<DanmakuScreen>
         }
         return ClipRect(
           child: IgnorePointer(
-            child: Stack(
-              children: [
-                RepaintBoundary(
-                  child: AnimatedBuilder(
-                    animation: _animationController,
-                    builder: (context, child) {
-                      return CustomPaint(
-                        painter: ScrollDanmakuPainter(
-                          progress: _animationController.value,
-                          scrollDanmakuItems: _scrollDanmakuItems,
-                          danmakuDurationInSeconds: _option.duration,
-                          fontSize: _option.fontSize,
-                          fontWeight: _option.fontWeight,
-                          strokeWidth: _option.strokeWidth,
-                          opacity: _option.opacity,
-                          danmakuHeight: _danmakuHeight,
-                          running: _running,
-                          tick: _tick,
-                        ),
-                        size: const Size(double.infinity, double.infinity),
-                      );
-                    },
+            child: Opacity(
+              opacity: _option.opacity,
+              child: Stack(
+                children: [
+                  RepaintBoundary(
+                    child: AnimatedBuilder(
+                      animation: _animationController,
+                      builder: (context, child) {
+                        return CustomPaint(
+                          painter: ScrollDanmakuPainter(
+                            progress: _animationController.value,
+                            scrollDanmakuItems: _scrollDanmakuItems,
+                            danmakuDurationInSeconds: _option.duration,
+                            fontSize: _option.fontSize,
+                            fontWeight: _option.fontWeight,
+                            strokeWidth: _option.strokeWidth,
+                            opacity: _option.opacity,
+                            danmakuHeight: _danmakuHeight,
+                            running: _running,
+                            tick: _tick,
+                          ),
+                          size: const Size(double.infinity, double.infinity),
+                        );
+                      },
+                    ),
                   ),
-                ),
-                RepaintBoundary(
-                  child: AnimatedBuilder(
-                    animation: _staticAnimationController,
-                    builder: (context, child) {
-                      return CustomPaint(
-                        painter: StaticDanmakuPainter(
-                          progress: _staticAnimationController.value,
-                          topDanmakuItems: _topDanmakuItems,
-                          bottomDanmakuItems: _bottomDanmakuItems,
-                          danmakuDurationInSeconds: _option.duration,
-                          fontSize: _option.fontSize,
-                          fontWeight: _option.fontWeight,
-                          strokeWidth: _option.strokeWidth,
-                          opacity: _option.opacity,
-                          danmakuHeight: _danmakuHeight,
-                          running: _running,
-                          tick: _tick,
-                        ),
-                        size: const Size(double.infinity, double.infinity),
-                      );
-                    },
+                  RepaintBoundary(
+                    child: AnimatedBuilder(
+                      animation: _staticAnimationController,
+                      builder: (context, child) {
+                        return CustomPaint(
+                          painter: StaticDanmakuPainter(
+                            progress: _staticAnimationController.value,
+                            topDanmakuItems: _topDanmakuItems,
+                            bottomDanmakuItems: _bottomDanmakuItems,
+                            danmakuDurationInSeconds: _option.duration,
+                            fontSize: _option.fontSize,
+                            fontWeight: _option.fontWeight,
+                            strokeWidth: _option.strokeWidth,
+                            opacity: _option.opacity,
+                            danmakuHeight: _danmakuHeight,
+                            running: _running,
+                            tick: _tick,
+                          ),
+                          size: const Size(double.infinity, double.infinity),
+                        );
+                      },
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );
