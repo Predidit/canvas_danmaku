@@ -134,12 +134,19 @@ class _DanmakuScreenState extends State<DanmakuScreen>
 
   /// 添加弹幕
   void addDanmaku(DanmakuContentItem content) {
-    if (!_running || !mounted) {
-      return;
-    }
+    // ensure adding self-send danmaku when pause
+    if (content.selfSend) {
+      if (!mounted) {
+        return;
+      }
+    } else {
+      if (!_running || !mounted) {
+        return;
+      }
 
-    if (!_stopwatch.isRunning) {
-      _startTick();
+      if (!_stopwatch.isRunning) {
+        _startTick();
+      }
     }
 
     // 在这里提前创建 Paragraph 缓存防止卡顿
