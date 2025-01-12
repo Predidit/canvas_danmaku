@@ -401,9 +401,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
         _bottomDanmakuItems.removeWhere((item) =>
             ((_tick - item.creationTime) > (_option.duration * 1000)));
         // 暂停动画
-        if (_scrollDanmakuItems.isEmpty &&
-            _topDanmakuItems.isEmpty &&
-            _bottomDanmakuItems.isEmpty) {
+        if (_scrollDanmakuItems.isEmpty) {
           if (_animationController.isAnimating) {
             _animationController.stop();
           }
