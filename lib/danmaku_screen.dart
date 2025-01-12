@@ -400,6 +400,14 @@ class _DanmakuScreenState extends State<DanmakuScreen>
         // 移除底部弹幕
         _bottomDanmakuItems.removeWhere((item) =>
             ((_tick - item.creationTime) > (_option.duration * 1000)));
+        // 暂停动画
+        if (_scrollDanmakuItems.isEmpty &&
+            _topDanmakuItems.isEmpty &&
+            _bottomDanmakuItems.isEmpty) {
+          if (_animationController.isAnimating) {
+            _animationController.stop();
+          }
+        }
 
         /// 重绘静态弹幕
         if (mounted) {
