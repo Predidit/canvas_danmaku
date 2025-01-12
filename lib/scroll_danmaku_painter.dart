@@ -65,14 +65,27 @@ class ScrollDanmakuPainter extends CustomPainter {
         );
 
         if (strokeWidth > 0) {
-          item.strokeParagraph ??= Utils.generateStrokeParagraph(
-            content: item.content,
-            danmakuWidth: size.width,
-            fontSize: fontSize,
-            fontWeight: fontWeight,
-            strokeWidth: strokeWidth,
-            // opacity: opacity,
-          );
+          if (item.content.isColorful == true) {
+            item.strokeParagraph = Utils.generateStrokeParagraph(
+              content: item.content,
+              danmakuWidth: size.width,
+              fontSize: fontSize,
+              fontWeight: fontWeight,
+              strokeWidth: strokeWidth,
+              size: Size(item.width, item.height),
+              offset: Offset(item.xPosition, item.yPosition),
+              // opacity: opacity,
+            );
+          } else {
+            item.strokeParagraph ??= Utils.generateStrokeParagraph(
+              content: item.content,
+              danmakuWidth: size.width,
+              fontSize: fontSize,
+              fontWeight: fontWeight,
+              strokeWidth: strokeWidth,
+              // opacity: opacity,
+            );
+          }
           pictureCanvas.drawParagraph(
             item.strokeParagraph!,
             Offset(item.xPosition, item.yPosition),
@@ -118,14 +131,27 @@ class ScrollDanmakuPainter extends CustomPainter {
         );
 
         if (strokeWidth > 0) {
-          item.strokeParagraph ??= Utils.generateStrokeParagraph(
-            content: item.content,
-            danmakuWidth: size.width,
-            fontSize: fontSize,
-            fontWeight: fontWeight,
-            strokeWidth: strokeWidth,
-            // opacity: opacity,
-          );
+          if (item.content.isColorful == true) {
+            item.strokeParagraph = Utils.generateStrokeParagraph(
+              content: item.content,
+              danmakuWidth: size.width,
+              fontSize: fontSize,
+              fontWeight: fontWeight,
+              strokeWidth: strokeWidth,
+              size: Size(item.width, item.height),
+              offset: Offset(item.xPosition, item.yPosition),
+              // opacity: opacity,
+            );
+          } else {
+            item.strokeParagraph ??= Utils.generateStrokeParagraph(
+              content: item.content,
+              danmakuWidth: size.width,
+              fontSize: fontSize,
+              fontWeight: fontWeight,
+              strokeWidth: strokeWidth,
+              // opacity: opacity,
+            );
+          }
           canvas.drawParagraph(
             item.strokeParagraph!,
             Offset(item.xPosition, item.yPosition),

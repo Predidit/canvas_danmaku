@@ -56,9 +56,17 @@ class StaticDanmakuPainter extends CustomPainter {
           fontSize: fontSize,
           fontWeight: fontWeight,
           strokeWidth: strokeWidth,
+          size: item.content.isColorful == true
+              ? Size(item.width, item.height)
+              : null,
+          offset: item.content.isColorful == true
+              ? Offset(
+                  item.xPosition,
+                  (size.height - item.yPosition - danmakuHeight),
+                )
+              : null,
           // opacity: opacity,
         );
-
         canvas.drawParagraph(
           item.strokeParagraph!,
           Offset(item.xPosition, item.yPosition),
@@ -98,6 +106,15 @@ class StaticDanmakuPainter extends CustomPainter {
           fontSize: fontSize,
           fontWeight: fontWeight,
           strokeWidth: strokeWidth,
+          size: item.content.isColorful == true
+              ? Size(item.width, item.height)
+              : null,
+          offset: item.content.isColorful == true
+              ? Offset(
+                  item.xPosition,
+                  (size.height - item.yPosition - danmakuHeight),
+                )
+              : null,
           // opacity: opacity,
         );
 

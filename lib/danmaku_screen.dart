@@ -172,7 +172,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     );
 
     ui.Paragraph? strokeParagraph;
-    if (_option.strokeWidth > 0) {
+    if (_option.strokeWidth > 0 && content.isColorful != true) {
       strokeParagraph = Utils.generateStrokeParagraph(
         content: content,
         danmakuWidth: danmakuWidth,
