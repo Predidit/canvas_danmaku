@@ -1,3 +1,6 @@
+## 0.2.6
+
+* Power Saving.
 ## 0.2.5
 
 * Danmakus can be cleared even they are not running.
