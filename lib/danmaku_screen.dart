@@ -512,6 +512,16 @@ class _DanmakuScreenState extends State<DanmakuScreen>
         /// 计算视图宽度
         if (constraints.maxWidth != _viewWidth) {
           _viewWidth = constraints.maxWidth;
+          for (DanmakuItem item in _topDanmakuItems) {
+            if (item.content.isColorful == true) {
+              item.strokeParagraph = null;
+            }
+          }
+          for (DanmakuItem item in _bottomDanmakuItems) {
+            if (item.content.isColorful == true) {
+              item.strokeParagraph = null;
+            }
+          }
         }
 
         _trackCount =
