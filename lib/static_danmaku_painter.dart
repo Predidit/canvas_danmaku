@@ -65,6 +65,7 @@ class StaticDanmakuPainter extends CustomPainter {
                   (size.height - item.yPosition - danmakuHeight),
                 )
               : null,
+          screenSize: item.content.isColorful == true ? size : null,
           // opacity: opacity,
         );
         canvas.drawParagraph(
@@ -115,6 +116,7 @@ class StaticDanmakuPainter extends CustomPainter {
                   (size.height - item.yPosition - danmakuHeight),
                 )
               : null,
+          screenSize: item.content.isColorful == true ? size : null,
           // opacity: opacity,
         );
 

@@ -79,85 +79,83 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Column(
         children: [
-          Wrap(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.add),
-                tooltip: 'Add Scroll',
-                onPressed: () {
-                  _controller?.addDanmaku(
-                    DanmakuContentItem(
-                      "这是一条超长弹幕ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789这是一条超长的弹幕，这条弹幕会超出屏幕宽度",
-                      color: getRandomColor(),
-                    ),
-                  );
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.add),
-                tooltip: 'Add Top',
-                onPressed: () {
-                  _controller?.addDanmaku(
-                    DanmakuContentItem(
-                      "这是一条顶部弹幕",
-                      color: getRandomColor(),
-                      type: DanmakuItemType.top,
-                    ),
-                  );
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.add),
-                tooltip: 'Add Bottom',
-                onPressed: () {
-                  _controller?.addDanmaku(
-                    DanmakuContentItem(
-                      "这是一条底部弹幕",
-                      color: getRandomColor(),
-                      type: DanmakuItemType.bottom,
-                    ),
-                  );
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.add),
-                tooltip: 'Add Bottom',
-                onPressed: () {
-                  _controller?.addDanmaku(
-                    DanmakuContentItem(
-                      "这是一条自己发的弹幕",
-                      color: getRandomColor(),
-                      type: DanmakuItemType.scroll,
-                      selfSend: true,
-                    ),
-                  );
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.play_circle_outline_outlined),
-                onPressed: startPlay,
-                tooltip: 'Start Player',
-              ),
-              IconButton(
-                icon: Icon(_running ? Icons.pause : Icons.play_arrow),
-                onPressed: () {
-                  if (_running) {
-                    _controller?.pause();
-                  } else {
-                    _controller?.resume();
-                  }
-                  setState(() {
-                    _running = !_running;
-                  });
-                },
-                tooltip: 'Play Resume',
-              ),
-              IconButton(
-                icon: const Icon(Icons.clear),
-                onPressed: _controller?.clear,
-                tooltip: 'Clear',
-              ),
-            ],
+          FittedBox(
+            child: Row(
+              children: [
+                TextButton(
+                  child: const Text('Scroll'),
+                  onPressed: () {
+                    _controller?.addDanmaku(
+                      DanmakuContentItem(
+                        "这是一条超长弹幕ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789这是一条超长的弹幕，这条弹幕会超出屏幕宽度",
+                        color: getRandomColor(),
+                      ),
+                    );
+                  },
+                ),
+                TextButton(
+                  child: const Text('Top'),
+                  onPressed: () {
+                    _controller?.addDanmaku(
+                      DanmakuContentItem(
+                        "这是一条顶部弹幕",
+                        color: getRandomColor(),
+                        type: DanmakuItemType.top,
+                      ),
+                    );
+                  },
+                ),
+                TextButton(
+                  child: const Text('Bottom'),
+                  onPressed: () {
+                    _controller?.addDanmaku(
+                      DanmakuContentItem(
+                        "这是一条底部弹幕",
+                        color: getRandomColor(),
+                        type: DanmakuItemType.bottom,
+                      ),
+                    );
+                  },
+                ),
+                TextButton(
+                  child: const Text('Self'),
+                  onPressed: () {
+                    _controller?.addDanmaku(
+                      DanmakuContentItem(
+                        "这是一条自己发的弹幕",
+                        color: getRandomColor(),
+                        type: DanmakuItemType.scroll,
+                        selfSend: true,
+                      ),
+                    );
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.play_circle_outline_outlined),
+                  onPressed: startPlay,
+                  tooltip: 'Start Player',
+                ),
+                IconButton(
+                  icon: Icon(_running ? Icons.pause : Icons.play_arrow),
+                  onPressed: () {
+                    if (_running) {
+                      _controller?.pause();
+                    } else {
+                      _controller?.resume();
+                    }
+                    setState(() {
+                      _running = !_running;
+                    });
+                  },
+                  tooltip: 'Play Resume',
+                ),
+                IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: _controller?.clear,
+                  tooltip: 'Clear',
+                ),
+              ],
+            ),
           ),
           Expanded(
             child: Container(

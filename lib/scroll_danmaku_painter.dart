@@ -74,6 +74,7 @@ class ScrollDanmakuPainter extends CustomPainter {
               strokeWidth: strokeWidth,
               size: Size(item.width, item.height),
               offset: Offset(item.xPosition, item.yPosition),
+              screenSize: size,
               // opacity: opacity,
             );
           } else {
@@ -140,6 +141,7 @@ class ScrollDanmakuPainter extends CustomPainter {
               strokeWidth: strokeWidth,
               size: Size(item.width, item.height),
               offset: Offset(item.xPosition, item.yPosition),
+              screenSize: size,
               // opacity: opacity,
             );
           } else {

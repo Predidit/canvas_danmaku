@@ -35,6 +35,7 @@ class Utils {
     required double strokeWidth,
     Size? size,
     Offset? offset,
+    Size? screenSize,
     // required double opacity,
   }) {
     final Paint strokePaint = Paint()
@@ -67,6 +68,9 @@ class Utils {
       ..addText(content.text);
 
     return strokeBuilder.build()
-      ..layout(ui.ParagraphConstraints(width: danmakuWidth));
+      ..layout(ui.ParagraphConstraints(
+          width: content.isColorful == true && size!.width > screenSize!.width
+              ? double.infinity
+              : danmakuWidth));
   }
 }
