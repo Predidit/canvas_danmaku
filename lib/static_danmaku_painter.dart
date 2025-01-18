@@ -45,6 +45,10 @@ class StaticDanmakuPainter extends CustomPainter {
         danmakuWidth: size.width,
         fontSize: fontSize,
         fontWeight: fontWeight,
+        size: item.content.isColorful == true
+            ? Size(item.width, item.height)
+            : null,
+        screenSize: item.content.isColorful == true ? size : null,
         // opacity: opacity,
       );
 
@@ -96,6 +100,10 @@ class StaticDanmakuPainter extends CustomPainter {
         danmakuWidth: size.width,
         fontSize: fontSize,
         fontWeight: fontWeight,
+        size: item.content.isColorful == true
+            ? Size(item.width, item.height)
+            : null,
+        screenSize: item.content.isColorful == true ? size : null,
         // opacity: opacity,
       );
 

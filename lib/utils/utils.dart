@@ -8,6 +8,8 @@ class Utils {
     required double danmakuWidth,
     required double fontSize,
     required int fontWeight,
+    Size? size,
+    Size? screenSize,
     // required double opacity,
   }) {
     final ui.ParagraphBuilder builder = ui.ParagraphBuilder(
@@ -24,7 +26,10 @@ class Utils {
       )
       ..addText(content.text);
     return builder.build()
-      ..layout(ui.ParagraphConstraints(width: danmakuWidth));
+      ..layout(ui.ParagraphConstraints(
+          width: content.isColorful == true && size!.width > screenSize!.width
+              ? double.infinity
+              : danmakuWidth));
   }
 
   static generateStrokeParagraph({

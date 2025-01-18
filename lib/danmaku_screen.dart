@@ -163,13 +163,16 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     final danmakuWidth = textPainter.width;
     final danmakuHeight = textPainter.height;
 
-    final ui.Paragraph paragraph = Utils.generateParagraph(
-      content: content,
-      danmakuWidth: danmakuWidth,
-      fontSize: _option.fontSize,
-      fontWeight: _option.fontWeight,
-      // opacity: _option.opacity,
-    );
+    ui.Paragraph? paragraph;
+    if (content.isColorful != true) {
+      paragraph = Utils.generateParagraph(
+        content: content,
+        danmakuWidth: danmakuWidth,
+        fontSize: _option.fontSize,
+        fontWeight: _option.fontWeight,
+        // opacity: _option.opacity,
+      );
+    }
 
     ui.Paragraph? strokeParagraph;
     if (_option.strokeWidth > 0 && content.isColorful != true) {
