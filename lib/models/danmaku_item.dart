@@ -23,9 +23,8 @@ class DanmakuItem {
   /// 上次绘制时间
   int? lastDrawTick;
 
-  /// 弹幕布局缓存
-  ui.Paragraph? paragraph;
-  ui.Paragraph? strokeParagraph;
+  /// 弹幕图片缓存
+  ui.Image? paragraphImage;
 
   DanmakuItem({
     required this.content,
@@ -34,8 +33,7 @@ class DanmakuItem {
     required this.width,
     this.xPosition = 0,
     this.yPosition = 0,
-    this.paragraph,
-    this.strokeParagraph,
+    this.paragraphImage,
     this.lastDrawTick,
   });
 }

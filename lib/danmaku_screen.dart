@@ -65,6 +65,9 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   /// 运行状态
   bool _running = true;
 
+  // 设备像素比，用于生成高分辨率图片
+  double devicePixelRatio = 1.0;
+
   @override
   void initState() {
     super.initState();
@@ -97,6 +100,12 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     WidgetsBinding.instance.addObserver(this);
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+  }
+
   /// 处理 Android/iOS 应用后台或熄屏导致的动画问题
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -115,7 +124,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   }
 
   /// 添加弹幕
-  void addDanmaku(DanmakuContentItem content) {
+  void addDanmaku(DanmakuContentItem content) async {
     if (!_running || !mounted) {
       return;
     }
@@ -131,14 +140,13 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     final danmakuWidth = textPainter.width;
     final danmakuHeight = textPainter.height;
 
-    final ui.Paragraph paragraph = Utils.generateParagraph(
-        content, danmakuWidth, _option.fontSize, _option.fontWeight);
-
-    ui.Paragraph? strokeParagraph;
-    if (_option.showStroke) {
-      strokeParagraph = Utils.generateStrokeParagraph(
-          content, danmakuWidth, _option.fontSize, _option.fontWeight);
-    }
+    final ui.Image paragraphImage = await Utils.generateParagraphImage(
+        content,
+        danmakuWidth,
+        _option.fontSize,
+        _option.fontWeight,
+        devicePixelRatio,
+        _option.showStroke);
 
     int idx = 1;
     for (double yPosition in _trackYPositions) {
@@ -148,28 +156,28 @@ class _DanmakuScreenState extends State<DanmakuScreen>
 
         if (scrollCanAddToTrack) {
           _scrollDanmakuItems.add(DanmakuItem(
-              yPosition: yPosition,
-              xPosition: _viewWidth,
-              width: danmakuWidth,
-              height: danmakuHeight,
-              creationTime: _tick,
-              content: content,
-              paragraph: paragraph,
-              strokeParagraph: strokeParagraph));
+            yPosition: yPosition,
+            xPosition: _viewWidth,
+            width: danmakuWidth,
+            height: danmakuHeight,
+            creationTime: _tick,
+            content: content,
+            paragraphImage: paragraphImage,
+          ));
           break;
         }
 
         /// 无法填充自己发送的弹幕时强制添加
         if (content.selfSend && idx == _trackCount) {
           _scrollDanmakuItems.add(DanmakuItem(
-              yPosition: _trackYPositions[0],
-              xPosition: _viewWidth,
-              width: danmakuWidth,
-              height: danmakuHeight,
-              creationTime: _tick,
-              content: content,
-              paragraph: paragraph,
-              strokeParagraph: strokeParagraph));
+            yPosition: _trackYPositions[0],
+            xPosition: _viewWidth,
+            width: danmakuWidth,
+            height: danmakuHeight,
+            creationTime: _tick,
+            content: content,
+            paragraphImage: paragraphImage,
+          ));
           break;
         }
 
@@ -179,14 +187,14 @@ class _DanmakuScreenState extends State<DanmakuScreen>
           var randomYPosition =
               _trackYPositions[random.nextInt(_trackYPositions.length)];
           _scrollDanmakuItems.add(DanmakuItem(
-              yPosition: randomYPosition,
-              xPosition: _viewWidth,
-              width: danmakuWidth,
-              height: danmakuHeight,
-              creationTime: _tick,
-              content: content,
-              paragraph: paragraph,
-              strokeParagraph: strokeParagraph));
+            yPosition: randomYPosition,
+            xPosition: _viewWidth,
+            width: danmakuWidth,
+            height: danmakuHeight,
+            creationTime: _tick,
+            content: content,
+            paragraphImage: paragraphImage,
+          ));
           break;
         }
       }
@@ -196,14 +204,14 @@ class _DanmakuScreenState extends State<DanmakuScreen>
 
         if (topCanAddToTrack) {
           _topDanmakuItems.add(DanmakuItem(
-              yPosition: yPosition,
-              xPosition: _viewWidth,
-              width: danmakuWidth,
-              height: danmakuHeight,
-              creationTime: _tick,
-              content: content,
-              paragraph: paragraph,
-              strokeParagraph: strokeParagraph));
+            yPosition: yPosition,
+            xPosition: _viewWidth,
+            width: danmakuWidth,
+            height: danmakuHeight,
+            creationTime: _tick,
+            content: content,
+            paragraphImage: paragraphImage,
+          ));
           break;
         }
       }
@@ -213,14 +221,14 @@ class _DanmakuScreenState extends State<DanmakuScreen>
 
         if (bottomCanAddToTrack) {
           _bottomDanmakuItems.add(DanmakuItem(
-              yPosition: yPosition,
-              xPosition: _viewWidth,
-              width: danmakuWidth,
-              height: danmakuHeight,
-              creationTime: _tick,
-              content: content,
-              paragraph: paragraph,
-              strokeParagraph: strokeParagraph));
+            yPosition: yPosition,
+            xPosition: _viewWidth,
+            width: danmakuWidth,
+            height: danmakuHeight,
+            creationTime: _tick,
+            content: content,
+            paragraphImage: paragraphImage,
+          ));
           break;
         }
       }
@@ -269,7 +277,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   }
 
   /// 更新弹幕设置
-  void updateOption(DanmakuOption option) {
+  void updateOption(DanmakuOption option) async {
     bool needRestart = false;
     bool needClearParagraph = false;
     if (_animationController.isAnimating) {
@@ -294,30 +302,42 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     _option = option;
     _controller.option = _option;
 
-    /// 清理已经存在的 Paragraph 缓存
+    /// 重建已经存在的 Paragraph 缓存
     if (needClearParagraph) {
       for (DanmakuItem item in _scrollDanmakuItems) {
-        if (item.paragraph != null) {
-          item.paragraph = null;
-        }
-        if (item.strokeParagraph != null) {
-          item.strokeParagraph = null;
+        if (item.paragraphImage != null) {
+          item.paragraphImage = null;
+          item.paragraphImage = await Utils.generateParagraphImage(
+              item.content,
+              item.width,
+              _option.fontSize,
+              _option.fontWeight,
+              devicePixelRatio,
+              _option.showStroke);
         }
       }
       for (DanmakuItem item in _topDanmakuItems) {
-        if (item.paragraph != null) {
-          item.paragraph = null;
-        }
-        if (item.strokeParagraph != null) {
-          item.strokeParagraph = null;
+        if (item.paragraphImage != null) {
+          item.paragraphImage = null;
+          item.paragraphImage = await Utils.generateParagraphImage(
+              item.content,
+              item.width,
+              _option.fontSize,
+              _option.fontWeight,
+              devicePixelRatio,
+              _option.showStroke);
         }
       }
       for (DanmakuItem item in _bottomDanmakuItems) {
-        if (item.paragraph != null) {
-          item.paragraph = null;
-        }
-        if (item.strokeParagraph != null) {
-          item.strokeParagraph = null;
+        if (item.paragraphImage != null) {
+          item.paragraphImage = null;
+          item.paragraphImage = await Utils.generateParagraphImage(
+              item.content,
+              item.width,
+              _option.fontSize,
+              _option.fontWeight,
+              devicePixelRatio,
+              _option.showStroke);
         }
       }
     }
@@ -464,7 +484,8 @@ class _DanmakuScreenState extends State<DanmakuScreen>
                         _option.showStroke,
                         _danmakuHeight,
                         _running,
-                        _tick),
+                        _tick,
+                        devicePixelRatio),
                     child: Container(),
                   );
                 },
@@ -484,7 +505,8 @@ class _DanmakuScreenState extends State<DanmakuScreen>
                         _option.showStroke,
                         _danmakuHeight,
                         _running,
-                        _tick),
+                        _tick,
+                        devicePixelRatio),
                     child: Container(),
                   );
                 },
