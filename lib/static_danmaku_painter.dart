@@ -52,6 +52,8 @@ class StaticDanmakuPainter extends CustomPainter {
         // opacity: opacity,
       );
 
+      late Offset offset = Offset.zero;
+
       // 黑色部分
       if (strokeWidth > 0) {
         item.strokeParagraph ??= Utils.generateStrokeParagraph(
@@ -69,10 +71,31 @@ class StaticDanmakuPainter extends CustomPainter {
           screenSize: item.content.isColorful == true ? size : null,
           // opacity: opacity,
         );
-        canvas.drawParagraph(
-          item.strokeParagraph!,
-          Offset(item.xPosition, item.yPosition),
-        );
+
+        if (item.content.count != null) {
+          TextPainter textPainter = Utils.getCountPainter(
+            isStroke: true,
+            content: item.content,
+            fontSize: fontSize,
+            fontWeight: fontWeight,
+            strokeWidth: strokeWidth,
+          );
+          offset =
+              Offset(textPainter.width / 2, item.yPosition + danmakuHeight / 3);
+          textPainter.paint(
+            canvas,
+            Offset(item.xPosition - offset.dx, offset.dy),
+          );
+          canvas.drawParagraph(
+            item.strokeParagraph!,
+            Offset(item.xPosition + offset.dx, item.yPosition),
+          );
+        } else {
+          canvas.drawParagraph(
+            item.strokeParagraph!,
+            Offset(item.xPosition, item.yPosition),
+          );
+        }
       }
 
       if (item.content.selfSend) {
@@ -82,11 +105,30 @@ class StaticDanmakuPainter extends CustomPainter {
           selfSendPaint,
         );
       }
-      // 白色部分
-      canvas.drawParagraph(
-        item.paragraph!,
-        Offset(item.xPosition, item.yPosition),
-      );
+
+      if (item.content.count != null) {
+        TextPainter textPainter = Utils.getCountPainter(
+          isStroke: false,
+          content: item.content,
+          fontSize: fontSize,
+          fontWeight: fontWeight,
+          strokeWidth: strokeWidth,
+        );
+        textPainter.paint(
+          canvas,
+          Offset(item.xPosition - offset.dx, offset.dy),
+        );
+        canvas.drawParagraph(
+          item.paragraph!,
+          Offset(item.xPosition + offset.dx, item.yPosition),
+        );
+      } else {
+        // 白色部分
+        canvas.drawParagraph(
+          item.paragraph!,
+          Offset(item.xPosition, item.yPosition),
+        );
+      }
     }
     // 绘制底部弹幕 (翻转绘制)
     for (DanmakuItem item in bottomDanmakuItems) {
@@ -103,6 +145,8 @@ class StaticDanmakuPainter extends CustomPainter {
         screenSize: item.content.isColorful == true ? size : null,
         // opacity: opacity,
       );
+
+      late Offset offset = Offset.zero;
 
       // 黑色部分
       if (strokeWidth > 0) {
@@ -125,13 +169,38 @@ class StaticDanmakuPainter extends CustomPainter {
           // opacity: opacity,
         );
 
-        canvas.drawParagraph(
-          item.strokeParagraph!,
-          Offset(
-            item.xPosition,
-            (size.height - item.yPosition - danmakuHeight),
-          ),
-        );
+        if (item.content.count != null) {
+          TextPainter textPainter = Utils.getCountPainter(
+            isStroke: true,
+            content: item.content,
+            fontSize: fontSize,
+            fontWeight: fontWeight,
+            strokeWidth: strokeWidth,
+          );
+          offset = Offset(
+              textPainter.width / 2,
+              (size.height - item.yPosition - danmakuHeight) +
+                  danmakuHeight / 3);
+          textPainter.paint(
+            canvas,
+            Offset(item.xPosition - offset.dx, offset.dy),
+          );
+          canvas.drawParagraph(
+            item.strokeParagraph!,
+            Offset(
+              item.xPosition + offset.dx,
+              size.height - item.yPosition - danmakuHeight,
+            ),
+          );
+        } else {
+          canvas.drawParagraph(
+            item.strokeParagraph!,
+            Offset(
+              item.xPosition,
+              size.height - item.yPosition - danmakuHeight,
+            ),
+          );
+        }
       }
 
       if (item.content.selfSend) {
@@ -143,11 +212,35 @@ class StaticDanmakuPainter extends CustomPainter {
         );
       }
 
-      // 白色部分
-      canvas.drawParagraph(
-        item.paragraph!,
-        Offset(item.xPosition, size.height - item.yPosition - danmakuHeight),
-      );
+      if (item.content.count != null) {
+        TextPainter textPainter = Utils.getCountPainter(
+          isStroke: false,
+          content: item.content,
+          fontSize: fontSize,
+          fontWeight: fontWeight,
+          strokeWidth: strokeWidth,
+        );
+        textPainter.paint(
+          canvas,
+          Offset(item.xPosition - offset.dx, offset.dy),
+        );
+        canvas.drawParagraph(
+          item.paragraph!,
+          Offset(
+            item.xPosition + offset.dx,
+            size.height - item.yPosition - danmakuHeight,
+          ),
+        );
+      } else {
+        // 白色部分
+        canvas.drawParagraph(
+          item.paragraph!,
+          Offset(
+            item.xPosition,
+            size.height - item.yPosition - danmakuHeight,
+          ),
+        );
+      }
     }
   }
 

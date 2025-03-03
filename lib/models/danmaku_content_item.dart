@@ -22,11 +22,15 @@ class DanmakuContentItem {
   /// 是否为会员弹幕
   final bool? isColorful;
 
+  /// 弹幕数量
+  final int? count;
+
   DanmakuContentItem(
     this.text, {
     this.color = Colors.white,
     this.type = DanmakuItemType.scroll,
     this.selfSend = false,
     this.isColorful,
+    this.count,
   });
 }

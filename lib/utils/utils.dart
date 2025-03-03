@@ -3,6 +3,32 @@ import 'package:flutter/material.dart';
 import '/models/danmaku_content_item.dart';
 
 class Utils {
+  static TextPainter getCountPainter({
+    required bool isStroke,
+    required DanmakuContentItem content,
+    required double fontSize,
+    required int fontWeight,
+    required double strokeWidth,
+  }) {
+    late final Paint paint = Paint()
+      ..style = ui.PaintingStyle.stroke
+      ..color = Colors.black
+      ..strokeWidth = strokeWidth;
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: '(${content.count})',
+        style: TextStyle(
+          fontSize: fontSize / 5 * 3,
+          color: isStroke ? null : content.color,
+          fontWeight: FontWeight.values[fontWeight],
+          foreground: isStroke ? paint : null,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    return textPainter;
+  }
+
   static generateParagraph({
     required DanmakuContentItem content,
     required double danmakuWidth,

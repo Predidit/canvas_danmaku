@@ -68,6 +68,8 @@ class ScrollDanmakuPainter extends CustomPainter {
           // opacity: opacity,
         );
 
+        late Offset offset = Offset.zero;
+
         if (strokeWidth > 0) {
           if (item.content.isColorful == true) {
             item.strokeParagraph = Utils.generateStrokeParagraph(
@@ -91,10 +93,30 @@ class ScrollDanmakuPainter extends CustomPainter {
               // opacity: opacity,
             );
           }
-          pictureCanvas.drawParagraph(
-            item.strokeParagraph!,
-            Offset(item.xPosition, item.yPosition),
-          );
+          if (item.content.count != null) {
+            TextPainter textPainter = Utils.getCountPainter(
+              isStroke: true,
+              content: item.content,
+              fontSize: fontSize,
+              fontWeight: fontWeight,
+              strokeWidth: strokeWidth,
+            );
+            offset = Offset(
+                textPainter.width / 2, item.yPosition + danmakuHeight / 3);
+            textPainter.paint(
+              canvas,
+              Offset(item.xPosition - offset.dx, offset.dy),
+            );
+            pictureCanvas.drawParagraph(
+              item.strokeParagraph!,
+              Offset(item.xPosition + offset.dx, item.yPosition),
+            );
+          } else {
+            pictureCanvas.drawParagraph(
+              item.strokeParagraph!,
+              Offset(item.xPosition, item.yPosition),
+            );
+          }
         }
 
         if (item.content.selfSend) {
@@ -105,10 +127,29 @@ class ScrollDanmakuPainter extends CustomPainter {
           );
         }
 
-        pictureCanvas.drawParagraph(
-          item.paragraph!,
-          Offset(item.xPosition, item.yPosition),
-        );
+        if (item.content.count != null) {
+          TextPainter textPainter = Utils.getCountPainter(
+            isStroke: false,
+            content: item.content,
+            fontSize: fontSize,
+            fontWeight: fontWeight,
+            strokeWidth: strokeWidth,
+          );
+          textPainter.paint(
+            canvas,
+            Offset(item.xPosition - offset.dx, offset.dy),
+          );
+          pictureCanvas.drawParagraph(
+            item.paragraph!,
+            Offset(item.xPosition + offset.dx, item.yPosition),
+          );
+        } else {
+          pictureCanvas.drawParagraph(
+            item.paragraph!,
+            Offset(item.xPosition, item.yPosition),
+          );
+        }
+
         item.lastDrawTick = tick;
       }
 
@@ -139,6 +180,8 @@ class ScrollDanmakuPainter extends CustomPainter {
           // opacity: opacity,
         );
 
+        late Offset offset = Offset.zero;
+
         if (strokeWidth > 0) {
           if (item.content.isColorful == true) {
             item.strokeParagraph = Utils.generateStrokeParagraph(
@@ -162,10 +205,30 @@ class ScrollDanmakuPainter extends CustomPainter {
               // opacity: opacity,
             );
           }
-          canvas.drawParagraph(
-            item.strokeParagraph!,
-            Offset(item.xPosition, item.yPosition),
-          );
+          if (item.content.count != null) {
+            TextPainter textPainter = Utils.getCountPainter(
+              isStroke: true,
+              content: item.content,
+              fontSize: fontSize,
+              fontWeight: fontWeight,
+              strokeWidth: strokeWidth,
+            );
+            offset = Offset(
+                textPainter.width / 2, item.yPosition + danmakuHeight / 3);
+            textPainter.paint(
+              canvas,
+              Offset(item.xPosition - offset.dx, offset.dy),
+            );
+            canvas.drawParagraph(
+              item.strokeParagraph!,
+              Offset(item.xPosition + offset.dx, item.yPosition),
+            );
+          } else {
+            canvas.drawParagraph(
+              item.strokeParagraph!,
+              Offset(item.xPosition, item.yPosition),
+            );
+          }
         }
 
         if (item.content.selfSend) {
@@ -176,10 +239,29 @@ class ScrollDanmakuPainter extends CustomPainter {
           );
         }
 
-        canvas.drawParagraph(
-          item.paragraph!,
-          Offset(item.xPosition, item.yPosition),
-        );
+        if (item.content.count != null) {
+          TextPainter textPainter = Utils.getCountPainter(
+            isStroke: false,
+            content: item.content,
+            fontSize: fontSize,
+            fontWeight: fontWeight,
+            strokeWidth: strokeWidth,
+          );
+          textPainter.paint(
+            canvas,
+            Offset(item.xPosition - offset.dx, offset.dy),
+          );
+          canvas.drawParagraph(
+            item.paragraph!,
+            Offset(item.xPosition + offset.dx, item.yPosition),
+          );
+        } else {
+          canvas.drawParagraph(
+            item.paragraph!,
+            Offset(item.xPosition, item.yPosition),
+          );
+        }
+
         item.lastDrawTick = tick;
       }
     }
