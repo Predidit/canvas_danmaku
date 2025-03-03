@@ -64,10 +64,7 @@ class StaticDanmakuPainter extends CustomPainter {
               ? Size(item.width, item.height)
               : null,
           offset: item.content.isColorful == true
-              ? Offset(
-                  item.xPosition,
-                  (size.height - item.yPosition - danmakuHeight),
-                )
+              ? Offset(item.xPosition, item.yPosition)
               : null,
           screenSize: item.content.isColorful == true ? size : null,
           // opacity: opacity,
