@@ -267,6 +267,10 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       }
 
       if (content.type == DanmakuItemType.bottom && !_option.hideBottom) {
+        if (_option.safeArea && yPosition <= _danmakuHeight) {
+          continue;
+        }
+
         bool bottomCanAddToTrack = _bottomCanAddToTrack(yPosition);
 
         if (bottomCanAddToTrack) {

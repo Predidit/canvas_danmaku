@@ -18,7 +18,7 @@ class Utils {
       text: TextSpan(
         text: '(${content.count})',
         style: TextStyle(
-          fontSize: fontSize / 5 * 3,
+          fontSize: fontSize * 0.6,
           color: isStroke ? null : content.color,
           fontWeight: FontWeight.values[fontWeight],
           foreground: isStroke ? paint : null,
