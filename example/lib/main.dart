@@ -50,8 +50,11 @@ class _HomePageState extends State<HomePage> {
   /// 弹幕透明度
   double _opacity = 1.0;
 
-  /// 弹幕持续时间
+  /// 滚动弹幕持续时间
   int _duration = 8;
+
+  /// 静态弹幕持续时间
+  int _staticDuration = 5;
 
   /// 弹幕字号
   double _fontSize = (Platform.isIOS || Platform.isAndroid) ? 16 : 25;
@@ -175,6 +178,7 @@ class _HomePageState extends State<HomePage> {
                   fontSize: _fontSize,
                   fontWeight: _fontWeight,
                   duration: _duration,
+                  staticDuration: _staticDuration,
                   strokeWidth: _strokeWidth,
                   massiveMode: _massiveMode,
                   hideScroll: _hideScroll,
@@ -267,7 +271,7 @@ class _HomePageState extends State<HomePage> {
                   );
                 },
               ),
-              Text("Duration : $_duration"),
+              Text("Scroll Duration : $_duration"),
               Slider(
                 value: _duration.toDouble(),
                 min: 4,
@@ -278,7 +282,23 @@ class _HomePageState extends State<HomePage> {
                     _duration = e.toInt();
                   });
                   _controller?.updateOption(
-                    _controller!.option.copyWith(duration: e.toInt()),
+                    _controller!.option.copyWith(duration: _duration),
+                  );
+                },
+              ),
+              Text("Static Duration : $_staticDuration"),
+              Slider(
+                value: _staticDuration.toDouble(),
+                min: 1,
+                max: 20,
+                divisions: 19,
+                onChanged: (e) {
+                  setState(() {
+                    _staticDuration = e.toInt();
+                  });
+                  _controller?.updateOption(
+                    _controller!.option
+                        .copyWith(staticDuration: _staticDuration),
                   );
                 },
               ),
