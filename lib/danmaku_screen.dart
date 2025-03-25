@@ -88,12 +88,12 @@ class _DanmakuScreenState extends State<DanmakuScreen>
 
     _animationController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: _option.duration),
+      duration: Duration(milliseconds: (_option.duration * 1000).toInt()),
     )..repeat();
 
     _staticAnimationController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: _option.staticDuration),
+      duration: Duration(milliseconds: (_option.staticDuration * 1000).toInt()),
     );
 
     // WidgetsBinding.instance.addObserver(this);
@@ -489,10 +489,10 @@ class _DanmakuScreenState extends State<DanmakuScreen>
             .removeWhere((item) => item.xPosition + item.width < 0);
         // 移除顶部弹幕
         _topDanmakuItems.removeWhere((item) =>
-            ((_tick - item.creationTime) > (_option.staticDuration * 1000)));
+            ((_tick - item.creationTime) >= (_option.staticDuration * 1000)));
         // 移除底部弹幕
         _bottomDanmakuItems.removeWhere((item) =>
-            ((_tick - item.creationTime) > (_option.staticDuration * 1000)));
+            ((_tick - item.creationTime) >= (_option.staticDuration * 1000)));
         // 暂停动画
         if (_scrollDanmakuItems.isEmpty) {
           if (_animationController.isAnimating) {

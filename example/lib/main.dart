@@ -51,10 +51,10 @@ class _HomePageState extends State<HomePage> {
   double _opacity = 1.0;
 
   /// 滚动弹幕持续时间
-  int _duration = 8;
+  double _duration = 8.0;
 
   /// 静态弹幕持续时间
-  int _staticDuration = 5;
+  double _staticDuration = 5.0;
 
   /// 弹幕字号
   double _fontSize = (Platform.isIOS || Platform.isAndroid) ? 16 : 25;
@@ -279,7 +279,7 @@ class _HomePageState extends State<HomePage> {
                 divisions: 16,
                 onChanged: (e) {
                   setState(() {
-                    _duration = e.toInt();
+                    _duration = e;
                   });
                   _controller?.updateOption(
                     _controller!.option.copyWith(duration: _duration),
@@ -294,7 +294,7 @@ class _HomePageState extends State<HomePage> {
                 divisions: 19,
                 onChanged: (e) {
                   setState(() {
-                    _staticDuration = e.toInt();
+                    _staticDuration = e;
                   });
                   _controller?.updateOption(
                     _controller!.option

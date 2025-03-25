@@ -6,7 +6,7 @@ class StaticDanmakuPainter extends CustomPainter {
   final double progress;
   final List<DanmakuItem> topDanmakuItems;
   final List<DanmakuItem> bottomDanmakuItems;
-  final int danmakuDurationInSeconds;
+  final double danmakuDurationInSeconds;
   final double fontSize;
   final int fontWeight;
   final double strokeWidth;

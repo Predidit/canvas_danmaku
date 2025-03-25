@@ -9,10 +9,10 @@ class DanmakuOption {
   final double area;
 
   /// 滚动弹幕运行时间，秒
-  final int duration;
+  final double duration;
 
-   /// 静态弹幕运行时间，秒
-  final int staticDuration;
+  /// 静态弹幕运行时间，秒
+  final double staticDuration;
 
   /// 不透明度，0.1-1.0
   final double opacity;
@@ -58,8 +58,8 @@ class DanmakuOption {
     double? fontSize,
     int? fontWeight,
     double? area,
-    int? duration,
-    int? staticDuration,
+    double? duration,
+    double? staticDuration,
     double? opacity,
     bool? hideTop,
     bool? hideBottom,

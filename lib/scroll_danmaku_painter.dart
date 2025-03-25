@@ -6,7 +6,7 @@ import '/utils/utils.dart';
 class ScrollDanmakuPainter extends CustomPainter {
   final double progress;
   final List<DanmakuItem> scrollDanmakuItems;
-  final int danmakuDurationInSeconds;
+  final double danmakuDurationInSeconds;
   final double fontSize;
   final int fontWeight;
   final double strokeWidth;
