@@ -82,13 +82,13 @@ class SpecialDanmakuContentItem extends DanmakuContentItem {
     double videoX = 1920,
     double videoY = 1080,
   ]) {
-    double startX = _toRelative(list[0], videoX);
-    double startY = _toRelative(list[1], videoY);
+    var (startX, endX) = _toRelativePosition(list[0], list[7], videoX);
+    var (startY, endY) = _toRelativePosition(list[1], list[8], videoY);
     List<String> alphaString = list[2].split('-');
     double startA = double.parse(alphaString[0]);
     double endA = double.parse(alphaString[1]);
     Tween<double> alphaTween = _makeTween(startA, endA);
-    int duration = (double.parse(list[3]) * 1000).round();
+    int duration = (_parseDouble(list[3]) * 1000).round();
     String text = list[4].trim();
     int rotateZ = _parseInt(list[5]);
     int rotateY = _parseInt(list[6]);
@@ -98,8 +98,6 @@ class SpecialDanmakuContentItem extends DanmakuContentItem {
       if (rotateZ != 0) matrix.rotateZ(_degreeToRadian(rotateZ));
       if (rotateY != 0) matrix.rotateY(_degreeToRadian(rotateY));
     }
-    double endX = _toRelative(list[7], videoX);
-    double endY = _toRelative(list[8], videoY);
     var translateXTween = _makeTween(startX, endX);
     var translateYTween = _makeTween(startY, endY);
     int translationDuration = _parseInt(list[9]);
@@ -130,16 +128,46 @@ class SpecialDanmakuContentItem extends DanmakuContentItem {
     );
   }
 
-  static double _toRelative(String num, double videoSize) {
-    double value = double.parse(num);
-    if (value > 1 || !num.contains('.')) value /= videoSize;
-    return value;
+  static (double, double) _toRelativePosition(
+    dynamic rawStart,
+    dynamic rawEnd,
+    double videoSize,
+  ) {
+    double toRadix(double? value, dynamic rawValue) =>
+        (value! > 1 || (rawValue is String && !rawValue.contains('.')))
+            ? value /= videoSize
+            : value;
+
+    double? convert(value) {
+      if (value is num) {
+        return value.toDouble();
+      } else if (value is String) {
+        return double.tryParse(value);
+      }
+      return null;
+    }
+
+    double? start = convert(rawStart);
+    double? end = convert(rawEnd);
+
+    if (start == null && end == null) return (0, 0);
+    start ??= end;
+    end ??= start;
+
+    return (toRadix(start, rawStart), toRadix(end, rawEnd));
   }
 
   static int _parseInt(dynamic digit) => switch (digit) {
         int() => digit,
         double() => digit.toInt(),
-        String() => int.parse(digit),
+        String() => int.tryParse(digit) ?? 0,
+        _ => throw UnimplementedError()
+      };
+
+  static double _parseDouble(dynamic digit) => switch (digit) {
+        int() => digit.toDouble(),
+        double() => digit,
+        String() => double.tryParse(digit) ?? 0,
         _ => throw UnimplementedError()
       };
 
