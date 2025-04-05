@@ -126,6 +126,101 @@ class _HomePageState extends State<HomePage> {
                   },
                 ),
                 TextButton(
+                  child: const Text('Special'),
+                  onPressed: () {
+                    final random = Random();
+                    _controller?.addDanmaku(
+                      SpecialDanmakuContentItem(
+                        '这是一条特殊弹幕',
+                        color: getRandomColor(),
+                        fontSize: random.nextInt(50) + 25,
+                        translateXTween: Tween<double>(
+                          begin: random.nextDouble(),
+                          end: random.nextDouble(),
+                        ),
+                        translateYTween: Tween<double>(
+                          begin: random.nextDouble(),
+                          end: random.nextDouble(),
+                        ),
+                        alphaTween: Tween<double>(
+                            begin: random.nextDouble(),
+                            end: random.nextDouble()),
+                        matrix: Matrix4.identity()
+                          ..rotateZ(random.nextDouble() * pi)
+                          ..rotateY(random.nextDouble() * pi),
+                        duration: random.nextInt(16000),
+                        easingType: const [
+                          Curves.linear,
+                          Curves.easeInCubic
+                        ][random.nextInt(2)],
+                        hasStroke: true,
+                      ),
+                    );
+                  },
+                ),
+                TextButton(
+                  child: const Text('Circle'),
+                  onPressed: () {
+                    Iterable.generate(
+                      36,
+                      (i) => SpecialDanmakuContentItem(
+                        '测试',
+                        duration: 4000,
+                        color: Colors.red,
+                        fontSize: 64 * 2,
+                        translateXTween: Tween<double>(begin: 0.5, end: 0.5),
+                        translateYTween: Tween<double>(begin: 0.5, end: 0.5),
+                        alphaTween: Tween<double>(begin: 1, end: 0),
+                        matrix: Matrix4.identity()..rotateZ(i * pi / 18),
+                        easingType: Curves.linear,
+                        hasStroke: true,
+                      ),
+                    ).forEach(_controller!.addDanmaku);
+                  },
+                ),
+                TextButton(
+                  child: const Text('Star'),
+                  onPressed: () {
+                    _controller?.addDanmaku(SpecialDanmakuContentItem.fromList(
+                        getRandomColor(), 44, [
+                      "0.939",
+                      "0.083",
+                      "1-1",
+                      "6",
+                      "☆——————\n" * 14,
+                      "342",
+                      "0",
+                      "0.002",
+                      "0.271",
+                      500,
+                      0,
+                      1,
+                      "SimHei",
+                      1
+                    ]));
+                  },
+                ),
+                TextButton(
+                  child: const Text('DanMu'),
+                  onPressed: () async {
+                    String data = await rootBundle.loadString('assets/dm.json');
+                    final danmaku = jsonDecode(data) as List;
+                    final dan = danmaku.last as List;
+                    final mu = danmaku.first as List;
+                    for (var item in dan) {
+                      _controller?.addDanmaku(
+                          SpecialDanmakuContentItem.fromList(
+                              Colors.orange, 16, item));
+                    }
+                    await Future.delayed(const Duration(seconds: 2));
+                    for (var item in mu) {
+                      _controller?.addDanmaku(
+                          SpecialDanmakuContentItem.fromList(
+                              Colors.orange, 16, item));
+                    }
+                  },
+                ),
+                TextButton(
                   child: const Text('Self'),
                   onPressed: () {
                     _controller?.addDanmaku(

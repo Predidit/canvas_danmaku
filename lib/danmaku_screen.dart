@@ -2,6 +2,7 @@ import 'package:canvas_danmaku/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'models/danmaku_item.dart';
 import 'scroll_danmaku_painter.dart';
+import 'special_danmaku_painter.dart';
 import 'static_danmaku_painter.dart';
 import 'danmaku_controller.dart';
 import 'dart:ui' as ui;
@@ -50,6 +51,9 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   /// 底部弹幕
   List<DanmakuItem> _bottomDanmakuItems = [];
 
+  /// 高级弹幕
+  List<DanmakuItem> _specialDanmakuItems = [];
+
   /// 弹幕高度
   late double _danmakuHeight;
 
@@ -57,10 +61,12 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   late int _trackCount;
 
   /// 弹幕轨道位置
-  final List<double> _trackYPositions = [];
+  late List<double> _trackYPositions;
+
+  late final _random = Random();
 
   /// 内部计时器
-  late int _tick;
+  int get _tick => _stopwatch.elapsedMilliseconds;
 
   final _stopwatch = Stopwatch();
 
@@ -71,7 +77,6 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   void initState() {
     super.initState();
     // 计时器初始化
-    _tick = 0;
     // _startTick(); // start when adding danmaku
     _option = widget.option;
     _controller = DanmakuController(
@@ -227,9 +232,8 @@ class _DanmakuScreenState extends State<DanmakuScreen>
 
         /// 海量弹幕启用时进行随机添加
         if (_option.massiveMode && idx == _trackCount) {
-          final random = Random();
           double randomYPosition =
-              _trackYPositions[random.nextInt(_trackYPositions.length)];
+              _trackYPositions[_random.nextInt(_trackYPositions.length)];
           _scrollDanmakuItems.add(
             DanmakuItem(
               yPosition: randomYPosition,
@@ -291,11 +295,19 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       }
       idx++;
     }
+    if (content.type == DanmakuItemType.special && !_option.hideSpecial) {
+      _specialDanmakuItems.add(DanmakuItem(
+        width: 0,
+        height: 0,
+        creationTime: _tick,
+        content: content,
+        paragraph: null,
+        strokeParagraph: null,
+      ));
+    }
 
-    if ((_scrollDanmakuItems.isNotEmpty ||
-            _topDanmakuItems.isNotEmpty ||
-            _bottomDanmakuItems.isNotEmpty) &&
-        !_animationController.isAnimating) {
+    if (!_animationController.isAnimating &&
+        (_scrollDanmakuItems.isNotEmpty || _specialDanmakuItems.isNotEmpty)) {
       _animationController.repeat();
     }
 
@@ -376,6 +388,10 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       _bottomDanmakuItems = [];
     }
 
+    if (option.hideSpecial && !_option.hideSpecial) {
+      _specialDanmakuItems = [];
+    }
+
     if (option.fontSize != _option.fontSize) {
       _updateOption(option);
       _danmakuHeight = _textPainter.height; // resize _danmakuHeight
@@ -425,6 +441,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       _scrollDanmakuItems = [];
       _topDanmakuItems = [];
       _bottomDanmakuItems = [];
+      _specialDanmakuItems = [];
     });
     _animationController.stop();
   }
@@ -472,40 +489,36 @@ class _DanmakuScreenState extends State<DanmakuScreen>
 
   // 基于Stopwatch的计时器同步
   void _startTick() async {
-    _stopwatch.reset();
+    // _stopwatch.reset();
     _stopwatch.start();
 
-    int lastElapsedTime = 0;
-
     while (_running && mounted) {
-      await Future.delayed(const Duration(milliseconds: 1));
-      int currentElapsedTime = _stopwatch.elapsedMilliseconds; // 获取当前的已用时间
-      int delta = currentElapsedTime - lastElapsedTime; // 计算自上次记录以来的时间差
-      _tick += delta;
-      lastElapsedTime = currentElapsedTime; // 更新最后记录的时间
-      if (lastElapsedTime % 100 == 0) {
-        // 移除屏幕外滚动弹幕
-        _scrollDanmakuItems
-            .removeWhere((item) => item.xPosition + item.width < 0);
-        // 移除顶部弹幕
-        _topDanmakuItems.removeWhere((item) =>
-            ((_tick - item.creationTime) >= (_option.staticDuration * 1000)));
-        // 移除底部弹幕
-        _bottomDanmakuItems.removeWhere((item) =>
-            ((_tick - item.creationTime) >= (_option.staticDuration * 1000)));
-        // 暂停动画
-        if (_scrollDanmakuItems.isEmpty) {
-          if (_animationController.isAnimating) {
-            _animationController.stop();
-          }
-        }
+      await Future.delayed(const Duration(milliseconds: 100));
+      // 移除屏幕外滚动弹幕
+      _scrollDanmakuItems
+          .removeWhere((item) => item.xPosition + item.width < 0);
+      // 移除顶部弹幕
+      _topDanmakuItems.removeWhere((item) =>
+          ((_tick - item.creationTime) >= (_option.staticDuration * 1000)));
+      // 移除底部弹幕
+      _bottomDanmakuItems.removeWhere((item) =>
+          ((_tick - item.creationTime) >= (_option.staticDuration * 1000)));
+      // 移除高级弹幕
+      _specialDanmakuItems.removeWhere((item) =>
+          (_tick - item.creationTime) >=
+          (item.content as SpecialDanmakuContentItem).duration);
+      // 暂停动画
+      if (_scrollDanmakuItems.isEmpty &&
+          _specialDanmakuItems.isEmpty &&
+          _animationController.isAnimating) {
+        _animationController.stop();
+      }
 
-        /// 重绘静态弹幕
-        if (mounted) {
-          setState(() {
-            _staticAnimationController.value = 0;
-          });
-        }
+      /// 重绘静态弹幕
+      if (mounted) {
+        setState(() {
+          _staticAnimationController.value = 0;
+        });
       }
     }
 
@@ -539,10 +552,8 @@ class _DanmakuScreenState extends State<DanmakuScreen>
           _trackCount = _trackCount - 1;
         }
 
-        _trackYPositions.clear();
-        for (int i = 0; i < _trackCount; i++) {
-          _trackYPositions.add(i * _danmakuHeight);
-        }
+        _trackYPositions =
+            List<double>.generate(_trackCount, (i) => i * _danmakuHeight);
         return ClipRect(
           child: IgnorePointer(
             child: Opacity(
@@ -586,6 +597,25 @@ class _DanmakuScreenState extends State<DanmakuScreen>
                             strokeWidth: _option.strokeWidth,
                             opacity: _option.opacity,
                             danmakuHeight: _danmakuHeight,
+                            running: _running,
+                            tick: _tick,
+                          ),
+                          size: const Size(double.infinity, double.infinity),
+                        );
+                      },
+                    ),
+                  ),
+                  RepaintBoundary(
+                    child: AnimatedBuilder(
+                      animation: _animationController, // 与滚动弹幕共用控制器
+                      builder: (context, child) {
+                        return CustomPaint(
+                          painter: SpecialDanmakuPainter(
+                            progress: _animationController.value,
+                            specialDanmakuItems: _specialDanmakuItems,
+                            fontSize: _option.fontSize,
+                            fontWeight: _option.fontWeight,
+                            strokeWidth: _option.strokeWidth,
                             running: _running,
                             tick: _tick,
                           ),
