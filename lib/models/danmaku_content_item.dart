@@ -85,8 +85,8 @@ class SpecialDanmakuContentItem extends DanmakuContentItem {
     var (startX, endX) = _toRelativePosition(list[0], list[7], videoX);
     var (startY, endY) = _toRelativePosition(list[1], list[8], videoY);
     List<String> alphaString = list[2].split('-');
-    double startA = double.parse(alphaString[0]);
-    double endA = double.parse(alphaString[1]);
+    double startA = double.tryParse(alphaString[0]) ?? 1;
+    double endA = double.tryParse(alphaString[1]) ?? 1;
     Tween<double> alphaTween = _makeTween(startA, endA);
     int duration = (_parseDouble(list[3]) * 1000).round();
     String text = list[4].trim();
