@@ -148,10 +148,10 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       if (!_running || !mounted) {
         return;
       }
+    }
 
-      if (!_stopwatch.isRunning) {
-        _startTick();
-      }
+    if (_running && !_stopwatch.isRunning) {
+      _startTick();
     }
 
     // 在这里提前创建 Paragraph 缓存防止卡顿
