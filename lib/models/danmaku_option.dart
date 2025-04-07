@@ -23,6 +23,8 @@ class DanmakuOption {
   /// 隐藏滚动弹幕
   final bool hideScroll;
 
+  final bool hideSpecial;
+
   /// 弹幕描边
   final bool showStroke;
 
@@ -41,6 +43,7 @@ class DanmakuOption {
     this.hideBottom = false,
     this.hideScroll = false,
     this.hideTop = false,
+    this.hideSpecial = false,
     this.showStroke = true,
     this.massiveMode = false,
     this.safeArea = true,

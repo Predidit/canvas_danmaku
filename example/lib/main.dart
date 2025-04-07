@@ -9,13 +9,15 @@ import 'package:flutter/services.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       title: 'CanvasDanmaku Demo',
       home: HomePage(),
     );
@@ -23,15 +25,16 @@ class MyApp extends StatelessWidget {
 }
 
 class HomePage extends StatefulWidget {
-  HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
-  _HomePageState createState() => _HomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  static final _random = Random();
+
   late DanmakuController _controller;
-  var _key = new GlobalKey<ScaffoldState>();
 
   final _danmuKey = GlobalKey();
 
@@ -53,16 +56,16 @@ class _HomePageState extends State<HomePage> {
   double _fontSize = (Platform.isIOS || Platform.isAndroid) ? 16 : 25;
 
   /// 弹幕粗细
-  int _fontWeight = 4;
+  final int _fontWeight = 4;
 
   /// 隐藏滚动弹幕
-  bool _hideScroll = false;
+  final bool _hideScroll = false;
 
   /// 隐藏顶部弹幕
-  bool _hideTop = false;
+  final bool _hideTop = false;
 
   /// 隐藏底部弹幕
-  bool _hideBottom = false;
+  final bool _hideBottom = false;
 
   /// 为字幕预留空间
   bool _safeArea = true;
@@ -70,16 +73,15 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _key,
       appBar: AppBar(
-        title: Text('CanvasDanmaku Demo'),
+        title: const Text('CanvasDanmaku Demo'),
       ),
       body: Column(
         children: [
           Wrap(
             children: [
               IconButton(
-                icon: Icon(Icons.add),
+                icon: const Icon(Icons.add),
                 tooltip: 'Add Scroll',
                 onPressed: () {
                   _controller.addDanmaku(
@@ -90,7 +92,7 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
               IconButton(
-                icon: Icon(Icons.add),
+                icon: const Icon(Icons.add),
                 tooltip: 'Add Top',
                 onPressed: () {
                   _controller.addDanmaku(
@@ -100,7 +102,7 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
               IconButton(
-                icon: Icon(Icons.add),
+                icon: const Icon(Icons.add),
                 tooltip: 'Add Bottom',
                 onPressed: () {
                   _controller.addDanmaku(
@@ -110,8 +112,83 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
               IconButton(
-                icon: Icon(Icons.add),
-                tooltip: 'Add Bottom',
+                icon: const Icon(Icons.add),
+                tooltip: 'Add Special',
+                onPressed: () {
+                  _controller.addDanmaku(randSpecialDanmaku());
+                },
+                onLongPress: () {
+                  for (var i = 0; i < 100; i++) {
+                    _controller.addDanmaku(randSpecialDanmaku());
+                  }
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.add),
+                tooltip: 'Add Special Circle',
+                onPressed: () {
+                  Iterable.generate(
+                    36,
+                    (i) => SpecialDanmakuContentItem(
+                      '测试',
+                      duration: 4000,
+                      color: Colors.red,
+                      fontSize: 64 * 2,
+                      translateXTween: Tween<double>(begin: 0.5, end: 0.5),
+                      translateYTween: Tween<double>(begin: 0.5, end: 0.5),
+                      alphaTween: Tween<double>(begin: 1, end: 0),
+                      matrix: Matrix4.identity()..rotateZ(i * pi / 18),
+                      easingType: Curves.linear,
+                      hasStroke: true,
+                    ),
+                  ).forEach(_controller.addDanmaku);
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.add),
+                tooltip: 'Add Special Star',
+                onPressed: () {
+                  _controller.addDanmaku(
+                      SpecialDanmakuContentItem.fromList(getRandomColor(), 44, [
+                    "0.939",
+                    "0.083",
+                    "1-1",
+                    "6",
+                    "☆——————\n" * 14,
+                    "342",
+                    "0",
+                    "0.002",
+                    "0.271",
+                    500,
+                    0,
+                    1,
+                    "SimHei",
+                    1
+                  ]));
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.add),
+                tooltip: 'Add Special Literal DanMu',
+                onPressed: () async {
+                  String data = await rootBundle.loadString('assets/dm.json');
+                  final danmaku = jsonDecode(data) as List;
+                  final dan = danmaku.last as List;
+                  final mu = danmaku.first as List;
+                  for (var item in dan) {
+                    _controller.addDanmaku(SpecialDanmakuContentItem.fromList(
+                        Colors.orange, 16, item));
+                  }
+                  await Future.delayed(const Duration(seconds: 2));
+                  for (var item in mu) {
+                    _controller.addDanmaku(SpecialDanmakuContentItem.fromList(
+                        Colors.orange, 16, item));
+                  }
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.add),
+                tooltip: 'Add Self',
                 onPressed: () {
                   _controller.addDanmaku(
                     DanmakuContentItem("这是一条自己发的弹幕",
@@ -122,7 +199,7 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
               IconButton(
-                icon: Icon(Icons.play_circle_outline_outlined),
+                icon: const Icon(Icons.play_circle_outline_outlined),
                 onPressed: startPlay,
                 tooltip: 'Start Player',
               ),
@@ -154,7 +231,7 @@ class _HomePageState extends State<HomePage> {
                 tooltip: 'Stroke',
               ),
               IconButton(
-                icon: Icon(Icons.clear),
+                icon: const Icon(Icons.clear),
                 onPressed: () {
                   _controller.clear();
                 },
@@ -189,7 +266,7 @@ class _HomePageState extends State<HomePage> {
       endDrawer: Drawer(
         child: SafeArea(
           child: ListView(
-            padding: EdgeInsets.all(8),
+            padding: const EdgeInsets.all(8),
             children: [
               Text("Opacity : $_opacity"),
               Slider(
@@ -264,31 +341,53 @@ class _HomePageState extends State<HomePage> {
   int sec = 0;
   void startPlay() async {
     String data = await rootBundle.loadString('assets/132590001.json');
-    List<DanmakuContentItem> _items = [];
+    List<DanmakuContentItem> items = [];
     var jsonMap = json.decode(data);
     for (var item in jsonMap['comments']) {
-      _items.add(DanmakuContentItem(
+      items.add(DanmakuContentItem(
         item['m'],
         color: Colors.white,
       ));
     }
-    if (timer == null) {
-      timer = Timer.periodic(Duration(seconds: 1), (timer) {
-        if (!_controller.running) return;
-        _controller.addDanmaku(_items[sec]);
-        sec++;
-      });
-    }
+    timer ??= Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!_controller.running) return;
+      _controller.addDanmaku(items[sec]);
+      sec++;
+    });
   }
 
   // 生成随机颜色
-  Color getRandomColor() {
-    final Random random = Random();
-    return Color.fromARGB(
-      255, // 固定 alpha 为 255（完全不透明）
-      random.nextInt(256),
-      random.nextInt(256),
-      random.nextInt(256),
+  static Color getRandomColor() {
+    return Color(0xFF000000 | _random.nextInt(0x1000000));
+  }
+
+  static randSpecialDanmaku() {
+    final translationStartDelay = _random.nextInt(1000);
+    final translationDuration = _random.nextInt(14000);
+    final duration =
+        translationStartDelay + translationDuration + _random.nextInt(1000);
+    return SpecialDanmakuContentItem(
+      '这是一条特殊弹幕',
+      color: getRandomColor(),
+      fontSize: _random.nextInt(50) + 25,
+      translateXTween: Tween<double>(
+        begin: _random.nextDouble(),
+        end: _random.nextDouble(),
+      ),
+      translateYTween: Tween<double>(
+        begin: _random.nextDouble(),
+        end: _random.nextDouble(),
+      ),
+      alphaTween:
+          Tween<double>(begin: _random.nextDouble(), end: _random.nextDouble()),
+      matrix: Matrix4.identity()
+        ..rotateZ(_random.nextDouble() * pi)
+        ..rotateY(_random.nextDouble() * pi),
+      duration: duration,
+      translationDuration: translationDuration,
+      translationStartDelay: translationStartDelay,
+      easingType: const [Curves.linear, Curves.easeInCubic][_random.nextInt(2)],
+      hasStroke: _random.nextBool(),
     );
   }
 
