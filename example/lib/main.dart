@@ -32,6 +32,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  static final _random = Random();
+
   DanmakuController? _controller;
 
   final _danmuKey = GlobalKey();
@@ -92,7 +94,7 @@ class _HomePageState extends State<HomePage> {
                       DanmakuContentItem(
                         "这是一条超长弹幕ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789这是一条超长的弹幕，这条弹幕会超出屏幕宽度",
                         color: getRandomColor(),
-                        count: [1, 10, 100, 1000, 10000][Random().nextInt(5)],
+                        count: [1, 10, 100, 1000, 10000][_random.nextInt(5)],
                       ),
                     );
                   },
@@ -107,7 +109,7 @@ class _HomePageState extends State<HomePage> {
                         // getRandomColor(),
                         isColorful: true,
                         type: DanmakuItemType.top,
-                        count: [1, 10, 100, 1000, 10000][Random().nextInt(5)],
+                        count: [1, 10, 100, 1000, 10000][_random.nextInt(5)],
                       ),
                     );
                   },
@@ -120,7 +122,7 @@ class _HomePageState extends State<HomePage> {
                         "这是一条底部弹幕",
                         color: getRandomColor(),
                         type: DanmakuItemType.bottom,
-                        count: [1, 10, 100, 1000, 10000][Random().nextInt(5)],
+                        count: [1, 10, 100, 1000, 10000][_random.nextInt(5)],
                       ),
                     );
                   },
@@ -128,34 +130,12 @@ class _HomePageState extends State<HomePage> {
                 TextButton(
                   child: const Text('Special'),
                   onPressed: () {
-                    final random = Random();
-                    _controller?.addDanmaku(
-                      SpecialDanmakuContentItem(
-                        '这是一条特殊弹幕',
-                        color: getRandomColor(),
-                        fontSize: random.nextInt(50) + 25,
-                        translateXTween: Tween<double>(
-                          begin: random.nextDouble(),
-                          end: random.nextDouble(),
-                        ),
-                        translateYTween: Tween<double>(
-                          begin: random.nextDouble(),
-                          end: random.nextDouble(),
-                        ),
-                        alphaTween: Tween<double>(
-                            begin: random.nextDouble(),
-                            end: random.nextDouble()),
-                        matrix: Matrix4.identity()
-                          ..rotateZ(random.nextDouble() * pi)
-                          ..rotateY(random.nextDouble() * pi),
-                        duration: random.nextInt(16000),
-                        easingType: const [
-                          Curves.linear,
-                          Curves.easeInCubic
-                        ][random.nextInt(2)],
-                        hasStroke: true,
-                      ),
-                    );
+                    _controller?.addDanmaku(randSpecialDanmaku());
+                  },
+                  onLongPress: () {
+                    for (var i = 0; i < 100; i++) {
+                      _controller?.addDanmaku(randSpecialDanmaku());
+                    }
                   },
                 ),
                 TextButton(
@@ -449,13 +429,37 @@ class _HomePageState extends State<HomePage> {
   }
 
   // 生成随机颜色
-  Color getRandomColor() {
-    final Random random = Random();
-    return Color.fromARGB(
-      255, // 固定 alpha 为 255（完全不透明）
-      random.nextInt(256),
-      random.nextInt(256),
-      random.nextInt(256),
+  static Color getRandomColor() {
+    return Color(0xFF000000 | _random.nextInt(0x1000000));
+  }
+
+  static randSpecialDanmaku() {
+    final translationStartDelay = _random.nextInt(1000);
+    final translationDuration = _random.nextInt(14000);
+    final duration =
+        translationStartDelay + translationDuration + _random.nextInt(1000);
+    return SpecialDanmakuContentItem(
+      '这是一条特殊弹幕',
+      color: getRandomColor(),
+      fontSize: _random.nextInt(50) + 25,
+      translateXTween: Tween<double>(
+        begin: _random.nextDouble(),
+        end: _random.nextDouble(),
+      ),
+      translateYTween: Tween<double>(
+        begin: _random.nextDouble(),
+        end: _random.nextDouble(),
+      ),
+      alphaTween:
+          Tween<double>(begin: _random.nextDouble(), end: _random.nextDouble()),
+      matrix: Matrix4.identity()
+        ..rotateZ(_random.nextDouble() * pi)
+        ..rotateY(_random.nextDouble() * pi),
+      duration: duration,
+      translationDuration: translationDuration,
+      translationStartDelay: translationStartDelay,
+      easingType: const [Curves.linear, Curves.easeInCubic][_random.nextInt(2)],
+      hasStroke: _random.nextBool(),
     );
   }
 

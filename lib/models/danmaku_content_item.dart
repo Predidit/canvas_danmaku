@@ -39,7 +39,7 @@ class SpecialDanmakuContentItem extends DanmakuContentItem {
 
   final double fontSize; // 从弹幕内容外解析
   final bool hasStroke;
-  final Tween<double> alphaTween;
+  final Tween<double>? alphaTween;
 
   final Tween<double> translateXTween; // 相对坐标
   final Tween<double> translateYTween; // 相对坐标
@@ -58,6 +58,8 @@ class SpecialDanmakuContentItem extends DanmakuContentItem {
   @override
   DanmakuItemType get type => DanmakuItemType.special;
 
+  TextPainter? painterCache;
+
   SpecialDanmakuContentItem(
     super.text, {
     required this.duration,
@@ -66,7 +68,7 @@ class SpecialDanmakuContentItem extends DanmakuContentItem {
     this.hasStroke = false,
     required this.translateXTween,
     required this.translateYTween,
-    required this.alphaTween,
+    this.alphaTween,
     this.matrix,
     this.motionPathMetric,
     int? translationDuration,
@@ -78,16 +80,22 @@ class SpecialDanmakuContentItem extends DanmakuContentItem {
   factory SpecialDanmakuContentItem.fromList(
     Color color,
     double fontSize,
-    List list, [
+    List list, {
     double videoX = 1920,
     double videoY = 1080,
-  ]) {
+    bool disableGradient = false,
+  }) {
     var (startX, endX) = _toRelativePosition(list[0], list[7], videoX);
     var (startY, endY) = _toRelativePosition(list[1], list[8], videoY);
     List<String> alphaString = list[2].split('-');
     double startA = double.tryParse(alphaString[0]) ?? 1;
     double endA = double.tryParse(alphaString[1]) ?? 1;
-    Tween<double> alphaTween = _makeTween(startA, endA);
+    Tween<double>? alphaTween;
+    if (disableGradient || startA == endA) {
+      color = color.withOpacity((startA + endA) / 2);
+    } else {
+      alphaTween = Tween(begin: startA, end: endA);
+    }
     int duration = (_parseDouble(list[3]) * 1000).round();
     String text = list[4].trim();
     int rotateZ = _parseInt(list[5]);
