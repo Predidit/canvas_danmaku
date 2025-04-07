@@ -1,3 +1,6 @@
+## 0.2.7
+
+* Support bilibili spicial danmaku && better danmaku stopwatch.
 ## 0.2.6
 
 * Power Saving.
