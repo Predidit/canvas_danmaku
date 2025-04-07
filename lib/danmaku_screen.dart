@@ -2,6 +2,7 @@ import 'package:canvas_danmaku/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'models/danmaku_item.dart';
 import 'scroll_danmaku_painter.dart';
+import 'special_danmaku_painter.dart';
 import 'static_danmaku_painter.dart';
 import 'danmaku_controller.dart';
 import 'dart:ui' as ui;
@@ -50,6 +51,9 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   /// 底部弹幕
   final List<DanmakuItem> _bottomDanmakuItems = [];
 
+  /// 高级弹幕
+  final List<DanmakuItem> _specialDanmakuItems = [];
+
   /// 弹幕高度
   late double _danmakuHeight;
 
@@ -59,8 +63,12 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   /// 弹幕轨道位置
   final List<double> _trackYPositions = [];
 
+  late final _random = Random();
+
   /// 内部计时器
-  late int _tick;
+  int get _tick => _stopwatch.elapsedMilliseconds;
+
+  final _stopwatch = Stopwatch();
 
   /// 运行状态
   bool _running = true;
@@ -69,7 +77,6 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   void initState() {
     super.initState();
     // 计时器初始化
-    _tick = 0;
     _startTick();
     _option = widget.option;
     _controller = DanmakuController(
@@ -111,6 +118,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     WidgetsBinding.instance.removeObserver(this);
     _animationController.dispose();
     _staticAnimationController.dispose();
+    _stopwatch.stop();
     super.dispose();
   }
 
@@ -119,125 +127,166 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     if (!_running || !mounted) {
       return;
     }
-    // 在这里提前创建 Paragraph 缓存防止卡顿
-    final textPainter = TextPainter(
-      text: TextSpan(
-          text: content.text,
-          style: TextStyle(
-              fontSize: _option.fontSize,
-              fontWeight: FontWeight.values[_option.fontWeight])),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    final danmakuWidth = textPainter.width;
-    final danmakuHeight = textPainter.height;
 
-    final ui.Paragraph paragraph = Utils.generateParagraph(
-        content, danmakuWidth, _option.fontSize, _option.fontWeight);
+    if (content.type == DanmakuItemType.special) {
+      if (!_option.hideSpecial) {
+        (content as SpecialDanmakuContentItem).painterCache = TextPainter(
+          text: TextSpan(
+            text: content.text,
+            style: TextStyle(
+              color: content.color,
+              fontSize: content.fontSize,
+              fontWeight: FontWeight.values[_option.fontWeight],
+              shadows: content.hasStroke
+                  ? [
+                      Shadow(
+                          color: Colors.black.withOpacity(
+                              content.alphaTween?.begin ??
+                                  content.color.opacity),
+                          blurRadius: 2)
+                    ]
+                  : null,
+            ),
+          ),
+          textDirection: TextDirection.ltr,
+        )..layout();
+        _specialDanmakuItems.add(DanmakuItem(
+          width: 0,
+          height: 0,
+          creationTime: _tick,
+          content: content,
+          paragraph: null,
+          strokeParagraph: null,
+        ));
+      } else {
+        return;
+      }
+    } else {
+      // 在这里提前创建 Paragraph 缓存防止卡顿
+      final textPainter = TextPainter(
+        text: TextSpan(
+            text: content.text,
+            style: TextStyle(
+                fontSize: _option.fontSize,
+                fontWeight: FontWeight.values[_option.fontWeight])),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      final danmakuWidth = textPainter.width;
+      final danmakuHeight = textPainter.height;
 
-    ui.Paragraph? strokeParagraph;
-    if (_option.showStroke) {
-      strokeParagraph = Utils.generateStrokeParagraph(
+      final ui.Paragraph paragraph = Utils.generateParagraph(
           content, danmakuWidth, _option.fontSize, _option.fontWeight);
-    }
 
-    int idx = 1;
-    for (double yPosition in _trackYPositions) {
-      if (content.type == DanmakuItemType.scroll && !_option.hideScroll) {
-        bool scrollCanAddToTrack =
-            _scrollCanAddToTrack(yPosition, danmakuWidth);
-
-        if (scrollCanAddToTrack) {
-          _scrollDanmakuItems.add(DanmakuItem(
-              yPosition: yPosition,
-              xPosition: _viewWidth,
-              width: danmakuWidth,
-              height: danmakuHeight,
-              creationTime: _tick,
-              content: content,
-              paragraph: paragraph,
-              strokeParagraph: strokeParagraph));
-          break;
-        }
-
-        /// 无法填充自己发送的弹幕时强制添加
-        if (content.selfSend && idx == _trackCount) {
-          _scrollDanmakuItems.add(DanmakuItem(
-              yPosition: _trackYPositions[0],
-              xPosition: _viewWidth,
-              width: danmakuWidth,
-              height: danmakuHeight,
-              creationTime: _tick,
-              content: content,
-              paragraph: paragraph,
-              strokeParagraph: strokeParagraph));
-          break;
-        }
-
-        /// 海量弹幕启用时进行随机添加
-        if (_option.massiveMode && idx == _trackCount) {
-          final random = Random();
-          var randomYPosition =
-              _trackYPositions[random.nextInt(_trackYPositions.length)];
-          _scrollDanmakuItems.add(DanmakuItem(
-              yPosition: randomYPosition,
-              xPosition: _viewWidth,
-              width: danmakuWidth,
-              height: danmakuHeight,
-              creationTime: _tick,
-              content: content,
-              paragraph: paragraph,
-              strokeParagraph: strokeParagraph));
-          break;
-        }
+      ui.Paragraph? strokeParagraph;
+      if (_option.showStroke) {
+        strokeParagraph = Utils.generateStrokeParagraph(
+            content, danmakuWidth, _option.fontSize, _option.fontWeight);
       }
 
-      if (content.type == DanmakuItemType.top && !_option.hideTop) {
-        bool topCanAddToTrack = _topCanAddToTrack(yPosition);
+      int idx = 1;
+      for (double yPosition in _trackYPositions) {
+        if (content.type == DanmakuItemType.scroll && !_option.hideScroll) {
+          bool scrollCanAddToTrack =
+              _scrollCanAddToTrack(yPosition, danmakuWidth);
 
-        if (topCanAddToTrack) {
-          _topDanmakuItems.add(DanmakuItem(
-              yPosition: yPosition,
-              xPosition: _viewWidth,
-              width: danmakuWidth,
-              height: danmakuHeight,
-              creationTime: _tick,
-              content: content,
-              paragraph: paragraph,
-              strokeParagraph: strokeParagraph));
-          break;
+          if (scrollCanAddToTrack) {
+            _scrollDanmakuItems.add(DanmakuItem(
+                yPosition: yPosition,
+                xPosition: _viewWidth,
+                width: danmakuWidth,
+                height: danmakuHeight,
+                creationTime: _tick,
+                content: content,
+                paragraph: paragraph,
+                strokeParagraph: strokeParagraph));
+            break;
+          }
+
+          /// 无法填充自己发送的弹幕时强制添加
+          if (content.selfSend && idx == _trackCount) {
+            _scrollDanmakuItems.add(DanmakuItem(
+                yPosition: _trackYPositions[0],
+                xPosition: _viewWidth,
+                width: danmakuWidth,
+                height: danmakuHeight,
+                creationTime: _tick,
+                content: content,
+                paragraph: paragraph,
+                strokeParagraph: strokeParagraph));
+            break;
+          }
+
+          /// 海量弹幕启用时进行随机添加
+          if (_option.massiveMode && idx == _trackCount) {
+            var randomYPosition =
+                _trackYPositions[_random.nextInt(_trackYPositions.length)];
+            _scrollDanmakuItems.add(DanmakuItem(
+                yPosition: randomYPosition,
+                xPosition: _viewWidth,
+                width: danmakuWidth,
+                height: danmakuHeight,
+                creationTime: _tick,
+                content: content,
+                paragraph: paragraph,
+                strokeParagraph: strokeParagraph));
+            break;
+          }
         }
-      }
 
-      if (content.type == DanmakuItemType.bottom && !_option.hideBottom) {
-        bool bottomCanAddToTrack = _bottomCanAddToTrack(yPosition);
+        if (content.type == DanmakuItemType.top && !_option.hideTop) {
+          bool topCanAddToTrack = _topCanAddToTrack(yPosition);
 
-        if (bottomCanAddToTrack) {
-          _bottomDanmakuItems.add(DanmakuItem(
-              yPosition: yPosition,
-              xPosition: _viewWidth,
-              width: danmakuWidth,
-              height: danmakuHeight,
-              creationTime: _tick,
-              content: content,
-              paragraph: paragraph,
-              strokeParagraph: strokeParagraph));
-          break;
+          if (topCanAddToTrack) {
+            _topDanmakuItems.add(DanmakuItem(
+                yPosition: yPosition,
+                xPosition: _viewWidth,
+                width: danmakuWidth,
+                height: danmakuHeight,
+                creationTime: _tick,
+                content: content,
+                paragraph: paragraph,
+                strokeParagraph: strokeParagraph));
+            break;
+          }
         }
+
+        if (content.type == DanmakuItemType.bottom && !_option.hideBottom) {
+          bool bottomCanAddToTrack = _bottomCanAddToTrack(yPosition);
+
+          if (bottomCanAddToTrack) {
+            _bottomDanmakuItems.add(DanmakuItem(
+                yPosition: yPosition,
+                xPosition: _viewWidth,
+                width: danmakuWidth,
+                height: danmakuHeight,
+                creationTime: _tick,
+                content: content,
+                paragraph: paragraph,
+                strokeParagraph: strokeParagraph));
+            break;
+          }
+        }
+        idx++;
       }
-      idx++;
     }
 
-    if ((_scrollDanmakuItems.isNotEmpty ||
-            _topDanmakuItems.isNotEmpty ||
-            _bottomDanmakuItems.isNotEmpty) &&
-        !_animationController.isAnimating) {
-      _animationController.repeat();
+    switch (content.type) {
+      case DanmakuItemType.top:
+      case DanmakuItemType.bottom:
+        // 重绘静态弹幕
+        setState(() {
+          _staticAnimationController.value = 0;
+        });
+        break;
+      case DanmakuItemType.scroll:
+      case DanmakuItemType.special:
+        if (!_animationController.isAnimating &&
+            (_scrollDanmakuItems.isNotEmpty ||
+                _specialDanmakuItems.isNotEmpty)) {
+          _animationController.repeat();
+        }
+        break;
     }
-
-    /// 重绘静态弹幕
-    setState(() {
-      _staticAnimationController.value = 0;
-    });
   }
 
   /// 暂停
@@ -249,6 +298,9 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       });
       if (_animationController.isAnimating) {
         _animationController.stop();
+      }
+      if (_stopwatch.isRunning) {
+        _stopwatch.stop();
       }
     }
   }
@@ -334,6 +386,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       _scrollDanmakuItems.clear();
       _topDanmakuItems.clear();
       _bottomDanmakuItems.clear();
+      _specialDanmakuItems.clear();
     });
     _animationController.stop();
   }
@@ -381,42 +434,42 @@ class _DanmakuScreenState extends State<DanmakuScreen>
 
   // 基于Stopwatch的计时器同步
   void _startTick() async {
-    final stopwatch = Stopwatch()..start();
-    int lastElapsedTime = 0;
+    // _stopwatch.reset();
+    _stopwatch.start();
+
+    final staticDuration = _option.duration * 1000;
 
     while (_running && mounted) {
-      await Future.delayed(const Duration(milliseconds: 1));
-      int currentElapsedTime = stopwatch.elapsedMilliseconds; // 获取当前的已用时间
-      int delta = currentElapsedTime - lastElapsedTime; // 计算自上次记录以来的时间差
-      _tick += delta;
-      lastElapsedTime = currentElapsedTime; // 更新最后记录的时间
-      if (lastElapsedTime % 100 == 0) {
-        // 移除屏幕外滚动弹幕
-        _scrollDanmakuItems
-            .removeWhere((item) => item.xPosition + item.width < 0);
-        // 移除顶部弹幕
-        _topDanmakuItems.removeWhere((item) =>
-            ((_tick - item.creationTime) > (_option.duration * 1000)));
-        // 移除底部弹幕
-        _bottomDanmakuItems.removeWhere((item) =>
-            ((_tick - item.creationTime) > (_option.duration * 1000)));
-        // 暂停动画
-        if (_scrollDanmakuItems.isEmpty) {
-          if (_animationController.isAnimating) {
-            _animationController.stop();
-          }
-        }
+      await Future.delayed(const Duration(milliseconds: 100));
+      // 移除屏幕外滚动弹幕
+      _scrollDanmakuItems
+          .removeWhere((item) => item.xPosition + item.width < 0);
+      // 移除顶部弹幕
+      _topDanmakuItems
+          .removeWhere((item) => (_tick - item.creationTime) >= staticDuration);
+      // 移除底部弹幕
+      _bottomDanmakuItems
+          .removeWhere((item) => (_tick - item.creationTime) >= staticDuration);
+      // 移除高级弹幕
+      _specialDanmakuItems.removeWhere((item) =>
+          (_tick - item.creationTime) >=
+          (item.content as SpecialDanmakuContentItem).duration);
+      // 暂停动画
+      if (_scrollDanmakuItems.isEmpty &&
+          _specialDanmakuItems.isEmpty &&
+          _animationController.isAnimating) {
+        _animationController.stop();
+      }
 
-        /// 重绘静态弹幕
-        if (mounted) {
-          setState(() {
-            _staticAnimationController.value = 0;
-          });
-        }
+      /// 重绘静态弹幕
+      if (mounted) {
+        setState(() {
+          _staticAnimationController.value = 0;
+        });
       }
     }
 
-    stopwatch.stop();
+    _stopwatch.stop();
   }
 
   @override
@@ -489,6 +542,23 @@ class _DanmakuScreenState extends State<DanmakuScreen>
                   );
                 },
               )),
+              RepaintBoundary(
+                child: AnimatedBuilder(
+                  animation: _animationController, // 与滚动弹幕共用控制器
+                  builder: (context, child) {
+                    return CustomPaint(
+                      painter: SpecialDanmakuPainter(
+                          _animationController.value,
+                          _specialDanmakuItems,
+                          _option.fontSize,
+                          _option.fontWeight,
+                          _running,
+                          _tick),
+                      child: Container(),
+                    );
+                  },
+                ),
+              ),
             ]),
           ),
         ),
