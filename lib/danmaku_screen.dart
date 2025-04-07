@@ -118,6 +118,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     WidgetsBinding.instance.removeObserver(this);
     _animationController.dispose();
     _staticAnimationController.dispose();
+    _stopwatch.stop();
     super.dispose();
   }
 
@@ -297,6 +298,9 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       });
       if (_animationController.isAnimating) {
         _animationController.stop();
+      }
+      if (_stopwatch.isRunning) {
+        _stopwatch.stop();
       }
     }
   }
