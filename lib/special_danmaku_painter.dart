@@ -54,23 +54,18 @@ class SpecialDanmakuPainter extends CustomPainter {
         item.alphaTween == null ? item.color : item.color.withOpacity(alpha);
     // 文本
     if (color != item.painterCache?.text?.style?.color) {
-      item.painterCache = TextPainter(
-        text: TextSpan(
-          text: item.text,
-          style: TextStyle(
-            color: color,
-            fontSize: item.fontSize,
-            fontWeight: FontWeight.values[fontWeight],
-            shadows: item.hasStroke
-                ? [
-                    Shadow(
-                        color: Colors.black.withOpacity(alpha), blurRadius: 2)
-                  ]
-                : null,
-          ),
+      item.painterCache!.text = TextSpan(
+        text: item.text,
+        style: TextStyle(
+          color: color,
+          fontSize: item.fontSize,
+          fontWeight: FontWeight.values[fontWeight],
+          shadows: item.hasStroke
+              ? [Shadow(color: Colors.black.withOpacity(alpha), blurRadius: 2)]
+              : null,
         ),
-        textDirection: TextDirection.ltr,
-      )..layout();
+      );
+      item.painterCache!.layout();
     }
 
     // 路径动画 TODO
