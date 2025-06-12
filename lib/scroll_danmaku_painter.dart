@@ -120,8 +120,8 @@ class ScrollDanmakuPainter extends CustomPainter {
 
         if (item.content.selfSend) {
           pictureCanvas.drawRect(
-            Offset(item.xPosition, item.yPosition).translate(-2, 2) &
-                (Size(item.width, item.height) + const Offset(4, 0)),
+            Offset(item.xPosition - 2, item.yPosition) &
+                Size(item.width + 4, item.height),
             selfSendPaint,
           );
         }
@@ -232,8 +232,8 @@ class ScrollDanmakuPainter extends CustomPainter {
 
         if (item.content.selfSend) {
           canvas.drawRect(
-            Offset(item.xPosition, item.yPosition).translate(-2, 2) &
-                (Size(item.width, item.height) + const Offset(4, 0)),
+            Offset(item.xPosition - 2, item.yPosition) &
+                Size(item.width + 4, item.height),
             selfSendPaint,
           );
         }

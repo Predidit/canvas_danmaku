@@ -100,8 +100,8 @@ class StaticDanmakuPainter extends CustomPainter {
 
       if (item.content.selfSend) {
         canvas.drawRect(
-          Offset(item.xPosition, item.yPosition).translate(-2, 2) &
-              (Size(item.width, item.height) + const Offset(4, 0)),
+          Offset(item.xPosition - 2, item.yPosition) &
+              Size(item.width + 4, item.height),
           selfSendPaint,
         );
       }
@@ -205,9 +205,9 @@ class StaticDanmakuPainter extends CustomPainter {
 
       if (item.content.selfSend) {
         canvas.drawRect(
-          Offset(item.xPosition, (size.height - item.yPosition - danmakuHeight))
-                  .translate(-2, 2) &
-              (Size(item.width, item.height) + const Offset(4, 0)),
+          Offset(item.xPosition - 2,
+                  (size.height - item.yPosition - danmakuHeight)) &
+              Size(item.width + 4, item.height),
           selfSendPaint,
         );
       }
