@@ -72,7 +72,7 @@ class Utils {
     final Paint strokePaint = Paint()
       ..shader = content.isColorful == true && offset != null && size != null
           ? const LinearGradient(
-              colors: [Color(0xFFFF6699), Colors.blue],
+              colors: [Color(0xFFF2509E), Color(0xFF308BCD)],
             ).createShader(
               Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
             )
