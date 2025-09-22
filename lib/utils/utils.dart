@@ -1,107 +1,99 @@
+import 'dart:math';
 import 'dart:ui' as ui;
-import 'package:flutter/material.dart';
-import '/models/danmaku_content_item.dart';
 
-class Utils {
-  static TextPainter getCountPainter({
-    required bool isStroke,
-    required DanmakuContentItem content,
-    required double fontSize,
-    required int fontWeight,
-    required double strokeWidth,
-  }) {
-    late final Paint paint = Paint()
-      ..style = ui.PaintingStyle.stroke
-      ..color = Colors.black
-      ..strokeWidth = strokeWidth;
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: '(${content.count})',
-        style: TextStyle(
-          fontSize: fontSize * 0.6,
-          color: isStroke ? null : content.color,
-          fontWeight: FontWeight.values[fontWeight],
-          foreground: isStroke ? paint : null,
-        ),
+import 'package:canvas_danmaku/models/danmaku_content_item.dart';
+import 'package:flutter/material.dart';
+
+abstract class DmUtils {
+  static final Random random = Random();
+
+  static String generateRandomString(int length) {
+    const characters = '0123456789abcdefghijklmnopqrstuvwxyz';
+
+    return String.fromCharCodes(
+      Iterable.generate(
+        length,
+        (_) => characters.codeUnitAt(random.nextInt(characters.length)),
       ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    return textPainter;
+    );
   }
 
-  static generateParagraph({
+  static ui.Paragraph generateParagraph({
     required DanmakuContentItem content,
-    required double danmakuWidth,
     required double fontSize,
     required int fontWeight,
-    Size? size,
-    Size? screenSize,
-    // required double opacity,
   }) {
     final ui.ParagraphBuilder builder = ui.ParagraphBuilder(
       ui.ParagraphStyle(
         textAlign: TextAlign.left,
-        fontSize: fontSize,
         fontWeight: FontWeight.values[fontWeight],
         textDirection: TextDirection.ltr,
         maxLines: 1,
       ),
-    )
-      ..pushStyle(
-        ui.TextStyle(color: content.color),
-      )
+    );
+
+    if (content.count case final count?) {
+      builder
+        ..pushStyle(
+          ui.TextStyle(
+            color: content.color,
+            fontSize: fontSize * 0.6,
+          ),
+        )
+        ..addText('($count)')
+        ..pop();
+    }
+
+    builder
+      ..pushStyle(ui.TextStyle(color: content.color, fontSize: fontSize))
       ..addText(content.text);
+
     return builder.build()
-      ..layout(ui.ParagraphConstraints(
-          width: content.isColorful == true && size!.width > screenSize!.width
-              ? double.infinity
-              : danmakuWidth));
+      ..layout(const ui.ParagraphConstraints(width: double.infinity));
   }
 
-  static generateStrokeParagraph({
+  static ui.Paragraph generateStrokeParagraph({
     required DanmakuContentItem content,
-    required double danmakuWidth,
     required double fontSize,
     required int fontWeight,
     required double strokeWidth,
     Size? size,
-    Offset? offset,
-    Size? screenSize,
-    // required double opacity,
   }) {
     final Paint strokePaint = Paint()
-      ..shader = content.isColorful == true && offset != null && size != null
-          ? const LinearGradient(
-              colors: [Color(0xFFF2509E), Color(0xFF308BCD)],
-            ).createShader(
-              Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
-            )
+      ..shader = content.isColorful && size != null
+          ? const LinearGradient(colors: [Color(0xFFF2509E), Color(0xFF308BCD)])
+              .createShader(Rect.fromLTWH(0, 0, size.width, size.height))
           : null
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth;
 
-    if (content.isColorful != true) {
+    if (!content.isColorful) {
       strokePaint.color = Colors.black;
     }
 
     final ui.ParagraphBuilder strokeBuilder = ui.ParagraphBuilder(
       ui.ParagraphStyle(
         textAlign: TextAlign.left,
-        fontSize: fontSize,
         fontWeight: FontWeight.values[fontWeight],
         textDirection: TextDirection.ltr,
         maxLines: 1,
       ),
-    )
-      ..pushStyle(
-        ui.TextStyle(foreground: strokePaint),
-      )
+    );
+
+    if (content.count case final count?) {
+      strokeBuilder
+        ..pushStyle(
+          ui.TextStyle(fontSize: fontSize * 0.6, foreground: strokePaint),
+        )
+        ..addText('($count)')
+        ..pop();
+    }
+
+    strokeBuilder
+      ..pushStyle(ui.TextStyle(fontSize: fontSize, foreground: strokePaint))
       ..addText(content.text);
 
     return strokeBuilder.build()
-      ..layout(ui.ParagraphConstraints(
-          width: content.isColorful == true && size!.width > screenSize!.width
-              ? double.infinity
-              : danmakuWidth));
+      ..layout(const ui.ParagraphConstraints(width: double.infinity));
   }
 }

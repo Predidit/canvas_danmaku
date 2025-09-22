@@ -1,10 +1,10 @@
-import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
-import 'package:flutter/material.dart';
-import 'package:canvas_danmaku/canvas_danmaku.dart';
 
+import 'package:canvas_danmaku/canvas_danmaku.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 void main() async {
@@ -38,8 +38,6 @@ class _HomePageState extends State<HomePage> {
 
   final _danmuKey = GlobalKey();
 
-  bool _running = true;
-
   /// 弹幕行高
   double _lineHeight = 1.6;
 
@@ -56,7 +54,7 @@ class _HomePageState extends State<HomePage> {
   double _duration = 8.0;
 
   /// 静态弹幕持续时间
-  double _staticDuration = 5.0;
+  double _staticDuration = 3.0;
 
   /// 弹幕字号
   double _fontSize = (Platform.isIOS || Platform.isAndroid) ? 16 : 25;
@@ -83,6 +81,7 @@ class _HomePageState extends State<HomePage> {
         title: const Text('CanvasDanmaku Demo'),
       ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           FittedBox(
             child: Row(
@@ -93,7 +92,9 @@ class _HomePageState extends State<HomePage> {
                     _controller?.addDanmaku(
                       DanmakuContentItem(
                         "这是一条超长弹幕ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789这是一条超长的弹幕，这条弹幕会超出屏幕宽度",
-                        color: getRandomColor(),
+                        isColorful: true,
+                        color: Colors.white,
+                        // color: getRandomColor(),
                         count: [1, 10, 100, 1000, 10000][_random.nextInt(5)],
                       ),
                     );
@@ -105,9 +106,9 @@ class _HomePageState extends State<HomePage> {
                     _controller?.addDanmaku(
                       DanmakuContentItem(
                         "这是一条顶部弹幕",
-                        color: Colors.white,
-                        // getRandomColor(),
+                        // color: getRandomColor(),
                         isColorful: true,
+                        color: Colors.white,
                         type: DanmakuItemType.top,
                         count: [1, 10, 100, 1000, 10000][_random.nextInt(5)],
                       ),
@@ -120,7 +121,9 @@ class _HomePageState extends State<HomePage> {
                     _controller?.addDanmaku(
                       DanmakuContentItem(
                         "这是一条底部弹幕",
-                        color: getRandomColor(),
+                        // color: getRandomColor(),
+                        isColorful: true,
+                        color: Colors.white,
                         type: DanmakuItemType.bottom,
                         count: [1, 10, 100, 1000, 10000][_random.nextInt(5)],
                       ),
@@ -161,23 +164,24 @@ class _HomePageState extends State<HomePage> {
                 TextButton(
                   child: const Text('Star'),
                   onPressed: () {
-                    _controller?.addDanmaku(SpecialDanmakuContentItem.fromList(
-                        getRandomColor(), 44, [
-                      "0.939",
-                      "0.083",
-                      "1-1",
-                      "6",
-                      "☆——————\n" * 14,
-                      "342",
-                      "0",
-                      "0.002",
-                      "0.271",
-                      500,
-                      0,
-                      1,
-                      "SimHei",
-                      1
-                    ]));
+                    _controller?.addDanmaku(
+                      SpecialDanmakuContentItem.fromList(getRandomColor(), 44, [
+                        "0.939",
+                        "0.083",
+                        "1-1",
+                        "6",
+                        "☆——————\n" * 14,
+                        "342",
+                        "0",
+                        "0.002",
+                        "0.271",
+                        500,
+                        0,
+                        1,
+                        "SimHei",
+                        1,
+                      ]),
+                    );
                   },
                 ),
                 TextButton(
@@ -189,14 +193,22 @@ class _HomePageState extends State<HomePage> {
                     final mu = danmaku.first as List;
                     for (var item in dan) {
                       _controller?.addDanmaku(
-                          SpecialDanmakuContentItem.fromList(
-                              Colors.orange, 16, item));
+                        SpecialDanmakuContentItem.fromList(
+                          Colors.orange,
+                          16,
+                          item,
+                        ),
+                      );
                     }
                     await Future.delayed(const Duration(seconds: 2));
                     for (var item in mu) {
                       _controller?.addDanmaku(
-                          SpecialDanmakuContentItem.fromList(
-                              Colors.orange, 16, item));
+                        SpecialDanmakuContentItem.fromList(
+                          Colors.orange,
+                          16,
+                          item,
+                        ),
+                      );
                     }
                   },
                 ),
@@ -206,8 +218,14 @@ class _HomePageState extends State<HomePage> {
                     _controller?.addDanmaku(
                       DanmakuContentItem(
                         "这是一条自己发的弹幕",
-                        color: getRandomColor(),
-                        type: DanmakuItemType.scroll,
+                        // color: getRandomColor(),
+                        color: Colors.white,
+                        isColorful: true,
+                        type: const [
+                          DanmakuItemType.top,
+                          DanmakuItemType.bottom,
+                          DanmakuItemType.scroll,
+                        ][_random.nextInt(3)],
                         selfSend: true,
                       ),
                     );
@@ -218,49 +236,62 @@ class _HomePageState extends State<HomePage> {
                   onPressed: startPlay,
                   tooltip: 'Start Player',
                 ),
-                IconButton(
-                  icon: Icon(_running ? Icons.pause : Icons.play_arrow),
-                  onPressed: () {
-                    if (_running) {
-                      _controller?.pause();
-                    } else {
-                      _controller?.resume();
-                    }
-                    setState(() {
-                      _running = !_running;
-                    });
+                Builder(
+                  builder: (context) {
+                    return IconButton(
+                      icon: Icon(
+                        _controller?.running ?? true
+                            ? Icons.pause
+                            : Icons.play_arrow,
+                      ),
+                      onPressed: () {
+                        if (_controller != null) {
+                          if (_controller!.running) {
+                            _controller!.pause();
+                          } else {
+                            _controller!.resume();
+                          }
+                          (context as Element).markNeedsBuild();
+                        }
+                      },
+                      tooltip: 'Play Resume',
+                    );
                   },
-                  tooltip: 'Play Resume',
                 ),
                 IconButton(
                   icon: const Icon(Icons.clear),
-                  onPressed: _controller?.clear,
+                  onPressed: () {
+                    _controller?.clear();
+                  },
                   tooltip: 'Clear',
                 ),
               ],
             ),
           ),
           Expanded(
-            child: Container(
+            child: ColoredBox(
               color: Colors.grey,
-              child: DanmakuScreen(
-                key: _danmuKey,
-                createdController: (DanmakuController e) {
-                  _controller = e;
-                },
-                option: DanmakuOption(
-                  opacity: _opacity,
-                  fontSize: _fontSize,
-                  fontWeight: _fontWeight,
-                  duration: _duration,
-                  staticDuration: _staticDuration,
-                  strokeWidth: _strokeWidth,
-                  massiveMode: _massiveMode,
-                  hideScroll: _hideScroll,
-                  hideTop: _hideTop,
-                  hideBottom: _hideBottom,
-                  safeArea: _safeArea,
-                  lineHeight: _lineHeight,
+              child: AnimatedOpacity(
+                opacity: _opacity,
+                duration: const Duration(milliseconds: 100),
+                child: DanmakuScreen(
+                  key: _danmuKey,
+                  createdController: (DanmakuController e) {
+                    _controller = e;
+                  },
+                  option: DanmakuOption(
+                    fontSize: _fontSize,
+                    fontWeight: _fontWeight,
+                    duration: _duration,
+                    staticDuration: _staticDuration,
+                    strokeWidth: _strokeWidth,
+                    massiveMode: _massiveMode,
+                    hideScroll: _hideScroll,
+                    hideTop: _hideTop,
+                    hideBottom: _hideBottom,
+                    safeArea: _safeArea,
+                    lineHeight: _lineHeight,
+                  ),
                 ),
               ),
             ),
@@ -272,134 +303,208 @@ class _HomePageState extends State<HomePage> {
           child: ListView(
             padding: const EdgeInsets.all(8),
             children: [
-              Text("Line Height : $_lineHeight"),
-              Slider(
-                value: _lineHeight,
-                min: 1.0,
-                max: 3.0,
-                onChanged: (e) {
-                  setState(() {
-                    _lineHeight = double.parse(e.toStringAsFixed(1));
-                  });
-                  _controller?.updateOption(
-                    _controller!.option.copyWith(lineHeight: _lineHeight),
+              Builder(
+                builder: (context) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text("Line Height : $_lineHeight"),
+                      Slider(
+                        value: _lineHeight,
+                        min: 1.0,
+                        max: 3.0,
+                        onChanged: (e) {
+                          if (_controller != null) {
+                            _lineHeight = double.parse(e.toStringAsFixed(1));
+                            _controller!.updateOption(
+                              _controller!.option.copyWith(
+                                lineHeight: _lineHeight,
+                              ),
+                            );
+                            (context as Element).markNeedsBuild();
+                          }
+                        },
+                      ),
+                    ],
                   );
                 },
               ),
-              Text("Stroke Width : $_strokeWidth"),
-              Slider(
-                value: _strokeWidth,
-                min: 0,
-                max: 10,
-                divisions: 20,
-                onChanged: (e) {
-                  setState(() {
-                    _strokeWidth = e;
-                  });
-                  _controller?.updateOption(
-                    _controller!.option.copyWith(strokeWidth: _strokeWidth),
+              Builder(
+                builder: (context) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Stroke Width : $_strokeWidth"),
+                      Slider(
+                        value: _strokeWidth,
+                        min: 0,
+                        max: 10,
+                        divisions: 20,
+                        onChanged: (e) {
+                          if (_controller != null) {
+                            _strokeWidth = e;
+                            _controller!.updateOption(
+                              _controller!.option.copyWith(
+                                strokeWidth: _strokeWidth,
+                              ),
+                            );
+                            (context as Element).markNeedsBuild();
+                          }
+                        },
+                      ),
+                    ],
                   );
                 },
               ),
-              Text("Font Weight : $_fontWeight"),
-              Slider(
-                value: _fontWeight.toDouble(),
-                min: 0,
-                max: 8,
-                divisions: 8,
-                onChanged: (e) {
-                  setState(() {
-                    _fontWeight = e.toInt();
-                  });
-                  _controller?.updateOption(
-                    _controller!.option.copyWith(fontWeight: _fontWeight),
+              Builder(
+                builder: (context) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Font Weight : $_fontWeight"),
+                      Slider(
+                        value: _fontWeight.toDouble(),
+                        min: 0,
+                        max: 8,
+                        divisions: 8,
+                        onChanged: (e) {
+                          if (_controller != null) {
+                            _fontWeight = e.toInt();
+                            _controller!.updateOption(
+                              _controller!.option.copyWith(
+                                fontWeight: _fontWeight,
+                              ),
+                            );
+                          }
+                          (context as Element).markNeedsBuild();
+                        },
+                      ),
+                    ],
                   );
                 },
               ),
-              Text("Opacity : $_opacity"),
+              const Text("Opacity : "),
               Slider(
                 value: _opacity,
                 min: 0.1,
                 max: 1.0,
                 divisions: 9,
                 onChanged: (e) {
-                  setState(() {
-                    _opacity = double.parse(e.toStringAsFixed(1));
-                  });
-                  _controller?.updateOption(
-                    _controller!.option.copyWith(opacity: e),
+                  _opacity = double.parse(e.toStringAsFixed(1));
+                  setState(() {});
+                },
+              ),
+              Builder(
+                builder: (context) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text("Font Size : "),
+                      Slider(
+                        value: _fontSize,
+                        min: 8,
+                        max: 36,
+                        divisions: 14,
+                        onChanged: (e) {
+                          if (_controller != null) {
+                            _fontSize = e;
+                            _controller!.updateOption(
+                              _controller!.option.copyWith(fontSize: e),
+                            );
+                            (context as Element).markNeedsBuild();
+                          }
+                        },
+                      ),
+                    ],
                   );
                 },
               ),
-              Text("Font Size : $_fontSize"),
-              Slider(
-                value: _fontSize,
-                min: 8,
-                max: 36,
-                divisions: 14,
-                onChanged: (e) {
-                  setState(() {
-                    _fontSize = e;
-                  });
-                  _controller?.updateOption(
-                    _controller!.option.copyWith(fontSize: e),
+              Builder(
+                builder: (context) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Scroll Duration : $_duration"),
+                      Slider(
+                        value: _duration.toDouble(),
+                        min: 4,
+                        max: 20,
+                        divisions: 16,
+                        onChanged: (e) {
+                          if (_controller != null) {
+                            _duration = e;
+                            _controller!.updateOption(
+                              _controller!.option.copyWith(duration: _duration),
+                            );
+                            (context as Element).markNeedsBuild();
+                          }
+                        },
+                      ),
+                    ],
                   );
                 },
               ),
-              Text("Scroll Duration : $_duration"),
-              Slider(
-                value: _duration.toDouble(),
-                min: 4,
-                max: 20,
-                divisions: 16,
-                onChanged: (e) {
-                  setState(() {
-                    _duration = e;
-                  });
-                  _controller?.updateOption(
-                    _controller!.option.copyWith(duration: _duration),
+              Builder(
+                builder: (context) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text("Static Duration : "),
+                      Slider(
+                        value: _staticDuration.toDouble(),
+                        min: 1,
+                        max: 20,
+                        divisions: 19,
+                        onChanged: (e) {
+                          if (_controller != null) {
+                            _staticDuration = e;
+                            _controller!.updateOption(
+                              _controller!.option.copyWith(
+                                staticDuration: _staticDuration,
+                              ),
+                            );
+                            (context as Element).markNeedsBuild();
+                          }
+                        },
+                      ),
+                    ],
                   );
                 },
               ),
-              Text("Static Duration : $_staticDuration"),
-              Slider(
-                value: _staticDuration.toDouble(),
-                min: 1,
-                max: 20,
-                divisions: 19,
-                onChanged: (e) {
-                  setState(() {
-                    _staticDuration = e;
-                  });
-                  _controller?.updateOption(
-                    _controller!.option
-                        .copyWith(staticDuration: _staticDuration),
+              Builder(
+                builder: (context) {
+                  return SwitchListTile(
+                    title: const Text('MassiveMode'),
+                    value: _massiveMode,
+                    onChanged: (e) {
+                      if (_controller != null) {
+                        _massiveMode = e;
+                        _controller!.updateOption(
+                          _controller!.option.copyWith(massiveMode: e),
+                        );
+                        (context as Element).markNeedsBuild();
+                      }
+                    },
                   );
                 },
               ),
-              SwitchListTile(
-                  title: const Text('MassiveMode'),
-                  value: _massiveMode,
-                  onChanged: (e) {
-                    setState(() {
-                      _massiveMode = e;
-                    });
-                    _controller?.updateOption(
-                      _controller!.option.copyWith(massiveMode: e),
-                    );
-                  }),
-              SwitchListTile(
-                title: const Text('SafeArea'),
-                value: _safeArea,
-                onChanged: (e) {
-                  setState(() {
-                    _safeArea = e;
-                  });
-                  _controller?.updateOption(
-                    _controller!.option.copyWith(safeArea: e),
+              Builder(
+                builder: (context) {
+                  return SwitchListTile(
+                    title: const Text('SafeArea'),
+                    value: _safeArea,
+                    onChanged: (e) {
+                      if (_controller != null) {
+                        _safeArea = e;
+                        _controller!.updateOption(
+                          _controller!.option.copyWith(safeArea: e),
+                        );
+                        (context as Element).markNeedsBuild();
+                      }
+                    },
                   );
                 },
-              )
+              ),
             ],
           ),
         ),
@@ -409,7 +514,7 @@ class _HomePageState extends State<HomePage> {
 
   Timer? timer;
   int sec = 0;
-  void startPlay() async {
+  Future<void> startPlay() async {
     String data = await rootBundle.loadString('assets/132590001.json');
     List<DanmakuContentItem> items = [];
     Map jsonMap = json.decode(data);
@@ -422,7 +527,7 @@ class _HomePageState extends State<HomePage> {
       );
     }
     timer ??= Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_controller == null || _controller?.running == false) return;
+      if (_controller == null) return;
       _controller?.addDanmaku(items[sec]);
       sec++;
     });
@@ -433,7 +538,7 @@ class _HomePageState extends State<HomePage> {
     return Color(0xFF000000 | _random.nextInt(0x1000000));
   }
 
-  static randSpecialDanmaku() {
+  static SpecialDanmakuContentItem randSpecialDanmaku() {
     final translationStartDelay = _random.nextInt(1000);
     final translationDuration = _random.nextInt(14000);
     final duration =
@@ -450,8 +555,10 @@ class _HomePageState extends State<HomePage> {
         begin: _random.nextDouble(),
         end: _random.nextDouble(),
       ),
-      alphaTween:
-          Tween<double>(begin: _random.nextDouble(), end: _random.nextDouble()),
+      alphaTween: Tween<double>(
+        begin: _random.nextDouble(),
+        end: _random.nextDouble(),
+      ),
       matrix: Matrix4.identity()
         ..rotateZ(_random.nextDouble() * pi)
         ..rotateY(_random.nextDouble() * pi),

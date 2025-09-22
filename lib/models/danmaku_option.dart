@@ -11,11 +11,12 @@ class DanmakuOption {
   /// 滚动弹幕运行时间，秒
   final double duration;
 
+  final double durationInMilliseconds;
+
   /// 静态弹幕运行时间，秒
   final double staticDuration;
 
-  /// 不透明度，0.1-1.0
-  final double opacity;
+  final double staticDurationInMilliseconds;
 
   /// 隐藏顶部弹幕
   final bool hideTop;
@@ -46,7 +47,6 @@ class DanmakuOption {
     this.area = 1.0,
     this.duration = 10,
     this.staticDuration = 5,
-    this.opacity = 1.0,
     this.hideBottom = false,
     this.hideScroll = false,
     this.hideTop = false,
@@ -55,7 +55,8 @@ class DanmakuOption {
     this.massiveMode = false,
     this.safeArea = true,
     this.lineHeight = 1.6,
-  });
+  })  : durationInMilliseconds = duration * 1000,
+        staticDurationInMilliseconds = staticDuration * 1000;
 
   DanmakuOption copyWith({
     double? fontSize,
@@ -63,7 +64,6 @@ class DanmakuOption {
     double? area,
     double? duration,
     double? staticDuration,
-    double? opacity,
     bool? hideTop,
     bool? hideBottom,
     bool? hideScroll,
@@ -78,7 +78,6 @@ class DanmakuOption {
       fontWeight: fontWeight ?? this.fontWeight,
       duration: duration ?? this.duration,
       staticDuration: staticDuration ?? this.staticDuration,
-      opacity: opacity ?? this.opacity,
       hideTop: hideTop ?? this.hideTop,
       hideBottom: hideBottom ?? this.hideBottom,
       hideScroll: hideScroll ?? this.hideScroll,

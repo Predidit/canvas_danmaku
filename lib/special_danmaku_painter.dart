@@ -6,7 +6,7 @@ import 'package:canvas_danmaku/models/danmaku_item.dart';
 import 'package:flutter/material.dart';
 
 class SpecialDanmakuPainter extends CustomPainter {
-  final double progress;
+  final int length;
   final List<DanmakuItem> specialDanmakuItems;
   final double fontSize;
   final int fontWeight;
@@ -16,7 +16,7 @@ class SpecialDanmakuPainter extends CustomPainter {
   final int batchThreshold;
 
   SpecialDanmakuPainter({
-    required this.progress,
+    required this.length,
     required this.specialDanmakuItems,
     required this.fontSize,
     required this.fontWeight,
@@ -28,6 +28,10 @@ class SpecialDanmakuPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    if (specialDanmakuItems.isEmpty) {
+      return;
+    }
+
     var pictureCanvas = canvas;
     var batch = specialDanmakuItems.length > batchThreshold;
     late ui.PictureRecorder pictureRecorder;
@@ -36,7 +40,8 @@ class SpecialDanmakuPainter extends CustomPainter {
       pictureCanvas = Canvas(pictureRecorder);
     }
     for (final item in specialDanmakuItems) {
-      final elapsed = tick - item.creationTime;
+      item.drawTick ??= tick;
+      final elapsed = tick - item.drawTick!;
       final content = item.content as SpecialDanmakuContentItem;
       if (elapsed >= 0 && elapsed < content.duration) {
         _paintSpecialDanmaku(pictureCanvas, content, size, elapsed);
@@ -50,10 +55,11 @@ class SpecialDanmakuPainter extends CustomPainter {
   void _paintSpecialDanmaku(
       Canvas canvas, SpecialDanmakuContentItem item, Size size, int elapsed) {
     // 透明度动画
-    late final alpha = item.alphaTween?.transform(elapsed / item.duration) ??
-        item.color.opacity;
-    final color =
-        item.alphaTween == null ? item.color : item.color.withOpacity(alpha);
+    late final alpha =
+        item.alphaTween?.transform(elapsed / item.duration) ?? item.color.a;
+    final color = item.alphaTween == null
+        ? item.color
+        : item.color.withValues(alpha: alpha);
     // 文本
     if (color != item.painterCache?.text?.style?.color) {
       item.painterCache!.text = TextSpan(
@@ -65,7 +71,7 @@ class SpecialDanmakuPainter extends CustomPainter {
           shadows: item.hasStroke
               ? [
                   Shadow(
-                      color: Colors.black.withOpacity(alpha),
+                      color: Colors.black.withValues(alpha: alpha),
                       blurRadius: strokeWidth)
                 ]
               : null,
@@ -94,9 +100,10 @@ class SpecialDanmakuPainter extends CustomPainter {
     }
 
     if (item.matrix != null) {
-      canvas.save();
-      canvas.translate(dx, dy);
-      canvas.transform(item.matrix!.storage);
+      canvas
+        ..save()
+        ..translate(dx, dy)
+        ..transform(item.matrix!.storage);
       item.painterCache!.paint(canvas, Offset.zero);
       canvas.restore();
     } else {
@@ -107,7 +114,7 @@ class SpecialDanmakuPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant SpecialDanmakuPainter oldDelegate) {
     return running ||
-        oldDelegate.specialDanmakuItems.length != specialDanmakuItems.length ||
+        oldDelegate.length != length ||
         oldDelegate.fontSize != fontSize ||
         oldDelegate.strokeWidth != strokeWidth;
   }

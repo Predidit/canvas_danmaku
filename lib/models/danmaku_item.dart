@@ -1,12 +1,10 @@
 import 'dart:ui' as ui;
-import '/models/danmaku_content_item.dart';
+
+import 'package:canvas_danmaku/models/danmaku_content_item.dart';
 
 class DanmakuItem {
   /// 弹幕内容
   final DanmakuContentItem content;
-
-  /// 弹幕创建时间
-  final int creationTime;
 
   /// 弹幕宽度
   final double width;
@@ -21,21 +19,40 @@ class DanmakuItem {
   double yPosition;
 
   /// 上次绘制时间
-  int? lastDrawTick;
+  int? drawTick;
 
   /// 弹幕布局缓存
   ui.Paragraph? paragraph;
   ui.Paragraph? strokeParagraph;
 
+  bool expired = false;
+
+  bool needRemove(bool needRemove) {
+    if (needRemove) {
+      dispose();
+    }
+    return needRemove;
+  }
+
+  void dispose() {
+    paragraph?.dispose();
+    paragraph = null;
+    clearStrokeParagraph();
+  }
+
+  void clearStrokeParagraph() {
+    strokeParagraph?.dispose();
+    strokeParagraph = null;
+  }
+
   DanmakuItem({
     required this.content,
-    required this.creationTime,
     required this.height,
     required this.width,
     this.xPosition = 0,
     this.yPosition = 0,
     this.paragraph,
     this.strokeParagraph,
-    this.lastDrawTick,
+    this.drawTick,
   });
 }

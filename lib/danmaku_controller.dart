@@ -1,60 +1,27 @@
+import 'package:canvas_danmaku/models/danmaku_content_item.dart';
+import 'package:canvas_danmaku/models/danmaku_option.dart';
 import 'package:flutter/material.dart';
 
-import 'models/danmaku_option.dart';
-import '/models/danmaku_content_item.dart';
-
 class DanmakuController {
-  final ValueChanged<DanmakuContentItem> onAddDanmaku;
-  final ValueChanged<DanmakuOption> onUpdateOption;
-  final VoidCallback onPause;
-  final VoidCallback onResume;
-  final VoidCallback onClear;
+  final ValueChanged<DanmakuContentItem> addDanmaku;
+  final ValueChanged<DanmakuOption> updateOption;
+  final VoidCallback pause;
+  final VoidCallback resume;
+  final VoidCallback clear;
+  final DanmakuOption Function() getOption;
+  final bool Function() isRunning;
+
+  DanmakuOption get option => getOption();
+
+  bool get running => isRunning();
 
   DanmakuController({
-    required this.onAddDanmaku,
-    required this.onUpdateOption,
-    required this.onPause,
-    required this.onResume,
-    required this.onClear,
+    required this.addDanmaku,
+    required this.updateOption,
+    required this.pause,
+    required this.resume,
+    required this.clear,
+    required this.getOption,
+    required this.isRunning,
   });
-
-  bool _running = true;
-
-  /// 是否运行中
-  /// 可以调用pause()暂停弹幕
-  bool get running => _running;
-  set running(e) {
-    _running = e;
-  }
-
-  DanmakuOption _option = DanmakuOption();
-  DanmakuOption get option => _option;
-  set option(e) {
-    _option = e;
-  }
-
-  /// 暂停弹幕
-  void pause() {
-    onPause.call();
-  }
-
-  /// 继续弹幕
-  void resume() {
-    onResume.call();
-  }
-
-  /// 清空弹幕
-  void clear() {
-    onClear.call();
-  }
-
-  /// 添加弹幕
-  void addDanmaku(DanmakuContentItem item) {
-    onAddDanmaku.call(item);
-  }
-
-  /// 更新弹幕配置
-  void updateOption(DanmakuOption option) {
-    onUpdateOption.call(option);
-  }
 }

@@ -19,7 +19,7 @@ class DanmakuContentItem {
   final bool selfSend;
 
   /// 是否为会员弹幕
-  final bool? isColorful;
+  final bool isColorful;
 
   /// 弹幕数量
   final int? count;
@@ -29,7 +29,7 @@ class DanmakuContentItem {
     this.color = Colors.white,
     this.type = DanmakuItemType.scroll,
     this.selfSend = false,
-    this.isColorful,
+    this.isColorful = false,
     this.count,
   });
 }
@@ -60,6 +60,18 @@ class SpecialDanmakuContentItem extends DanmakuContentItem {
 
   TextPainter? painterCache;
 
+  bool needRemove(bool needRemove) {
+    if (needRemove) {
+      dispose();
+    }
+    return needRemove;
+  }
+
+  void dispose() {
+    painterCache?.dispose();
+    painterCache = null;
+  }
+
   SpecialDanmakuContentItem(
     super.text, {
     required this.duration,
@@ -75,7 +87,7 @@ class SpecialDanmakuContentItem extends DanmakuContentItem {
     this.translationStartDelay = 0,
     super.count,
     this.easingType = Curves.linear,
-  }) : this.translationDuration = translationDuration ?? duration;
+  }) : translationDuration = translationDuration ?? duration;
 
   factory SpecialDanmakuContentItem.fromList(
     Color color,
@@ -92,7 +104,7 @@ class SpecialDanmakuContentItem extends DanmakuContentItem {
     double endA = double.tryParse(alphaString[1]) ?? 1;
     Tween<double>? alphaTween;
     if (disableGradient || startA == endA) {
-      color = color.withOpacity((startA + endA) / 2);
+      color = color.withValues(alpha: (startA + endA) / 2);
     } else {
       alphaTween = Tween(begin: startA, end: endA);
     }
