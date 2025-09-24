@@ -47,6 +47,7 @@ class ScrollDanmakuPainter extends CustomPainter {
         }
 
         item.drawTick ??= tick;
+        item.generateParagraphIfNeeded(fontSize, fontWeight);
         final endPosition = -item.width;
         final distance = startPosition - endPosition;
         item.xPosition = item.xPosition +
@@ -56,12 +57,6 @@ class ScrollDanmakuPainter extends CustomPainter {
           item.expired = true;
           continue;
         }
-
-        item.paragraph ??= DmUtils.generateParagraph(
-          content: item.content,
-          fontSize: fontSize,
-          fontWeight: fontWeight,
-        );
 
         if (strokeWidth > 0) {
           item.strokeParagraph ??= DmUtils.generateStrokeParagraph(
@@ -113,6 +108,7 @@ class ScrollDanmakuPainter extends CustomPainter {
         }
 
         item.drawTick ??= tick;
+        item.generateParagraphIfNeeded(fontSize, fontWeight);
         final endPosition = -item.width;
         final distance = startPosition - endPosition;
         item.xPosition = item.xPosition +
@@ -122,12 +118,6 @@ class ScrollDanmakuPainter extends CustomPainter {
           item.expired = true;
           continue;
         }
-
-        item.paragraph ??= DmUtils.generateParagraph(
-          content: item.content,
-          fontSize: fontSize,
-          fontWeight: fontWeight,
-        );
 
         if (strokeWidth > 0) {
           item.strokeParagraph ??= DmUtils.generateStrokeParagraph(

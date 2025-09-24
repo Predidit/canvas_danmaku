@@ -1,16 +1,17 @@
 import 'dart:ui' as ui;
 
 import 'package:canvas_danmaku/models/danmaku_content_item.dart';
+import 'package:canvas_danmaku/utils/utils.dart';
 
 class DanmakuItem {
   /// 弹幕内容
   final DanmakuContentItem content;
 
   /// 弹幕宽度
-  final double width;
+  double width;
 
   /// 弹幕高度
-  final double height;
+  double height;
 
   /// 弹幕水平方向位置
   double xPosition;
@@ -55,4 +56,17 @@ class DanmakuItem {
     this.strokeParagraph,
     this.drawTick,
   });
+
+  void generateParagraphIfNeeded(double fontSize, int fontWeight) {
+    if (paragraph == null) {
+      final paragraph = DmUtils.generateParagraph(
+        content: content,
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+      );
+      this.paragraph = paragraph;
+      width = paragraph.maxIntrinsicWidth;
+      height = paragraph.height;
+    }
+  }
 }
