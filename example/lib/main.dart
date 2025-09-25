@@ -63,13 +63,15 @@ class _HomePageState extends State<HomePage> {
   int _fontWeight = 4;
 
   /// 隐藏滚动弹幕
-  final bool _hideScroll = false;
+  bool _hideScroll = false;
 
   /// 隐藏顶部弹幕
-  final bool _hideTop = false;
+  bool _hideTop = false;
 
   /// 隐藏底部弹幕
-  final bool _hideBottom = false;
+  bool _hideBottom = false;
+
+  bool _hideSpecial = false;
 
   /// 为字幕预留空间
   bool _safeArea = true;
@@ -498,6 +500,74 @@ class _HomePageState extends State<HomePage> {
                         _safeArea = e;
                         _controller!.updateOption(
                           _controller!.option.copyWith(safeArea: e),
+                        );
+                        (context as Element).markNeedsBuild();
+                      }
+                    },
+                  );
+                },
+              ),
+              Builder(
+                builder: (context) {
+                  return SwitchListTile(
+                    title: const Text('hide scroll'),
+                    value: _hideScroll,
+                    onChanged: (e) {
+                      if (_controller != null) {
+                        _hideScroll = e;
+                        _controller!.updateOption(
+                          _controller!.option.copyWith(hideScroll: e),
+                        );
+                        (context as Element).markNeedsBuild();
+                      }
+                    },
+                  );
+                },
+              ),
+              Builder(
+                builder: (context) {
+                  return SwitchListTile(
+                    title: const Text('hide top'),
+                    value: _hideTop,
+                    onChanged: (e) {
+                      if (_controller != null) {
+                        _hideTop = e;
+                        _controller!.updateOption(
+                          _controller!.option.copyWith(hideTop: e),
+                        );
+                        (context as Element).markNeedsBuild();
+                      }
+                    },
+                  );
+                },
+              ),
+              Builder(
+                builder: (context) {
+                  return SwitchListTile(
+                    title: const Text('hide bottom'),
+                    value: _hideBottom,
+                    onChanged: (e) {
+                      if (_controller != null) {
+                        _hideBottom = e;
+                        _controller!.updateOption(
+                          _controller!.option.copyWith(hideBottom: e),
+                        );
+                        (context as Element).markNeedsBuild();
+                      }
+                    },
+                  );
+                },
+              ),
+              Builder(
+                builder: (context) {
+                  return SwitchListTile(
+                    title: const Text('hide special'),
+                    value: _hideSpecial,
+                    onChanged: (e) {
+                      if (_controller != null) {
+                        _hideSpecial = e;
+                        _controller!.updateOption(
+                          _controller!.option.copyWith(hideSpecial: e),
                         );
                         (context as Element).markNeedsBuild();
                       }

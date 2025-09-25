@@ -59,15 +59,16 @@ abstract class DmUtils {
     required double strokeWidth,
     Size? size,
   }) {
+    final isColorful = content.isColorful && size != null;
     final Paint strokePaint = Paint()
-      ..shader = content.isColorful && size != null
+      ..shader = isColorful
           ? const LinearGradient(colors: [Color(0xFFF2509E), Color(0xFF308BCD)])
               .createShader(Rect.fromLTWH(0, 0, size.width, size.height))
           : null
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth;
 
-    if (!content.isColorful) {
+    if (!isColorful) {
       strokePaint.color = Colors.black;
     }
 

@@ -34,10 +34,10 @@ class StaticDanmakuPainter extends CustomPainter {
     for (DanmakuItem item in staticDanmakuItems) {
       switch (item.content.type) {
         case DanmakuItemType.top:
-          item.drawTick ??= tick;
-          // 如果 Paragraph 没有缓存，则创建并缓存它
-          item.generateParagraphIfNeeded(fontSize, fontWeight);
-          item.xPosition = (size.width - item.width) / 2;
+          item
+            ..drawTick ??= tick
+            ..generateParagraphIfNeeded(fontSize, fontWeight)
+            ..xPosition = (size.width - item.width) / 2;
 
           // 黑色部分
           if (strokeWidth > 0) {
@@ -81,10 +81,10 @@ class StaticDanmakuPainter extends CustomPainter {
           );
           break;
         case DanmakuItemType.bottom:
-          item.drawTick ??= tick;
-          // 如果 Paragraph 没有缓存，则创建并缓存它
-          item.generateParagraphIfNeeded(fontSize, fontWeight);
-          item.xPosition = (size.width - item.width) / 2;
+          item
+            ..drawTick ??= tick
+            ..generateParagraphIfNeeded(fontSize, fontWeight)
+            ..xPosition = (size.width - item.width) / 2;
 
           // 黑色部分
           if (strokeWidth > 0) {

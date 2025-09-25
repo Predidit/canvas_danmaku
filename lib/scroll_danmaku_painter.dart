@@ -46,8 +46,9 @@ class ScrollDanmakuPainter extends CustomPainter {
           continue;
         }
 
-        item.drawTick ??= tick;
-        item.generateParagraphIfNeeded(fontSize, fontWeight);
+        item
+          ..drawTick ??= tick
+          ..generateParagraphIfNeeded(fontSize, fontWeight);
         final endPosition = -item.width;
         final distance = startPosition - endPosition;
         item.xPosition = item.xPosition +
@@ -68,13 +69,13 @@ class ScrollDanmakuPainter extends CustomPainter {
                 item.content.isColorful ? Size(item.width, item.height) : null,
           );
           if (item.content.isColorful) {
-            canvas
+            pictureCanvas
               ..save()
               ..translate(item.xPosition, item.yPosition)
               ..drawParagraph(item.strokeParagraph!, Offset.zero)
               ..restore();
           } else {
-            canvas.drawParagraph(
+            pictureCanvas.drawParagraph(
               item.strokeParagraph!,
               Offset(item.xPosition, item.yPosition),
             );
@@ -100,6 +101,7 @@ class ScrollDanmakuPainter extends CustomPainter {
 
       final ui.Picture picture = pictureRecorder.endRecording();
       canvas.drawPicture(picture);
+      picture.dispose();
     } else {
       // 弹幕数量较少时直接绘制 (节约创建 canvas 的开销)
       for (DanmakuItem item in scrollDanmakuItems) {
@@ -107,8 +109,9 @@ class ScrollDanmakuPainter extends CustomPainter {
           continue;
         }
 
-        item.drawTick ??= tick;
-        item.generateParagraphIfNeeded(fontSize, fontWeight);
+        item
+          ..drawTick ??= tick
+          ..generateParagraphIfNeeded(fontSize, fontWeight);
         final endPosition = -item.width;
         final distance = startPosition - endPosition;
         item.xPosition = item.xPosition +

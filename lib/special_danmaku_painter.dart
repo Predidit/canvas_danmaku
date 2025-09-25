@@ -48,7 +48,9 @@ class SpecialDanmakuPainter extends CustomPainter {
       }
     }
     if (batch) {
-      canvas.drawPicture(pictureRecorder.endRecording());
+      final ui.Picture picture = pictureRecorder.endRecording();
+      canvas.drawPicture(picture);
+      picture.dispose();
     }
   }
 
