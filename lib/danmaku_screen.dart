@@ -325,9 +325,9 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     if (!mounted) return;
     _clearDanmakus();
     if (_ticker.isActive) {
-      SchedulerBinding.instance.addPostFrameCallback(
-        (_) => _ticker.stop(),
-      );
+      // SchedulerBinding.instance.addPostFrameCallback(
+      //   (_) => _ticker.stop(),
+      // );
     } else {
       _notifier.refresh();
     }
@@ -475,6 +475,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     _timer ??= Timer.periodic(const Duration(milliseconds: 100), (_) {
       if (!mounted || !_running) {
         _cancelTimer();
+        return;
       }
       final tick = _notifier.value;
       // 移除屏幕外滚动弹幕
