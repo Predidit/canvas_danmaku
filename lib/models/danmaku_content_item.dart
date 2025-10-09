@@ -1,5 +1,4 @@
 import 'dart:math' show pi;
-import 'dart:ui' show PathMetric;
 
 import 'package:flutter/material.dart';
 
@@ -10,7 +9,7 @@ class DanmakuContentItem {
   final String text;
 
   /// 弹幕颜色
-  final Color color;
+  Color color;
 
   /// 弹幕类型
   final DanmakuItemType type;
@@ -32,6 +31,11 @@ class DanmakuContentItem {
     this.isColorful = false,
     this.count,
   });
+
+  @override
+  String toString() {
+    return 'DanmakuContentItem(text="$text", color=0x${color.toARGB32().toRadixString(16)}, type=${type.name}${count != null ? ", count=$count" : ""}${selfSend ? ", selfSend" : ""}${isColorful ? ", colorful" : ""})';
+  }
 }
 
 class SpecialDanmakuContentItem extends DanmakuContentItem {
@@ -46,8 +50,9 @@ class SpecialDanmakuContentItem extends DanmakuContentItem {
   final int translationDuration;
   final int translationStartDelay;
 
+  final double rotateZ;
   final Matrix4? matrix;
-  final PathMetric? motionPathMetric;
+  // final PathMetric? motionPathMetric;
 
   final Curve easingType;
 
@@ -58,20 +63,6 @@ class SpecialDanmakuContentItem extends DanmakuContentItem {
   @override
   DanmakuItemType get type => DanmakuItemType.special;
 
-  TextPainter? painterCache;
-
-  bool needRemove(bool needRemove) {
-    if (needRemove) {
-      dispose();
-    }
-    return needRemove;
-  }
-
-  void dispose() {
-    painterCache?.dispose();
-    painterCache = null;
-  }
-
   SpecialDanmakuContentItem(
     super.text, {
     required this.duration,
@@ -81,8 +72,9 @@ class SpecialDanmakuContentItem extends DanmakuContentItem {
     required this.translateXTween,
     required this.translateYTween,
     this.alphaTween,
+    this.rotateZ = 0,
     this.matrix,
-    this.motionPathMetric,
+    // this.motionPathMetric,
     int? translationDuration,
     this.translationStartDelay = 0,
     super.count,
@@ -97,35 +89,33 @@ class SpecialDanmakuContentItem extends DanmakuContentItem {
     double videoY = 1080,
     bool disableGradient = false,
   }) {
-    var (startX, endX) = _toRelativePosition(list[0], list[7], videoX);
-    var (startY, endY) = _toRelativePosition(list[1], list[8], videoY);
-    List<String> alphaString = list[2].split('-');
-    double startA = double.tryParse(alphaString[0]) ?? 1;
-    double endA = double.tryParse(alphaString[1]) ?? 1;
+    final (startX, endX) = _toRelativePosition(list[0], list[7], videoX);
+    final (startY, endY) = _toRelativePosition(list[1], list[8], videoY);
+    final List<String> alphaString = list[2].split('-');
+    final startA = double.tryParse(alphaString[0]) ?? 1;
+    final endA = double.tryParse(alphaString[1]) ?? 1;
     Tween<double>? alphaTween;
     if (disableGradient || startA == endA) {
       color = color.withValues(alpha: (startA + endA) / 2);
     } else {
+      color = color.withValues(alpha: startA);
       alphaTween = Tween(begin: startA, end: endA);
     }
-    int duration = (_parseDouble(list[3]) * 1000).round();
-    String text = list[4].trim();
-    int rotateZ = _parseInt(list[5]);
-    int rotateY = _parseInt(list[6]);
-    Matrix4? matrix;
-    if (rotateZ != 0 || rotateY != 0) {
-      matrix = Matrix4.identity();
-      if (rotateZ != 0) matrix.rotateZ(_degreeToRadian(rotateZ));
-      if (rotateY != 0) matrix.rotateY(_degreeToRadian(rotateY));
-    }
+    final duration = (_parseDouble(list[3]) * 1000).round();
+    final String text = list[4].trim();
+    final rotateZ = _degreeToRadian(_parseInt(list[5]));
+    final rotateY = _parseInt(list[6]);
+    final matrix = rotateY == 0
+        ? null
+        : (Matrix4.identity()..rotateY(_degreeToRadian(rotateY)));
     var translateXTween = _makeTween(startX, endX);
     var translateYTween = _makeTween(startY, endY);
-    int translationDuration = _parseInt(list[9]);
-    int translationStartDelay = _parseInt(list[10]);
-    bool hasStroke = list[11] == 1;
+    final translationDuration = _parseInt(list[9]);
+    final translationStartDelay = _parseInt(list[10]);
+    final hasStroke = list[11] == 1;
     // 字体
     // list[12];
-    var easingType = list[13] == 1 ? Curves.easeInCubic : Curves.linear;
+    final easingType = list[13] == 1 ? Curves.easeInCubic : Curves.linear;
     // TODO 路径动画
     // List<Path> path;
     // if (list.length > 15) {
@@ -142,6 +132,7 @@ class SpecialDanmakuContentItem extends DanmakuContentItem {
       translateYTween: translateYTween,
       translationDuration: translationDuration,
       translationStartDelay: translationStartDelay,
+      rotateZ: rotateZ,
       matrix: matrix,
       // motionPathMetric: null,
       easingType: easingType,

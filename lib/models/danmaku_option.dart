@@ -41,7 +41,7 @@ class DanmakuOption {
   /// 弹幕行高
   final double lineHeight;
 
-  DanmakuOption({
+  const DanmakuOption({
     this.fontSize = 16,
     this.fontWeight = 4,
     this.area = 1.0,

@@ -34,18 +34,24 @@ class ScrollDanmakuPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final startPosition = size.width;
-
-    if (scrollDanmakuItems.length > batchThreshold) {
+    late final ui.PictureRecorder pictureRecorder;
+    final Canvas pictureCanvas;
+    final batch = scrollDanmakuItems.length > batchThreshold;
+    if (batch) {
       // 弹幕数量超过阈值时使用批量绘制
-      final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
-      final Canvas pictureCanvas = Canvas(pictureRecorder);
+      pictureRecorder = ui.PictureRecorder();
+      pictureCanvas = Canvas(pictureRecorder);
+    } else {
+      pictureCanvas = canvas;
+    }
 
-      for (DanmakuItem item in scrollDanmakuItems) {
-        if (item.expired) {
-          continue;
-        }
+    for (DanmakuItem item in scrollDanmakuItems) {
+      if (item.expired) {
+        continue;
+      }
 
+      if (!item.suspend) {
+        final startPosition = size.width;
         item
           ..drawTick ??= tick
           ..generateParagraphIfNeeded(fontSize, fontWeight);
@@ -58,110 +64,51 @@ class ScrollDanmakuPainter extends CustomPainter {
           item.expired = true;
           continue;
         }
-
-        if (strokeWidth > 0) {
-          item.strokeParagraph ??= DmUtils.generateStrokeParagraph(
-            content: item.content,
-            fontSize: fontSize,
-            fontWeight: fontWeight,
-            strokeWidth: strokeWidth,
-            size:
-                item.content.isColorful ? Size(item.width, item.height) : null,
-          );
-          if (item.content.isColorful) {
-            pictureCanvas
-              ..save()
-              ..translate(item.xPosition, item.yPosition)
-              ..drawParagraph(item.strokeParagraph!, Offset.zero)
-              ..restore();
-          } else {
-            pictureCanvas.drawParagraph(
-              item.strokeParagraph!,
-              Offset(item.xPosition, item.yPosition),
-            );
-          }
-        } else {
-          item.clearStrokeParagraph();
-        }
-
-        if (item.content.selfSend) {
-          pictureCanvas.drawRect(
-            Offset(item.xPosition - 2, item.yPosition) &
-                Size(item.width + 4, item.height),
-            selfSendPaint,
-          );
-        }
-        pictureCanvas.drawParagraph(
-          item.paragraph!,
-          Offset(item.xPosition, item.yPosition),
-        );
-
-        item.drawTick = tick;
       }
 
+      if (strokeWidth > 0) {
+        item.strokeParagraph ??= DmUtils.generateStrokeParagraph(
+          content: item.content,
+          fontSize: fontSize,
+          fontWeight: fontWeight,
+          strokeWidth: strokeWidth,
+          size: item.content.isColorful ? Size(item.width, item.height) : null,
+        );
+        if (item.content.isColorful) {
+          pictureCanvas
+            ..save()
+            ..translate(item.xPosition, item.yPosition)
+            ..drawParagraph(item.strokeParagraph!, Offset.zero)
+            ..restore();
+        } else {
+          pictureCanvas.drawParagraph(
+            item.strokeParagraph!,
+            Offset(item.xPosition, item.yPosition),
+          );
+        }
+      } else {
+        item.clearStrokeParagraph();
+      }
+
+      if (item.content.selfSend) {
+        pictureCanvas.drawRect(
+          Offset(item.xPosition - 2, item.yPosition) &
+              Size(item.width + 4, item.height),
+          selfSendPaint,
+        );
+      }
+      pictureCanvas.drawParagraph(
+        item.paragraph!,
+        Offset(item.xPosition, item.yPosition),
+      );
+
+      item.drawTick = tick;
+    }
+
+    if (batch) {
       final ui.Picture picture = pictureRecorder.endRecording();
       canvas.drawPicture(picture);
       picture.dispose();
-    } else {
-      // 弹幕数量较少时直接绘制 (节约创建 canvas 的开销)
-      for (DanmakuItem item in scrollDanmakuItems) {
-        if (item.expired) {
-          continue;
-        }
-
-        item
-          ..drawTick ??= tick
-          ..generateParagraphIfNeeded(fontSize, fontWeight);
-        final endPosition = -item.width;
-        final distance = startPosition - endPosition;
-        item.xPosition = item.xPosition +
-            (((item.drawTick! - tick) / durationInMilliseconds) * distance);
-
-        if (item.xPosition < -item.width || item.xPosition > startPosition) {
-          item.expired = true;
-          continue;
-        }
-
-        if (strokeWidth > 0) {
-          item.strokeParagraph ??= DmUtils.generateStrokeParagraph(
-            content: item.content,
-            fontSize: fontSize,
-            fontWeight: fontWeight,
-            strokeWidth: strokeWidth,
-            size:
-                item.content.isColorful ? Size(item.width, item.height) : null,
-          );
-          if (item.content.isColorful) {
-            canvas
-              ..save()
-              ..translate(item.xPosition, item.yPosition)
-              ..drawParagraph(item.strokeParagraph!, Offset.zero)
-              ..restore();
-          } else {
-            canvas.drawParagraph(
-              item.strokeParagraph!,
-              Offset(item.xPosition, item.yPosition),
-            );
-          }
-        } else {
-          item.clearStrokeParagraph();
-        }
-
-        if (item.content.selfSend) {
-          canvas.drawRect(
-            Offset(item.xPosition - 2, item.yPosition) &
-                Size(item.width + 4, item.height),
-            selfSendPaint,
-          );
-        }
-
-        canvas.drawParagraph(
-          item.paragraph!,
-          Offset(item.xPosition, item.yPosition),
-        );
-
-        item.drawTick = tick;
-      }
     }
   }
 

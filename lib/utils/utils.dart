@@ -4,7 +4,7 @@ import 'dart:ui' as ui;
 import 'package:canvas_danmaku/models/danmaku_content_item.dart';
 import 'package:flutter/material.dart';
 
-abstract class DmUtils {
+abstract final class DmUtils {
   static final Random random = Random();
 
   static String generateRandomString(int length) {
@@ -95,6 +95,39 @@ abstract class DmUtils {
       ..addText(content.text);
 
     return strokeBuilder.build()
+      ..layout(const ui.ParagraphConstraints(width: double.infinity));
+  }
+
+  static ui.Paragraph generateSpecialParagraph({
+    required SpecialDanmakuContentItem content,
+    required int fontWeight,
+    required int elapsed,
+    required double strokeWidth,
+  }) {
+    late final alpha =
+        content.alphaTween?.transform(elapsed / content.duration) ??
+            content.color.a;
+    final ui.ParagraphBuilder builder = ui.ParagraphBuilder(
+      ui.ParagraphStyle(
+        textAlign: TextAlign.left,
+        fontWeight: FontWeight.values[fontWeight],
+        textDirection: TextDirection.ltr,
+        fontSize: content.fontSize,
+      ),
+    )
+      ..pushStyle(ui.TextStyle(
+          color: content.color,
+          fontSize: content.fontSize,
+          shadows: content.hasStroke
+              ? [
+                  Shadow(
+                      color: Colors.black.withValues(alpha: alpha),
+                      blurRadius: strokeWidth)
+                ]
+              : null))
+      ..addText(content.text);
+
+    return builder.build()
       ..layout(const ui.ParagraphConstraints(width: double.infinity));
   }
 }

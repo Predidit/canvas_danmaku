@@ -32,13 +32,19 @@ class StaticDanmakuPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     for (DanmakuItem item in staticDanmakuItems) {
+      // if (item.suspend) {
+      //   item.drawTick = tick;
+      // } else {
+      //   item.drawTick ??= tick;
+      // }
+
+      item
+        ..drawTick ??= tick
+        ..generateParagraphIfNeeded(fontSize, fontWeight)
+        ..xPosition = (size.width - item.width) / 2;
+
       switch (item.content.type) {
         case DanmakuItemType.top:
-          item
-            ..drawTick ??= tick
-            ..generateParagraphIfNeeded(fontSize, fontWeight)
-            ..xPosition = (size.width - item.width) / 2;
-
           // 黑色部分
           if (strokeWidth > 0) {
             item.strokeParagraph ??= DmUtils.generateStrokeParagraph(
@@ -81,11 +87,6 @@ class StaticDanmakuPainter extends CustomPainter {
           );
           break;
         case DanmakuItemType.bottom:
-          item
-            ..drawTick ??= tick
-            ..generateParagraphIfNeeded(fontSize, fontWeight)
-            ..xPosition = (size.width - item.width) / 2;
-
           // 黑色部分
           if (strokeWidth > 0) {
             item.strokeParagraph ??= DmUtils.generateStrokeParagraph(

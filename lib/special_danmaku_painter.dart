@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:canvas_danmaku/models/danmaku_content_item.dart';
 import 'package:canvas_danmaku/models/danmaku_item.dart';
+import 'package:canvas_danmaku/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 class SpecialDanmakuPainter extends CustomPainter {
@@ -32,19 +33,21 @@ class SpecialDanmakuPainter extends CustomPainter {
       return;
     }
 
-    var pictureCanvas = canvas;
-    var batch = specialDanmakuItems.length > batchThreshold;
-    late ui.PictureRecorder pictureRecorder;
+    final Canvas pictureCanvas;
+    final batch = specialDanmakuItems.length > batchThreshold;
+    late final ui.PictureRecorder pictureRecorder;
     if (batch) {
       pictureRecorder = ui.PictureRecorder();
       pictureCanvas = Canvas(pictureRecorder);
+    } else {
+      pictureCanvas = canvas;
     }
     for (final item in specialDanmakuItems) {
       item.drawTick ??= tick;
       final elapsed = tick - item.drawTick!;
       final content = item.content as SpecialDanmakuContentItem;
       if (elapsed >= 0 && elapsed < content.duration) {
-        _paintSpecialDanmaku(pictureCanvas, content, size, elapsed);
+        _paintSpecialDanmaku(pictureCanvas, item, content, size, elapsed);
       }
     }
     if (batch) {
@@ -54,8 +57,8 @@ class SpecialDanmakuPainter extends CustomPainter {
     }
   }
 
-  void _paintSpecialDanmaku(
-      Canvas canvas, SpecialDanmakuContentItem item, Size size, int elapsed) {
+  void _paintSpecialDanmaku(Canvas canvas, DanmakuItem dm,
+      SpecialDanmakuContentItem item, Size size, int elapsed) {
     // 透明度动画
     late final alpha =
         item.alphaTween?.transform(elapsed / item.duration) ?? item.color.a;
@@ -63,31 +66,25 @@ class SpecialDanmakuPainter extends CustomPainter {
         ? item.color
         : item.color.withValues(alpha: alpha);
     // 文本
-    if (color != item.painterCache?.text?.style?.color) {
-      item.painterCache!.text = TextSpan(
-        text: item.text,
-        style: TextStyle(
-          color: color,
-          fontSize: item.fontSize,
-          fontWeight: FontWeight.values[fontWeight],
-          shadows: item.hasStroke
-              ? [
-                  Shadow(
-                      color: Colors.black.withValues(alpha: alpha),
-                      blurRadius: strokeWidth)
-                ]
-              : null,
-        ),
-      );
-      item.painterCache!.layout();
+    final ui.Paragraph paragraph;
+    if (color != item.color) {
+      dm.paragraph?.dispose();
+      item.color = color;
+      paragraph = dm.paragraph = DmUtils.generateSpecialParagraph(
+          content: item,
+          fontWeight: fontWeight,
+          elapsed: elapsed,
+          strokeWidth: strokeWidth);
+    } else {
+      paragraph = dm.paragraph!;
     }
 
     // 路径动画 TODO
 
     // else 位移动画
-    late double dx, dy;
+    final double dx, dy;
     if (elapsed > item.translationStartDelay) {
-      late double translateProgress = item.easingType.transform(min(1.0,
+      late final translateProgress = item.easingType.transform(min(1.0,
           (elapsed - item.translationStartDelay) / item.translationDuration));
 
       double getOffset(Tween<double> tween) => tween is ConstantTween
@@ -101,15 +98,20 @@ class SpecialDanmakuPainter extends CustomPainter {
       dy = item.translateYTween.begin! * size.height;
     }
 
-    if (item.matrix != null) {
+    if (item.rotateZ != 0 || item.matrix != null) {
       canvas
         ..save()
-        ..translate(dx, dy)
-        ..transform(item.matrix!.storage);
-      item.painterCache!.paint(canvas, Offset.zero);
-      canvas.restore();
+        ..translate(dx, dy);
+      if (item.matrix != null) {
+        canvas.transform(item.matrix!.storage);
+      } else {
+        canvas.rotate(item.rotateZ);
+      }
+      canvas
+        ..drawParagraph(paragraph, Offset.zero)
+        ..restore();
     } else {
-      item.painterCache!.paint(canvas, Offset(dx, dy));
+      canvas.drawParagraph(paragraph, Offset(dx, dy));
     }
   }
 

@@ -28,6 +28,8 @@ class DanmakuItem {
 
   bool expired = false;
 
+  bool suspend = false;
+
   bool needRemove(bool needRemove) {
     if (needRemove) {
       dispose();
@@ -68,5 +70,10 @@ class DanmakuItem {
       width = paragraph.maxIntrinsicWidth;
       height = paragraph.height;
     }
+  }
+
+  @override
+  String toString() {
+    return 'DanmakuItem(content=$content, xPos=$xPosition, yPos=$yPosition, size=${ui.Size(width, height)}, drawTick=$drawTick)';
   }
 }

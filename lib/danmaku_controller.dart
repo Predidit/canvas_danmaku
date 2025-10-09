@@ -1,4 +1,5 @@
 import 'package:canvas_danmaku/models/danmaku_content_item.dart';
+import 'package:canvas_danmaku/models/danmaku_item.dart';
 import 'package:canvas_danmaku/models/danmaku_option.dart';
 import 'package:flutter/material.dart';
 
@@ -10,10 +11,18 @@ class DanmakuController {
   final VoidCallback clear;
   final DanmakuOption Function() getOption;
   final bool Function() isRunning;
+  final Iterable<DanmakuItem> Function(Offset) findDanmaku;
+  final DanmakuItem? Function(Offset) findSingleDanmaku;
+  final double Function() getViewWidth;
+  final double Function() getViewHeight;
 
   DanmakuOption get option => getOption();
 
   bool get running => isRunning();
+
+  double get viewWidth => getViewWidth();
+
+  double get viewHeight => getViewHeight();
 
   DanmakuController({
     required this.addDanmaku,
@@ -23,5 +32,9 @@ class DanmakuController {
     required this.clear,
     required this.getOption,
     required this.isRunning,
+    required this.findDanmaku,
+    required this.findSingleDanmaku,
+    required this.getViewWidth,
+    required this.getViewHeight,
   });
 }
