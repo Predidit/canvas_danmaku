@@ -35,7 +35,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   static final _random = Random();
 
-  DanmakuController? _controller;
+  DanmakuController<int>? _controller;
 
   final _danmuKey = GlobalKey();
 
@@ -133,6 +133,7 @@ class _HomePageState extends State<HomePage> {
                         // color: Colors.white,
                         color: getRandomColor(),
                         count: [1, 10, 100, 1000, 10000][_random.nextInt(5)],
+                        extra: _random.nextInt(2147483647),
                       ),
                     );
                   },
@@ -148,6 +149,7 @@ class _HomePageState extends State<HomePage> {
                         // color: Colors.white,
                         type: DanmakuItemType.top,
                         count: [1, 10, 100, 1000, 10000][_random.nextInt(5)],
+                        extra: _random.nextInt(2147483647),
                       ),
                     );
                   },
@@ -163,6 +165,7 @@ class _HomePageState extends State<HomePage> {
                         // color: Colors.white,
                         type: DanmakuItemType.bottom,
                         count: [1, 10, 100, 1000, 10000][_random.nextInt(5)],
+                        extra: _random.nextInt(2147483647),
                       ),
                     );
                   },
@@ -194,6 +197,7 @@ class _HomePageState extends State<HomePage> {
                         rotateZ: i * pi / 18,
                         easingType: Curves.linear,
                         hasStroke: true,
+                        extra: _random.nextInt(2147483647),
                       ),
                     ).forEach(_controller!.addDanmaku);
                   },
@@ -202,22 +206,27 @@ class _HomePageState extends State<HomePage> {
                   child: const Text('Star'),
                   onPressed: () {
                     _controller?.addDanmaku(
-                      SpecialDanmakuContentItem.fromList(getRandomColor(), 44, [
-                        "0.939",
-                        "0.083",
-                        "1-1",
-                        "6",
-                        "☆——————\n" * 14,
-                        "342",
-                        "0",
-                        "0.002",
-                        "0.271",
-                        500,
-                        0,
-                        1,
-                        "SimHei",
-                        1,
-                      ]),
+                      SpecialDanmakuContentItem.fromList(
+                        getRandomColor(),
+                        44,
+                        [
+                          "0.939",
+                          "0.083",
+                          "1-1",
+                          "6",
+                          "☆——————\n" * 14,
+                          "342",
+                          "0",
+                          "0.002",
+                          "0.271",
+                          500,
+                          0,
+                          1,
+                          "SimHei",
+                          1,
+                        ],
+                        extra: _random.nextInt(2147483647),
+                      ),
                     );
                   },
                 ),
@@ -234,6 +243,7 @@ class _HomePageState extends State<HomePage> {
                           Colors.orange,
                           16,
                           item,
+                          extra: _random.nextInt(2147483647),
                         ),
                       );
                     }
@@ -244,6 +254,7 @@ class _HomePageState extends State<HomePage> {
                           Colors.orange,
                           16,
                           item,
+                          extra: _random.nextInt(2147483647),
                         ),
                       );
                     }
@@ -264,6 +275,7 @@ class _HomePageState extends State<HomePage> {
                           DanmakuItemType.scroll,
                         ][_random.nextInt(3)],
                         selfSend: true,
+                        extra: _random.nextInt(2147483647),
                       ),
                     );
                   },
@@ -339,6 +351,7 @@ class _HomePageState extends State<HomePage> {
                     _removeOverlay();
                     item.suspend = true;
                     _suspendedDM = item;
+                    print('danmaku id: ${item.content.extra}');
 
                     final dy = item.content.type == DanmakuItemType.bottom
                         ? _controller!.viewHeight - item.yPosition - item.height
@@ -434,9 +447,9 @@ class _HomePageState extends State<HomePage> {
                   child: AnimatedOpacity(
                     opacity: _opacity,
                     duration: const Duration(milliseconds: 100),
-                    child: DanmakuScreen(
+                    child: DanmakuScreen<int>(
                       key: _danmuKey,
-                      createdController: (DanmakuController e) {
+                      createdController: (e) {
                         _controller = e;
                       },
                       option: DanmakuOption(
@@ -746,7 +759,7 @@ class _HomePageState extends State<HomePage> {
   int sec = 0;
   Future<void> startPlay() async {
     String data = await rootBundle.loadString('assets/132590001.json');
-    List<DanmakuContentItem> items = [];
+    List<DanmakuContentItem<int>> items = [];
     Map jsonMap = json.decode(data);
     for (Map item in jsonMap['comments']) {
       items.add(
@@ -768,7 +781,7 @@ class _HomePageState extends State<HomePage> {
     return Color(0xFF000000 | _random.nextInt(0x1000000));
   }
 
-  static SpecialDanmakuContentItem randSpecialDanmaku() {
+  static SpecialDanmakuContentItem<int> randSpecialDanmaku() {
     final translationStartDelay = _random.nextInt(1000);
     final translationDuration = _random.nextInt(14000);
     final duration =
@@ -796,6 +809,7 @@ class _HomePageState extends State<HomePage> {
       translationStartDelay: translationStartDelay,
       easingType: const [Curves.linear, Curves.easeInCubic][_random.nextInt(2)],
       hasStroke: _random.nextBool(),
+      extra: _random.nextInt(2147483647),
     );
   }
 

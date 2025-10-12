@@ -1,62 +1,36 @@
 import 'dart:math';
 import 'dart:ui' as ui;
 
+import 'package:canvas_danmaku/base_danmaku_painter.dart';
 import 'package:canvas_danmaku/models/danmaku_content_item.dart';
 import 'package:canvas_danmaku/models/danmaku_item.dart';
 import 'package:canvas_danmaku/utils/utils.dart';
 import 'package:flutter/material.dart';
 
-class SpecialDanmakuPainter extends CustomPainter {
-  final int length;
-  final List<DanmakuItem> specialDanmakuItems;
-  final double fontSize;
-  final int fontWeight;
-  final double strokeWidth;
-  final bool running;
-  final int tick;
-  final int batchThreshold;
-
+final class SpecialDanmakuPainter extends BaseDanmakuPainter {
   SpecialDanmakuPainter({
-    required this.length,
-    required this.specialDanmakuItems,
-    required this.fontSize,
-    required this.fontWeight,
-    required this.strokeWidth,
-    required this.running,
-    required this.tick,
-    this.batchThreshold = 10, // 默认值为10，可以自行调整
+    required super.length,
+    required super.danmakuItems,
+    required super.fontSize,
+    required super.fontWeight,
+    required super.strokeWidth,
+    required super.running,
+    required super.tick,
+    super.batchThreshold,
   });
 
   @override
-  void paint(Canvas canvas, Size size) {
-    if (specialDanmakuItems.isEmpty) {
-      return;
-    }
-
-    final Canvas pictureCanvas;
-    final batch = specialDanmakuItems.length > batchThreshold;
-    late final ui.PictureRecorder pictureRecorder;
-    if (batch) {
-      pictureRecorder = ui.PictureRecorder();
-      pictureCanvas = Canvas(pictureRecorder);
+  void paintDanmaku(ui.Canvas canvas, ui.Size size, DanmakuItem item) {
+    final elapsed = tick - (item.drawTick ??= tick);
+    final content = item.content as SpecialDanmakuContentItem;
+    if (0 <= elapsed && elapsed < content.duration) {
+      _paintSpecialDanmaku(canvas, item, content, size, elapsed);
     } else {
-      pictureCanvas = canvas;
-    }
-    for (final item in specialDanmakuItems) {
-      item.drawTick ??= tick;
-      final elapsed = tick - item.drawTick!;
-      final content = item.content as SpecialDanmakuContentItem;
-      if (elapsed >= 0 && elapsed < content.duration) {
-        _paintSpecialDanmaku(pictureCanvas, item, content, size, elapsed);
-      }
-    }
-    if (batch) {
-      final ui.Picture picture = pictureRecorder.endRecording();
-      canvas.drawPicture(picture);
-      picture.dispose();
+      item.expired = true;
     }
   }
 
+  @pragma("vm:prefer-inline")
   void _paintSpecialDanmaku(Canvas canvas, DanmakuItem dm,
       SpecialDanmakuContentItem item, Size size, int elapsed) {
     // 透明度动画
@@ -113,13 +87,5 @@ class SpecialDanmakuPainter extends CustomPainter {
     } else {
       canvas.drawParagraph(paragraph, Offset(dx, dy));
     }
-  }
-
-  @override
-  bool shouldRepaint(covariant SpecialDanmakuPainter oldDelegate) {
-    return running ||
-        oldDelegate.length != length ||
-        oldDelegate.fontSize != fontSize ||
-        oldDelegate.strokeWidth != strokeWidth;
   }
 }

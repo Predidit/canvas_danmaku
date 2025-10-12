@@ -1,10 +1,11 @@
 import 'dart:math' show pi;
 
+import 'package:flutter/foundation.dart' show objectRuntimeType;
 import 'package:flutter/material.dart';
 
 enum DanmakuItemType { scroll, top, bottom, special }
 
-class DanmakuContentItem {
+class DanmakuContentItem<T> {
   /// 弹幕文本
   final String text;
 
@@ -23,6 +24,8 @@ class DanmakuContentItem {
   /// 弹幕数量
   final int? count;
 
+  final T? extra;
+
   DanmakuContentItem(
     this.text, {
     this.color = Colors.white,
@@ -30,15 +33,16 @@ class DanmakuContentItem {
     this.selfSend = false,
     this.isColorful = false,
     this.count,
+    this.extra,
   });
 
   @override
   String toString() {
-    return 'DanmakuContentItem(text="$text", color=0x${color.toARGB32().toRadixString(16)}, type=${type.name}${count != null ? ", count=$count" : ""}${selfSend ? ", selfSend" : ""}${isColorful ? ", colorful" : ""})';
+    return '${objectRuntimeType(this, "DanmakuContentItem<?>")}(text="$text", color=0x${color.toARGB32().toRadixString(16)}, type=${type.name}${count != null ? ", count=$count" : ""}${selfSend ? ", selfSend" : ""}${isColorful ? ", colorful" : ""}${extra != null ? ". extra=$extra" : ""})';
   }
 }
 
-class SpecialDanmakuContentItem extends DanmakuContentItem {
+class SpecialDanmakuContentItem<T> extends DanmakuContentItem<T> {
   final int duration;
 
   final double fontSize; // 从弹幕内容外解析
@@ -79,6 +83,7 @@ class SpecialDanmakuContentItem extends DanmakuContentItem {
     this.translationStartDelay = 0,
     super.count,
     this.easingType = Curves.linear,
+    super.extra,
   }) : translationDuration = translationDuration ?? duration;
 
   factory SpecialDanmakuContentItem.fromList(
@@ -88,6 +93,7 @@ class SpecialDanmakuContentItem extends DanmakuContentItem {
     double videoX = 1920,
     double videoY = 1080,
     bool disableGradient = false,
+    T? extra,
   }) {
     final (startX, endX) = _toRelativePosition(list[0], list[7], videoX);
     final (startY, endY) = _toRelativePosition(list[1], list[8], videoY);
@@ -136,6 +142,7 @@ class SpecialDanmakuContentItem extends DanmakuContentItem {
       matrix: matrix,
       // motionPathMetric: null,
       easingType: easingType,
+      extra: extra,
     );
   }
 

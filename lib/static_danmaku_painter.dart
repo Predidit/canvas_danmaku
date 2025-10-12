@@ -3,14 +3,13 @@ import 'package:canvas_danmaku/models/danmaku_item.dart';
 import 'package:canvas_danmaku/utils/utils.dart';
 import 'package:flutter/material.dart';
 
-class StaticDanmakuPainter extends CustomPainter {
+final class StaticDanmakuPainter extends CustomPainter {
   final int length;
-  final List<DanmakuItem> staticDanmakuItems;
+  final List<DanmakuItem> danmakuItems;
   final double staticDurationInMilliseconds;
   final double fontSize;
   final int fontWeight;
   final double strokeWidth;
-  final bool running;
   final int tick;
 
   late final Paint selfSendPaint = Paint()
@@ -20,18 +19,17 @@ class StaticDanmakuPainter extends CustomPainter {
 
   StaticDanmakuPainter({
     required this.length,
-    required this.staticDanmakuItems,
+    required this.danmakuItems,
     required this.staticDurationInMilliseconds,
     required this.fontSize,
     required this.fontWeight,
     required this.strokeWidth,
-    required this.running,
     required this.tick,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    for (DanmakuItem item in staticDanmakuItems) {
+    for (var item in danmakuItems) {
       // if (item.suspend) {
       //   item.drawTick = tick;
       // } else {
@@ -146,10 +144,9 @@ class StaticDanmakuPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant StaticDanmakuPainter oldDelegate) {
-    return oldDelegate.length != length ||
-        oldDelegate.fontSize != fontSize ||
-        oldDelegate.fontWeight != fontWeight ||
-        oldDelegate.strokeWidth != strokeWidth;
-  }
+  bool shouldRepaint(covariant StaticDanmakuPainter oldDelegate) =>
+      oldDelegate.length != length ||
+      oldDelegate.fontSize != fontSize ||
+      oldDelegate.fontWeight != fontWeight ||
+      oldDelegate.strokeWidth != strokeWidth;
 }
