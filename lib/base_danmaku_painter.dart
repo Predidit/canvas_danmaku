@@ -38,8 +38,20 @@ abstract base class BaseDanmakuPainter extends CustomPainter {
       pictureCanvas = canvas;
     }
 
+    DanmakuItem? suspend;
     for (var i in danmakuItems) {
-      if (!i.expired) paintDanmaku(pictureCanvas, size, i);
+      if (i.expired) continue;
+
+      if (i.suspend) {
+        suspend = i;
+        continue;
+      }
+
+      paintDanmaku(pictureCanvas, size, i);
+    }
+
+    if (suspend case final suspend?) {
+      paintDanmaku(pictureCanvas, size, suspend);
     }
 
     if (pictureRecorder != null) {
