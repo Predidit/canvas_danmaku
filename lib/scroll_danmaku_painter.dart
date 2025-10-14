@@ -27,15 +27,14 @@ final class ScrollDanmakuPainter extends BaseDanmakuPainter {
 
   @override
   void paintDanmaku(ui.Canvas canvas, ui.Size size, DanmakuItem item) {
+    item.generateParagraphIfNeeded(fontSize, fontWeight);
     if (!item.suspend) {
       final startPosition = size.width;
-      item
-        ..drawTick ??= tick
-        ..generateParagraphIfNeeded(fontSize, fontWeight);
       final endPosition = -item.width;
       final distance = startPosition - endPosition;
       item.xPosition +=
-          ((item.drawTick! - tick) / durationInMilliseconds) * distance;
+          (((item.drawTick ??= tick) - tick) / durationInMilliseconds) *
+              distance;
 
       if (item.xPosition < endPosition || item.xPosition > startPosition) {
         item.expired = true;
