@@ -9,6 +9,7 @@ abstract base class BaseDanmakuPainter extends CustomPainter {
   final double fontSize;
   final int fontWeight;
   final double strokeWidth;
+  final double devicePixelRatio;
   final bool running;
   final int batchThreshold;
   final int tick;
@@ -19,10 +20,30 @@ abstract base class BaseDanmakuPainter extends CustomPainter {
     required this.fontSize,
     required this.fontWeight,
     required this.strokeWidth,
+    required this.devicePixelRatio,
     required this.running,
     required this.tick,
     this.batchThreshold = 10, // 默认值为10，可以自行调整
   });
+
+  static void paintImg(
+    Canvas canvas,
+    DanmakuItem item,
+    double dx,
+    double dy,
+    double devicePixelRatio,
+    Paint paint,
+  ) {
+    final img = item.image!;
+    if (devicePixelRatio == 1.0) {
+      canvas.drawImage(img, Offset(dx, dy), paint);
+    } else {
+      final src =
+          Rect.fromLTWH(0, 0, img.width.toDouble(), img.height.toDouble());
+      final dst = Rect.fromLTWH(dx, dy, item.width, item.height);
+      canvas.drawImageRect(img, src, dst, paint);
+    }
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -69,6 +90,7 @@ abstract base class BaseDanmakuPainter extends CustomPainter {
         oldDelegate.length != length ||
         oldDelegate.fontSize != fontSize ||
         oldDelegate.fontWeight != fontWeight ||
-        oldDelegate.strokeWidth != strokeWidth;
+        oldDelegate.strokeWidth != strokeWidth ||
+        oldDelegate.devicePixelRatio != devicePixelRatio;
   }
 }

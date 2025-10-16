@@ -129,9 +129,9 @@ class _HomePageState extends State<HomePage> {
                     _controller?.addDanmaku(
                       DanmakuContentItem(
                         "这是一条超长弹幕ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789这是一条超长的弹幕，这条弹幕会超出屏幕宽度",
-                        // isColorful: true,
-                        // color: Colors.white,
-                        color: getRandomColor(),
+                        isColorful: true,
+                        color: Colors.white,
+                        // color: getRandomColor(),
                         count: [1, 10, 100, 1000, 10000][_random.nextInt(5)],
                         extra: _random.nextInt(2147483647),
                       ),
@@ -144,9 +144,9 @@ class _HomePageState extends State<HomePage> {
                     _controller?.addDanmaku(
                       DanmakuContentItem(
                         "这是一条顶部弹幕",
-                        color: getRandomColor(),
-                        // isColorful: true,
-                        // color: Colors.white,
+                        // color: getRandomColor(),
+                        isColorful: true,
+                        color: Colors.white,
                         type: DanmakuItemType.top,
                         count: [1, 10, 100, 1000, 10000][_random.nextInt(5)],
                         extra: _random.nextInt(2147483647),
@@ -160,9 +160,9 @@ class _HomePageState extends State<HomePage> {
                     _controller?.addDanmaku(
                       DanmakuContentItem(
                         "这是一条底部弹幕",
-                        color: getRandomColor(),
-                        // isColorful: true,
-                        // color: Colors.white,
+                        // color: getRandomColor(),
+                        isColorful: true,
+                        color: Colors.white,
                         type: DanmakuItemType.bottom,
                         count: [1, 10, 100, 1000, 10000][_random.nextInt(5)],
                         extra: _random.nextInt(2147483647),
@@ -176,7 +176,7 @@ class _HomePageState extends State<HomePage> {
                     _controller?.addDanmaku(randSpecialDanmaku());
                   },
                   onLongPress: () {
-                    for (var i = 0; i < 100; i++) {
+                    for (var i = 0; i < 1000; i++) {
                       _controller?.addDanmaku(randSpecialDanmaku());
                     }
                   },

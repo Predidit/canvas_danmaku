@@ -109,11 +109,17 @@ class SpecialDanmakuContentItem<T> extends DanmakuContentItem<T> {
     }
     final duration = (_parseDouble(list[3]) * 1000).round();
     final String text = list[4].trim();
-    final rotateZ = _degreeToRadian(_parseInt(list[5]));
+    double rotateZ = _degreeToRadian(_parseInt(list[5]));
     final rotateY = _parseInt(list[6]);
-    final matrix = rotateY == 0
-        ? null
-        : (Matrix4.identity()..rotateY(_degreeToRadian(rotateY)));
+    Matrix4? matrix;
+    if (rotateY != 0) {
+      matrix = Matrix4.identity();
+      if (rotateZ != 0) {
+        matrix.rotateZ(rotateZ);
+        rotateZ = 0;
+      }
+      matrix.rotateY(_degreeToRadian(rotateY));
+    }
     var translateXTween = _makeTween(startX, endX);
     var translateYTween = _makeTween(startY, endY);
     final translationDuration = _parseInt(list[9]);
