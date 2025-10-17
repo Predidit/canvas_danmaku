@@ -802,8 +802,10 @@ class _HomePageState extends State<HomePage> {
         begin: _random.nextDouble(),
         end: _random.nextDouble(),
       ),
-      rotateZ: _random.nextDouble() * pi,
-      // matrix: Matrix4.identity()..rotateY(_random.nextDouble() * pi),
+      // rotateZ: _random.nextDouble() * pi,
+      matrix: Matrix4.identity()
+        ..rotateY(_random.nextDouble() * pi)
+        ..rotateZ(_random.nextDouble() * pi),
       duration: duration,
       translationDuration: translationDuration,
       translationStartDelay: translationStartDelay,

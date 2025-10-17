@@ -64,7 +64,7 @@ class DanmakuItem<T> {
         fontSize: fontSize,
         fontWeight: fontWeight,
       );
-      final img = DmUtils.recordDanmakuImage(
+      image = DmUtils.recordDanmakuImage(
         contentParagraph: paragraph,
         content: content,
         fontSize: fontSize,
@@ -72,11 +72,11 @@ class DanmakuItem<T> {
         strokeWidth: strokeWidth,
         devicePixelRatio: devicePixelRatio,
       );
-      image = img;
       width = paragraph.maxIntrinsicWidth +
           strokeWidth +
           (content.selfSend ? 4.0 : 0.0);
       height = paragraph.height + strokeWidth;
+      paragraph.dispose();
     }
   }
 

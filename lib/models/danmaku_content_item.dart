@@ -67,6 +67,8 @@ class SpecialDanmakuContentItem<T> extends DanmakuContentItem<T> {
   @override
   DanmakuItemType get type => DanmakuItemType.special;
 
+  late Rect rect;
+
   SpecialDanmakuContentItem(
     super.text, {
     required this.duration,

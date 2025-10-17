@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:canvas_danmaku/base_danmaku_painter.dart';
 import 'package:canvas_danmaku/models/danmaku_content_item.dart';
 import 'package:canvas_danmaku/models/danmaku_item.dart';
+import 'package:canvas_danmaku/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 final class SpecialDanmakuPainter extends BaseDanmakuPainter {
@@ -42,7 +43,7 @@ final class SpecialDanmakuPainter extends BaseDanmakuPainter {
           ));
 
     // 位移动画
-    final double dx, dy;
+    double dx, dy;
     if (elapsed > item.translationStartDelay) {
       late final translateProgress = item.easingType.transform(min(1.0,
           (elapsed - item.translationStartDelay) / item.translationDuration));
@@ -57,25 +58,30 @@ final class SpecialDanmakuPainter extends BaseDanmakuPainter {
       dx = item.translateXTween.begin! * size.width;
       dy = item.translateYTween.begin! * size.height;
     }
+    dx += item.rect.left;
+    dy += item.rect.top;
 
-    if (item.rotateZ != 0 || item.matrix != null) {
-      canvas
-        ..save()
-        ..translate(dx, dy);
-      if (item.matrix != null) {
-        canvas.transform(item.matrix!.storage);
-      } else {
-        canvas.rotate(item.rotateZ);
-      }
-      paintImg(canvas, dm.image!, 0, 0, Paint()..color = color);
-      canvas.restore();
-    } else {
-      paintImg(canvas, dm.image!, dx, dy, Paint()..color = color);
-    }
+    paintImg(
+      canvas,
+      dm.image ??= DmUtils.recordSpecialDanmakuImg(
+        content: item,
+        fontWeight: fontWeight,
+        strokeWidth: strokeWidth,
+        devicePixelRatio: devicePixelRatio,
+      ),
+      dx,
+      dy,
+      Paint()..color = color,
+    );
   }
 
   void paintImg(
-      ui.Canvas canvas, ui.Image image, double dx, double dy, Paint paint) {
+    ui.Canvas canvas,
+    ui.Image image,
+    double dx,
+    double dy,
+    Paint paint,
+  ) {
     if (devicePixelRatio == 1.0) {
       canvas.drawImage(image, Offset(dx, dy), paint);
     } else {

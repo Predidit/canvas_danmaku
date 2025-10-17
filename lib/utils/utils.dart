@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 abstract final class DmUtils {
   static final Random random = Random();
 
+  static const maxRasterizeSize = 8192.0;
+
   static String generateRandomString(int length) {
     const characters = '0123456789abcdefghijklmnopqrstuvwxyz';
 
@@ -140,14 +142,12 @@ abstract final class DmUtils {
     required double strokeWidth,
     required double devicePixelRatio,
   }) {
-    final ui.ParagraphBuilder builder = ui.ParagraphBuilder(
-      ui.ParagraphStyle(
-        textAlign: TextAlign.left,
-        fontWeight: FontWeight.values[fontWeight],
-        textDirection: TextDirection.ltr,
-        fontSize: content.fontSize,
-      ),
-    )
+    final builder = ui.ParagraphBuilder(ui.ParagraphStyle(
+      textAlign: TextAlign.left,
+      fontWeight: FontWeight.values[fontWeight],
+      textDirection: TextDirection.ltr,
+      fontSize: content.fontSize,
+    ))
       ..pushStyle(ui.TextStyle(
         color: content.color,
         fontSize: content.fontSize,
@@ -160,46 +160,112 @@ abstract final class DmUtils {
     final paragraph = builder.build()
       ..layout(const ui.ParagraphConstraints(width: double.infinity));
 
+    final strokeOffset = strokeWidth / 2;
+    final totalWidth = paragraph.maxIntrinsicWidth + strokeWidth;
+    final totalHeight = paragraph.height + strokeWidth;
+
     final rec = ui.PictureRecorder();
-    // TODO: record rotated image
-    ui.Canvas(rec)
-      ..scale(devicePixelRatio)
-      ..drawParagraph(
-        paragraph,
-        Offset(strokeWidth / 2, strokeWidth / 2),
+    final canvas = ui.Canvas(rec);
+
+    final Rect rect;
+    double adjuestDevicePixelRatio = devicePixelRatio;
+
+    if (content.rotateZ != 0 || content.matrix != null) {
+      rect = _calculateRotatedBounds(
+        totalWidth,
+        totalHeight,
+        content.rotateZ,
+        content.matrix,
       );
 
+      final imgLongestSide = rect.size.longestSide * devicePixelRatio;
+      if (imgLongestSide > maxRasterizeSize) {
+        // force resize
+        adjuestDevicePixelRatio = maxRasterizeSize / imgLongestSide;
+      }
+      canvas
+        ..scale(adjuestDevicePixelRatio)
+        ..translate(strokeOffset - rect.left, strokeOffset - rect.top);
+
+      if (content.matrix case final matrix?) {
+        canvas.transform(matrix.storage);
+      } else {
+        canvas.rotate(content.rotateZ);
+      }
+      canvas.drawParagraph(paragraph, Offset.zero);
+    } else {
+      rect = Rect.fromLTRB(0, 0, totalWidth, totalHeight);
+
+      final imgLongestSide = totalWidth * devicePixelRatio;
+      if (imgLongestSide > maxRasterizeSize) {
+        final scale = maxRasterizeSize / imgLongestSide;
+        adjuestDevicePixelRatio = scale;
+      }
+      canvas
+        ..scale(adjuestDevicePixelRatio)
+        ..drawParagraph(paragraph, Offset(strokeOffset, strokeOffset));
+    }
+
+    content.rect = rect;
+
+    final imgSize = rect.size * adjuestDevicePixelRatio;
     final pic = rec.endRecording();
-    final img = pic.toImageSync(
-      ((paragraph.maxIntrinsicWidth + strokeWidth) * devicePixelRatio).ceil(),
-      ((paragraph.height + strokeWidth) * devicePixelRatio).ceil(),
-    );
+    final img = pic.toImageSync(imgSize.width.ceil(), imgSize.height.ceil());
     pic.dispose();
+    paragraph.dispose();
+
     return img;
   }
 
-  // static (double, double) _calcRotatedSize(
-  //   double w,
-  //   double h,
-  //   double rotateZ,
-  //   Matrix4? matrix,
-  // ) {
-  //   final double cosZ;
-  //   final double cosY;
-  //   final double sinZ;
-  //   if (matrix == null) {
-  //     cosZ = cos(rotateZ);
-  //     sinZ = sin(rotateZ);
-  //     cosY = 1;
-  //   } else {
-  //     cosZ = matrix[5];
-  //     sinZ = matrix[1];
-  //     cosY = matrix[10];
-  //   }
+  static Rect _calculateRotatedBounds(
+    double w,
+    double h,
+    double rotateZ,
+    Matrix4? matrix,
+  ) {
+    final double cosZ;
+    final double cosY;
+    final double sinZ;
+    if (matrix == null) {
+      cosZ = cos(rotateZ);
+      sinZ = sin(rotateZ);
+      cosY = 1;
+    } else {
+      cosZ = matrix[5];
+      sinZ = matrix[1];
+      cosY = matrix[10];
+    }
 
-  //   final rotatedWidth = (w * cosZ * cosY + h * sinZ * cosY).abs();
-  //   final rotatedHeight = (w * sinZ + h * cosZ).abs();
+    final wx = w * cosZ * cosY;
+    final wy = w * sinZ;
+    final hx = -h * sinZ * cosY;
+    final hy = h * cosZ;
 
-  //   return (rotatedWidth, rotatedHeight);
-  // }
+    final minX = _min4(0.0, wx, hx, wx + hx);
+    final maxX = _max4(0.0, wx, hx, wx + hx);
+    final minY = _min4(0.0, wy, hy, wy + hy);
+    final maxY = _max4(0.0, wy, hy, wy + hy);
+
+    return Rect.fromLTRB(minX, minY, maxX, maxY);
+  }
+
+  @pragma("vm:prefer-inline")
+  static double _min4(double a, double b, double c, double d) {
+    final ab = a < b ? a : b;
+    final cd = c < d ? c : d;
+    return ab < cd ? ab : cd;
+  }
+
+  @pragma("vm:prefer-inline")
+  static double _max4(double a, double b, double c, double d) {
+    final ab = a > b ? a : b;
+    final cd = c > d ? c : d;
+    return ab > cd ? ab : cd;
+  }
+
+  static void tweenAdd(Tween<double> tween, double value) {
+    tween
+      ..begin = tween.begin! + value
+      ..end = tween.end! + value;
+  }
 }
