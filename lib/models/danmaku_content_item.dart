@@ -99,7 +99,7 @@ class SpecialDanmakuContentItem<T> extends DanmakuContentItem<T> {
   }) {
     final (startX, endX) = _toRelativePosition(list[0], list[7], videoX);
     final (startY, endY) = _toRelativePosition(list[1], list[8], videoY);
-    final List<String> alphaString = list[2].split('-');
+    final alphaString = (list[2] as String).split('-');
     final startA = double.tryParse(alphaString[0]) ?? 1;
     final endA = double.tryParse(alphaString[1]) ?? 1;
     Tween<double>? alphaTween;
@@ -110,7 +110,7 @@ class SpecialDanmakuContentItem<T> extends DanmakuContentItem<T> {
       alphaTween = Tween(begin: startA, end: endA);
     }
     final duration = (_parseDouble(list[3]) * 1000).round();
-    final String text = list[4].trim();
+    final text = (list[4] as String).trimRight();
     double rotateZ = _degreeToRadian(_parseInt(list[5]));
     final rotateY = _parseInt(list[6]);
     Matrix4? matrix;
@@ -204,7 +204,7 @@ class SpecialDanmakuContentItem<T> extends DanmakuContentItem<T> {
   }
 
   static double _degreeToRadian(int degree) {
-    const pi180 = pi / 180;
+    const pi180 = pi / 180.0;
     return degree * pi180;
   }
 }
