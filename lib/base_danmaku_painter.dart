@@ -14,6 +14,8 @@ abstract base class BaseDanmakuPainter extends CustomPainter {
   final int batchThreshold;
   final int tick;
 
+  static final Paint _paint = Paint();
+
   const BaseDanmakuPainter({
     required this.length,
     required this.danmakuItems,
@@ -32,16 +34,15 @@ abstract base class BaseDanmakuPainter extends CustomPainter {
     double dx,
     double dy,
     double devicePixelRatio,
-    Paint paint,
   ) {
     final img = item.image!;
     if (devicePixelRatio == 1.0) {
-      canvas.drawImage(img, Offset(dx, dy), paint);
+      canvas.drawImage(img, Offset(dx, dy), _paint);
     } else {
       final src =
           Rect.fromLTWH(0, 0, img.width.toDouble(), img.height.toDouble());
       final dst = Rect.fromLTWH(dx, dy, item.width, item.height);
-      canvas.drawImageRect(img, src, dst, paint);
+      canvas.drawImageRect(img, src, dst, _paint);
     }
   }
 

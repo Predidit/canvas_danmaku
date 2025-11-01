@@ -20,6 +20,8 @@ final class SpecialDanmakuPainter extends BaseDanmakuPainter {
     super.batchThreshold,
   });
 
+  static final _paint = Paint();
+
   @override
   void paintDanmaku(ui.Canvas canvas, ui.Size size, DanmakuItem item) {
     final elapsed = tick - (item.drawTick ??= tick);
@@ -71,7 +73,7 @@ final class SpecialDanmakuPainter extends BaseDanmakuPainter {
       ),
       dx,
       dy,
-      Paint()..color = color,
+      _paint..color = color,
     );
   }
 

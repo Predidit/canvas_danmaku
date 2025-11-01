@@ -93,9 +93,11 @@ abstract final class DmUtils {
         ..style = PaintingStyle.stroke
         ..strokeWidth = strokeWidth;
 
-      final count = content.count;
+      if (!content.isColorful) {
+        strokePaint.color = Colors.black;
+      }
 
-      if (count != null) {
+      if (content.count case final count?) {
         builder
           ..pushStyle(ui.TextStyle(
             fontSize: fontSize * 0.6,
@@ -108,10 +110,6 @@ abstract final class DmUtils {
       builder
         ..pushStyle(ui.TextStyle(fontSize: fontSize, foreground: strokePaint))
         ..addText(content.text);
-
-      if (!content.isColorful) {
-        strokePaint.color = Colors.black;
-      }
 
       final strokeParagraph = builder.build()
         ..layout(const ui.ParagraphConstraints(width: double.infinity));
@@ -168,7 +166,7 @@ abstract final class DmUtils {
     final canvas = ui.Canvas(rec);
 
     final Rect rect;
-    double adjuestDevicePixelRatio = devicePixelRatio;
+    double adjustDevicePixelRatio = devicePixelRatio;
 
     if (content.rotateZ != 0 || content.matrix != null) {
       rect = _calculateRotatedBounds(
@@ -181,10 +179,10 @@ abstract final class DmUtils {
       final imgLongestSide = rect.size.longestSide * devicePixelRatio;
       if (imgLongestSide > maxRasterizeSize) {
         // force resize
-        adjuestDevicePixelRatio = maxRasterizeSize / imgLongestSide;
+        adjustDevicePixelRatio = maxRasterizeSize / imgLongestSide;
       }
       canvas
-        ..scale(adjuestDevicePixelRatio)
+        ..scale(adjustDevicePixelRatio)
         ..translate(strokeOffset - rect.left, strokeOffset - rect.top);
 
       if (content.matrix case final matrix?) {
@@ -199,16 +197,16 @@ abstract final class DmUtils {
       final imgLongestSide = totalWidth * devicePixelRatio;
       if (imgLongestSide > maxRasterizeSize) {
         final scale = maxRasterizeSize / imgLongestSide;
-        adjuestDevicePixelRatio = scale;
+        adjustDevicePixelRatio = scale;
       }
       canvas
-        ..scale(adjuestDevicePixelRatio)
+        ..scale(adjustDevicePixelRatio)
         ..drawParagraph(paragraph, Offset(strokeOffset, strokeOffset));
     }
 
     content.rect = rect;
 
-    final imgSize = rect.size * adjuestDevicePixelRatio;
+    final imgSize = rect.size * adjustDevicePixelRatio;
     final pic = rec.endRecording();
     final img = pic.toImageSync(imgSize.width.ceil(), imgSize.height.ceil());
     pic.dispose();

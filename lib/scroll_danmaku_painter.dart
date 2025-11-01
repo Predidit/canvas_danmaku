@@ -53,7 +53,6 @@ final class ScrollDanmakuPainter extends BaseDanmakuPainter {
       item.xPosition,
       item.yPosition,
       devicePixelRatio,
-      Paint(),
     );
 
     item.drawTick = tick;

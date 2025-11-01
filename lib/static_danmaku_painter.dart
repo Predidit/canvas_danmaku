@@ -13,11 +13,6 @@ final class StaticDanmakuPainter extends CustomPainter {
   final double devicePixelRatio;
   final int tick;
 
-  late final Paint selfSendPaint = Paint()
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = strokeWidth
-    ..color = Colors.green;
-
   StaticDanmakuPainter({
     required this.length,
     required this.danmakuItems,
@@ -50,7 +45,6 @@ final class StaticDanmakuPainter extends CustomPainter {
             ? size.height - item.yPosition - item.height
             : item.yPosition,
         devicePixelRatio,
-        Paint(),
       );
     }
   }

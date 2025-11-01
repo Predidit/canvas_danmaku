@@ -77,12 +77,13 @@ class _HomePageState extends State<HomePage> {
   /// 为字幕预留空间
   bool _safeArea = true;
 
-  late final dmPadding = EdgeInsets.fromLTRB(
-    _random.nextDouble() * 50 + 10,
-    _random.nextDouble() * 50 + 10,
-    _random.nextDouble() * 50 + 10,
-    _random.nextDouble() * 50 + 10,
-  );
+  late final dmPadding = EdgeInsets.zero;
+  //  EdgeInsets.fromLTRB(
+  //   _random.nextDouble() * 50 + 10,
+  //   _random.nextDouble() * 50 + 10,
+  //   _random.nextDouble() * 50 + 10,
+  //   _random.nextDouble() * 50 + 10,
+  // );
 
   DanmakuItem? _suspendedDM;
   OverlayEntry? _overlayEntry;
@@ -129,9 +130,9 @@ class _HomePageState extends State<HomePage> {
                     _controller?.addDanmaku(
                       DanmakuContentItem(
                         "这是一条超长弹幕ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789这是一条超长的弹幕，这条弹幕会超出屏幕宽度",
-                        isColorful: true,
-                        color: Colors.white,
-                        // color: getRandomColor(),
+                        // isColorful: true,
+                        // color: Colors.white,
+                        color: getRandomColor(),
                         count: [1, 10, 100, 1000, 10000][_random.nextInt(5)],
                         extra: _random.nextInt(2147483647),
                       ),
@@ -144,9 +145,9 @@ class _HomePageState extends State<HomePage> {
                     _controller?.addDanmaku(
                       DanmakuContentItem(
                         "这是一条顶部弹幕",
-                        // color: getRandomColor(),
-                        isColorful: true,
-                        color: Colors.white,
+                        color: getRandomColor(),
+                        // isColorful: true,
+                        // color: Colors.white,
                         type: DanmakuItemType.top,
                         count: [1, 10, 100, 1000, 10000][_random.nextInt(5)],
                         extra: _random.nextInt(2147483647),
@@ -160,9 +161,9 @@ class _HomePageState extends State<HomePage> {
                     _controller?.addDanmaku(
                       DanmakuContentItem(
                         "这是一条底部弹幕",
-                        // color: getRandomColor(),
-                        isColorful: true,
-                        color: Colors.white,
+                        color: getRandomColor(),
+                        // isColorful: true,
+                        // color: Colors.white,
                         type: DanmakuItemType.bottom,
                         count: [1, 10, 100, 1000, 10000][_random.nextInt(5)],
                         extra: _random.nextInt(2147483647),
@@ -266,9 +267,9 @@ class _HomePageState extends State<HomePage> {
                     _controller?.addDanmaku(
                       DanmakuContentItem(
                         "这是一条自己发的弹幕",
-                        // color: getRandomColor(),
-                        color: Colors.white,
-                        isColorful: true,
+                        color: getRandomColor(),
+                        // color: Colors.white,
+                        // isColorful: true,
                         type: const [
                           DanmakuItemType.top,
                           DanmakuItemType.bottom,
@@ -323,6 +324,7 @@ class _HomePageState extends State<HomePage> {
               padding: dmPadding,
               child: Listener(
                 onPointerUp: (event) {
+                  return;
                   if (_controller == null) return;
 
                   // final items = _controller
@@ -578,13 +580,12 @@ class _HomePageState extends State<HomePage> {
                       Slider(
                         value: _fontSize,
                         min: 8,
-                        max: 36,
-                        divisions: 14,
+                        max: 100,
                         onChanged: (e) {
                           if (_controller != null) {
-                            _fontSize = e;
+                            _fontSize = e.round().toDouble();
                             _controller!.updateOption(
-                              _controller!.option.copyWith(fontSize: e),
+                              _controller!.option.copyWith(fontSize: _fontSize),
                             );
                             (context as Element).markNeedsBuild();
                           }
