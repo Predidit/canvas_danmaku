@@ -29,6 +29,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   canvas_danmaku:
     path: ../
+  xml: ^6.6.1
 
 dev_dependencies:
   flutter_test:

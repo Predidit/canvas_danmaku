@@ -7,6 +7,7 @@ import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:xml/xml.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -281,6 +282,10 @@ class _HomePageState extends State<HomePage> {
                     );
                   },
                 ),
+                TextButton(
+                  onPressed: loadXmlDmFromAsset,
+                  child: const Text('XML'),
+                ),
                 IconButton(
                   icon: const Icon(Icons.play_circle_outline_outlined),
                   onPressed: startPlay,
@@ -313,6 +318,7 @@ class _HomePageState extends State<HomePage> {
                   onPressed: () {
                     _controller?.clear();
                     _removeOverlay();
+                    _stopTimer();
                   },
                   tooltip: 'Clear',
                 ),
@@ -756,24 +762,93 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Timer? timer;
-  int sec = 0;
+  Timer? _timer;
+
+  void _stopTimer() {
+    _timer?.cancel();
+    _timer = null;
+  }
+
+  Future<void> loadXmlDmFromAsset() async {
+    _stopTimer();
+
+    // final xmlString = await rootBundle.loadString('assets/dm.xml');
+    final xmlString = await rootBundle.loadString('assets/dm_special.xml');
+    final document = XmlDocument.parse(xmlString);
+
+    final danmakus = document.findAllElements('d').toList();
+
+    int index = 0;
+    final length = danmakus.length;
+    _timer = Timer.periodic(const Duration(milliseconds: 200), (_) {
+      if (index > length || _controller == null) {
+        _stopTimer();
+        return;
+      }
+      final dm = danmakus[index];
+      final pAttr = dm.getAttribute('p');
+      final content = dm.innerText;
+      if (pAttr != null) {
+        final parts = pAttr.split(',');
+        final type = _parseType(parts[1]);
+        final color = _parseColor(parts[3]);
+        if (type == DanmakuItemType.special) {
+          try {
+            _controller!.addDanmaku(
+              SpecialDanmakuContentItem.fromList(
+                color,
+                double.parse(parts[2]),
+                jsonDecode(content.replaceAll('\n', '\\n')),
+              ),
+            );
+          } catch (_) {}
+        } else {
+          _controller?.addDanmaku(
+            DanmakuContentItem(
+              content,
+              type: type,
+              color: color,
+            ),
+          );
+        }
+      }
+      index++;
+    });
+  }
+
+  Color _parseColor(String color) => Color(int.parse(color) | 0xFF000000);
+
+  DanmakuItemType _parseType(String type) => switch (type) {
+    '4' => DanmakuItemType.bottom,
+    '5' => DanmakuItemType.top,
+    '7' => DanmakuItemType.special,
+    _ => DanmakuItemType.scroll,
+  };
+
   Future<void> startPlay() async {
+    _stopTimer();
     String data = await rootBundle.loadString('assets/132590001.json');
     List<DanmakuContentItem<int>> items = [];
     Map jsonMap = json.decode(data);
     for (Map item in jsonMap['comments']) {
+      final parts = (item['p'] as String).split(',');
       items.add(
         DanmakuContentItem(
           item['m'],
-          color: Colors.white,
+          type: _parseType(parts[1]),
+          color: _parseColor(parts[2]),
         ),
       );
     }
-    timer ??= Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_controller == null) return;
-      _controller?.addDanmaku(items[sec]);
-      sec++;
+    int index = 0;
+    final length = items.length;
+    _timer = Timer.periodic(const Duration(milliseconds: 200), (_) {
+      if (index > length || _controller == null) {
+        _stopTimer();
+        return;
+      }
+      _controller?.addDanmaku(items[index]);
+      index++;
     });
   }
 
@@ -818,7 +893,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
-    timer?.cancel();
+    _stopTimer();
     super.dispose();
   }
 }
