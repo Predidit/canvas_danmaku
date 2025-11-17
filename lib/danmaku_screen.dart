@@ -45,9 +45,6 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
   /// 高级弹幕
   final _specialDanmakuItems = <DanmakuItem<T>>[];
 
-  /// 高级弹幕
-  final List<DanmakuItem> _specialDanmakuItems = [];
-
   /// 弹幕高度
   late double _danmakuHeight;
 
