@@ -164,14 +164,12 @@ class SpecialDanmakuContentItem<T> extends DanmakuContentItem<T> {
             ? value /= videoSize
             : value;
 
-    double? convert(value) {
-      if (value is num) {
-        return value.toDouble();
-      } else if (value is String) {
-        return double.tryParse(value);
-      }
-      return null;
-    }
+    double? convert(dynamic digit) => switch (digit) {
+          int() => digit.toDouble(),
+          double() => digit.isFinite ? digit : null,
+          String() => double.tryParse(digit),
+          _ => null
+        };
 
     double? start = convert(rawStart);
     double? end = convert(rawEnd);

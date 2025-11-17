@@ -233,6 +233,54 @@ class _HomePageState extends State<HomePage> {
                   },
                 ),
                 TextButton(
+                  child: const Text('Big'),
+                  onPressed: () {
+                    final color = getRandomColor();
+                    _controller!.addDanmaku(
+                      SpecialDanmakuContentItem(
+                        '测试',
+                        duration: 4000,
+                        color: color,
+                        fontSize: 128,
+                        translateXTween: ConstantTween(0),
+                        translateYTween: ConstantTween(0),
+                        alphaTween: Tween<double>(begin: 1, end: 0),
+                        easingType: Curves.linear,
+                        hasStroke: true,
+                        extra: _random.nextInt(2147483647),
+                      ),
+                    );
+                    _controller!.addDanmaku(
+                      SpecialDanmakuContentItem(
+                        '测试' * 200,
+                        duration: 4000,
+                        color: color,
+                        fontSize: 128,
+                        translateXTween: ConstantTween(0),
+                        translateYTween: ConstantTween(0),
+                        alphaTween: Tween<double>(begin: 1, end: 0),
+                        easingType: Curves.linear,
+                        hasStroke: true,
+                        extra: _random.nextInt(2147483647),
+                      ),
+                    );
+                    _controller!.addDanmaku(
+                      SpecialDanmakuContentItem(
+                        '测试\n' * 200,
+                        duration: 4000,
+                        color: color,
+                        fontSize: 128,
+                        translateXTween: ConstantTween(0),
+                        translateYTween: ConstantTween(0),
+                        alphaTween: Tween<double>(begin: 1, end: 0),
+                        easingType: Curves.linear,
+                        hasStroke: true,
+                        extra: _random.nextInt(2147483647),
+                      ),
+                    );
+                  },
+                ),
+                TextButton(
                   child: const Text('DanMu'),
                   onPressed: () async {
                     String data = await rootBundle.loadString('assets/dm.json');
