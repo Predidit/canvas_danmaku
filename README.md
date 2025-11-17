@@ -17,9 +17,9 @@ and the Flutter guide for
 
 ## 示例
 
-``` yaml
-dependencies: 
-  canvas_danmaku: ^0.2.7
+```yaml
+dependencies:
+  canvas_danmaku: ^0.3.0
 ```
 
 Example:
@@ -81,4 +81,3 @@ class _DanmakuPageState extends State<DanmakuPage> {
 ## 致谢
 
 [xiaoyaocz/ns_danmaku](https://github.com/xiaoyaocz/flutter_ns_danmaku) 本项目的灵感来自 ns_danmaku ，一个非常优秀的项目。
-
