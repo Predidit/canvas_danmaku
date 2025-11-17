@@ -62,16 +62,16 @@ class _HomePageState extends State<HomePage> {
   double _fontSize = (Platform.isIOS || Platform.isAndroid) ? 16 : 25;
 
   /// 弹幕粗细
-  int _fontWeight = 4;
+  final int _fontWeight = 4;
 
   /// 隐藏滚动弹幕
-  bool _hideScroll = false;
+  final bool _hideScroll = false;
 
   /// 隐藏顶部弹幕
-  bool _hideTop = false;
+  final bool _hideTop = false;
 
   /// 隐藏底部弹幕
-  bool _hideBottom = false;
+  final bool _hideBottom = false;
 
   bool _hideSpecial = false;
 
