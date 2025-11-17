@@ -4,7 +4,6 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:canvas_danmaku/canvas_danmaku.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:xml/xml.dart';
@@ -93,24 +92,6 @@ class _HomePageState extends State<HomePage> {
     _suspendedDM = null;
     _overlayEntry?.remove();
     _overlayEntry = null;
-  }
-
-  static const overlaySpacing = 10.0;
-  static const overlayWidth = 130.0;
-  static const overlayHeight = 35.0;
-
-  Widget _overlayItem(Widget child, {required VoidCallback onTap}) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: SizedBox(
-        height: overlayHeight,
-        width: overlayWidth / 3,
-        child: Center(
-          child: child,
-        ),
-      ),
-    );
   }
 
   @override
@@ -379,148 +360,26 @@ class _HomePageState extends State<HomePage> {
               child: Listener(
                 onPointerUp: (event) {
                   return;
-                  if (_controller == null) return;
-
-                  // final items = _controller
-                  //     !.findDanmaku(event.localPosition)
-                  //     .toList();
-                  // if (items != null && items.isNotEmpty) {
-                  //   for (var i in items) {
-                  //     i.suspend = true;
-                  //   }
-                  //   debugPrint(items.toString());
-                  // Future.delayed(const Duration(seconds: 3), () {
-                  //   for (var i in items) {
-                  //     i.suspend = false;
-                  //   }
-                  // });
-                  // }
-
-                  /// single
-                  final item = _controller!.findSingleDanmaku(
-                    event.localPosition,
-                  );
-
-                  if (item == null) {
-                    _removeOverlay();
-                  } else if (item != _suspendedDM) {
-                    _removeOverlay();
-                    item.suspend = true;
-                    _suspendedDM = item;
-                    print('danmaku id: ${item.content.extra}');
-
-                    final dy = item.content.type == DanmakuItemType.bottom
-                        ? _controller!.viewHeight - item.yPosition - item.height
-                        : item.yPosition;
-                    final dySpacing =
-                        event.position.dy - event.localPosition.dy;
-                    final dxSpacing =
-                        event.position.dx - event.localPosition.dx;
-                    _overlayEntry = OverlayEntry(
-                      builder: (context) {
-                        return Positioned(
-                          top: dy + item.height + dySpacing,
-                          left: clampDouble(
-                            event.position.dx - overlayWidth / 2,
-                            overlaySpacing + dxSpacing,
-                            _controller!.viewWidth -
-                                overlayWidth -
-                                overlaySpacing +
-                                dxSpacing,
-                          ),
-                          child: Column(
-                            children: [
-                              CustomPaint(
-                                painter: TrianglePainter(Colors.black54),
-                                size: const Size(12, 6),
-                              ),
-                              Container(
-                                width: overlayWidth,
-                                height: overlayHeight,
-                                decoration: const BoxDecoration(
-                                  color: Colors.black54,
-                                  borderRadius: BorderRadiusGeometry.all(
-                                    Radius.circular(18),
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    _overlayItem(
-                                      const Icon(
-                                        size: 20,
-                                        Icons.thumb_up_off_alt_outlined,
-                                        color: Colors.white,
-                                      ),
-                                      onTap: () {
-                                        _removeOverlay();
-                                        print('on thumb up');
-                                      },
-                                    ),
-                                    _overlayItem(
-                                      const Icon(
-                                        size: 20,
-                                        Icons.copy,
-                                        color: Colors.white,
-                                      ),
-                                      onTap: () {
-                                        Clipboard.setData(
-                                          ClipboardData(
-                                            text: item.content.text,
-                                          ),
-                                        );
-                                        _removeOverlay();
-                                        print('on copy');
-                                      },
-                                    ),
-                                    _overlayItem(
-                                      const Icon(
-                                        size: 20,
-                                        Icons.report_problem_outlined,
-                                        color: Colors.white,
-                                      ),
-                                      onTap: () {
-                                        _removeOverlay();
-                                        print('on report');
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    );
-                    Overlay.of(context).insert(_overlayEntry!);
-                  }
                 },
                 child: ColoredBox(
                   color: Colors.grey,
-                  child: AnimatedOpacity(
-                    opacity: _opacity,
-                    duration: const Duration(milliseconds: 100),
-                    child: DanmakuScreen<int>(
-                      key: _danmuKey,
-                      createdController: (e) {
-                        _controller = e;
-                      },
-                      option: DanmakuOption(
-                        fontSize: _fontSize,
-                        fontWeight: _fontWeight,
-                        duration: _duration,
-                        staticDuration: _staticDuration,
-                        strokeWidth: _strokeWidth,
-                        massiveMode: _massiveMode,
-                        hideScroll: _hideScroll,
-                        hideTop: _hideTop,
-                        hideBottom: _hideBottom,
-                        safeArea: _safeArea,
-                        lineHeight: _lineHeight,
-                      ),
+                  child: DanmakuScreen<int>(
+                    key: _danmuKey,
+                    createdController: (e) {
+                      _controller = e;
+                    },
+                    option: DanmakuOption(
+                      fontSize: _fontSize,
+                      fontWeight: _fontWeight,
+                      duration: _duration,
+                      staticDuration: _staticDuration,
+                      strokeWidth: _strokeWidth,
+                      massiveMode: _massiveMode,
+                      hideScroll: _hideScroll,
+                      hideTop: _hideTop,
+                      hideBottom: _hideBottom,
+                      safeArea: _safeArea,
+                      lineHeight: _lineHeight,
                     ),
                   ),
                 ),
@@ -621,8 +480,15 @@ class _HomePageState extends State<HomePage> {
                 max: 1.0,
                 divisions: 9,
                 onChanged: (e) {
-                  _opacity = double.parse(e.toStringAsFixed(1));
-                  setState(() {});
+                  if (_controller != null) {
+                    _opacity = e;
+                    _controller!.updateOption(
+                      _controller!.option.copyWith(
+                        opacity: _opacity,
+                      ),
+                    );
+                  }
+                  (context as Element).markNeedsBuild();
                 },
               ),
               Builder(

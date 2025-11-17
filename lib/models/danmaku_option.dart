@@ -11,6 +11,9 @@ class DanmakuOption {
   /// 滚动弹幕运行时间，秒
   final double duration;
 
+  /// 弹幕透明度
+  final double opacity;
+
   final double durationInMilliseconds;
 
   /// 静态弹幕运行时间，秒
@@ -47,6 +50,7 @@ class DanmakuOption {
     this.area = 1.0,
     this.duration = 10,
     this.staticDuration = 5,
+    this.opacity = 1.0,
     this.hideBottom = false,
     this.hideScroll = false,
     this.hideTop = false,
@@ -64,6 +68,7 @@ class DanmakuOption {
     double? area,
     double? duration,
     double? staticDuration,
+    double? opacity,
     bool? hideTop,
     bool? hideBottom,
     bool? hideScroll,
@@ -79,6 +84,7 @@ class DanmakuOption {
       fontWeight: fontWeight ?? this.fontWeight,
       duration: duration ?? this.duration,
       staticDuration: staticDuration ?? this.staticDuration,
+      opacity: opacity ?? this.opacity,
       hideTop: hideTop ?? this.hideTop,
       hideBottom: hideBottom ?? this.hideBottom,
       hideScroll: hideScroll ?? this.hideScroll,

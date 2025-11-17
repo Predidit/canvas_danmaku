@@ -492,79 +492,82 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
         }
 
         return ClipRect(
-          child: IgnorePointer(
-            child: Stack(
-              children: [
-                RepaintBoundary.wrap(
-                  ValueListenableBuilder(
-                    valueListenable: _notifier,
-                    builder: (context, value, child) {
-                      return CustomPaint(
-                        willChange: _running,
-                        painter: ScrollDanmakuPainter(
-                          length: _scrollDanmakuItems.length,
-                          danmakuItems: _scrollDanmakuItems,
-                          durationInMilliseconds:
-                              _option.durationInMilliseconds,
-                          fontSize: _option.fontSize,
-                          fontWeight: _option.fontWeight,
-                          strokeWidth: _option.strokeWidth,
-                          devicePixelRatio: devicePixelRatio,
-                          running: _running,
-                          tick: value,
-                        ),
-                        size: Size.infinite,
-                      );
-                    },
+          child: Opacity(
+            opacity: _option.opacity,
+            child: IgnorePointer(
+              child: Stack(
+                children: [
+                  RepaintBoundary.wrap(
+                    ValueListenableBuilder(
+                      valueListenable: _notifier,
+                      builder: (context, value, child) {
+                        return CustomPaint(
+                          willChange: _running,
+                          painter: ScrollDanmakuPainter(
+                            length: _scrollDanmakuItems.length,
+                            danmakuItems: _scrollDanmakuItems,
+                            durationInMilliseconds:
+                                _option.durationInMilliseconds,
+                            fontSize: _option.fontSize,
+                            fontWeight: _option.fontWeight,
+                            strokeWidth: _option.strokeWidth,
+                            devicePixelRatio: devicePixelRatio,
+                            running: _running,
+                            tick: value,
+                          ),
+                          size: Size.infinite,
+                        );
+                      },
+                    ),
+                    0,
                   ),
-                  0,
-                ),
-                RepaintBoundary.wrap(
-                  ValueListenableBuilder(
-                    valueListenable: _staticDanmakuItems,
-                    builder: (context, value, child) {
-                      return CustomPaint(
-                        painter: StaticDanmakuPainter(
-                          length: value.length,
-                          danmakuItems: value,
-                          staticDurationInMilliseconds:
-                              _option.staticDurationInMilliseconds,
-                          fontSize: _option.fontSize,
-                          fontWeight: _option.fontWeight,
-                          strokeWidth: _option.strokeWidth,
-                          devicePixelRatio: devicePixelRatio,
-                          tick: _notifier.value,
-                        ),
-                        size: Size.infinite,
-                      );
-                    },
+                  RepaintBoundary.wrap(
+                    ValueListenableBuilder(
+                      valueListenable: _staticDanmakuItems,
+                      builder: (context, value, child) {
+                        return CustomPaint(
+                          painter: StaticDanmakuPainter(
+                            length: value.length,
+                            danmakuItems: value,
+                            staticDurationInMilliseconds:
+                                _option.staticDurationInMilliseconds,
+                            fontSize: _option.fontSize,
+                            fontWeight: _option.fontWeight,
+                            strokeWidth: _option.strokeWidth,
+                            devicePixelRatio: devicePixelRatio,
+                            tick: _notifier.value,
+                          ),
+                          size: Size.infinite,
+                        );
+                      },
+                    ),
+                    1,
                   ),
-                  1,
-                ),
-                RepaintBoundary.wrap(
-                  IgnorePointer(
-                      child: ValueListenableBuilder(
-                    valueListenable: _notifier, // 与滚动弹幕共用控制器
-                    builder: (context, value, child) {
-                      return CustomPaint(
-                        willChange: _running,
-                        painter: SpecialDanmakuPainter(
-                          length: _specialDanmakuItems.length,
-                          danmakuItems: _specialDanmakuItems,
-                          fontSize: _option.fontSize,
-                          fontWeight: _option.fontWeight,
-                          strokeWidth: _option.strokeWidth,
-                          devicePixelRatio: devicePixelRatio,
-                          running: _running,
-                          tick: value,
-                        ),
-                        size: Size.infinite,
-                      );
-                    },
-                  )),
-                  2,
-                ),
-              ],
+                  RepaintBoundary.wrap(
+                    IgnorePointer(
+                        child: ValueListenableBuilder(
+                      valueListenable: _notifier, // 与滚动弹幕共用控制器
+                      builder: (context, value, child) {
+                        return CustomPaint(
+                          willChange: _running,
+                          painter: SpecialDanmakuPainter(
+                            length: _specialDanmakuItems.length,
+                            danmakuItems: _specialDanmakuItems,
+                            fontSize: _option.fontSize,
+                            fontWeight: _option.fontWeight,
+                            strokeWidth: _option.strokeWidth,
+                            devicePixelRatio: devicePixelRatio,
+                            running: _running,
+                            tick: value,
+                          ),
+                          size: Size.infinite,
+                        );
+                      },
+                    )),
+                    2,
+                  ),
+                ],
+              ),
             ),
           ),
         );
