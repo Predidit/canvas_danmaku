@@ -1,18 +1,17 @@
 import 'dart:ui' as ui;
-import '/models/danmaku_content_item.dart';
 
-class DanmakuItem {
+import 'package:canvas_danmaku/models/danmaku_content_item.dart';
+import 'package:canvas_danmaku/utils/utils.dart';
+
+class DanmakuItem<T> {
   /// 弹幕内容
-  final DanmakuContentItem content;
-
-  /// 弹幕创建时间
-  final int creationTime;
+  final DanmakuContentItem<T> content;
 
   /// 弹幕宽度
-  final double width;
+  double width;
 
   /// 弹幕高度
-  final double height;
+  double height;
 
   /// 弹幕水平方向位置
   double xPosition;
@@ -21,21 +20,68 @@ class DanmakuItem {
   double yPosition;
 
   /// 上次绘制时间
-  int? lastDrawTick;
+  int? drawTick;
 
   /// 弹幕布局缓存
-  ui.Paragraph? paragraph;
-  ui.Paragraph? strokeParagraph;
+  ui.Image? image;
+
+  bool expired = false;
+
+  bool suspend = false;
+
+  @pragma("vm:prefer-inline")
+  bool needRemove(bool needRemove) {
+    if (needRemove) {
+      dispose();
+    }
+    return needRemove;
+  }
+
+  void dispose() {
+    image?.dispose();
+    image = null;
+  }
 
   DanmakuItem({
     required this.content,
-    required this.creationTime,
     required this.height,
     required this.width,
     this.xPosition = 0,
     this.yPosition = 0,
-    this.paragraph,
-    this.strokeParagraph,
-    this.lastDrawTick,
+    this.image,
+    this.drawTick,
   });
+
+  void drawParagraphIfNeeded(
+    double fontSize,
+    int fontWeight,
+    double strokeWidth,
+    double devicePixelRatio,
+  ) {
+    if (image == null) {
+      final paragraph = DmUtils.generateParagraph(
+        content: content,
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+      );
+      image = DmUtils.recordDanmakuImage(
+        contentParagraph: paragraph,
+        content: content,
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        strokeWidth: strokeWidth,
+        devicePixelRatio: devicePixelRatio,
+      );
+      width = paragraph.maxIntrinsicWidth +
+          strokeWidth +
+          (content.selfSend ? 4.0 : 0.0);
+      height = paragraph.height + strokeWidth;
+      paragraph.dispose();
+    }
+  }
+
+  @override
+  String toString() {
+    return 'DanmakuItem(content=$content, xPos=$xPosition, yPos=$yPosition, size=${ui.Size(width, height)}, drawTick=$drawTick)';
+  }
 }

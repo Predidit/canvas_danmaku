@@ -1,79 +1,53 @@
-import 'dart:math';
+import 'dart:math' show min;
 import 'dart:ui' as ui;
 
+import 'package:canvas_danmaku/base_danmaku_painter.dart';
 import 'package:canvas_danmaku/models/danmaku_content_item.dart';
 import 'package:canvas_danmaku/models/danmaku_item.dart';
+import 'package:canvas_danmaku/utils/utils.dart';
 import 'package:flutter/material.dart';
 
-class SpecialDanmakuPainter extends CustomPainter {
-  final double progress;
-  final List<DanmakuItem> specialDanmakuItems;
-  final double fontSize;
-  final int fontWeight;
-  final bool running;
-  final int tick;
-  final int batchThreshold;
-
-  SpecialDanmakuPainter(
-    this.progress,
-    this.specialDanmakuItems,
-    this.fontSize,
-    this.fontWeight,
-    this.running,
-    this.tick, {
-    this.batchThreshold = 10, // 默认值为10，可以自行调整
+final class SpecialDanmakuPainter extends BaseDanmakuPainter {
+  SpecialDanmakuPainter({
+    required super.length,
+    required super.danmakuItems,
+    required super.fontSize,
+    required super.fontWeight,
+    required super.strokeWidth,
+    required super.devicePixelRatio,
+    required super.running,
+    required super.tick,
+    super.batchThreshold,
   });
 
+  static final _paint = Paint();
+
   @override
-  void paint(Canvas canvas, Size size) {
-    var pictureCanvas = canvas;
-    var batch = specialDanmakuItems.length > batchThreshold;
-    late ui.PictureRecorder pictureRecorder;
-    if (batch) {
-      pictureRecorder = ui.PictureRecorder();
-      pictureCanvas = Canvas(pictureRecorder);
-    }
-    for (final item in specialDanmakuItems) {
-      final elapsed = tick - item.creationTime;
-      final content = item.content as SpecialDanmakuContentItem;
-      if (elapsed >= 0 && elapsed < content.duration) {
-        _paintSpecialDanmaku(pictureCanvas, content, size, elapsed);
-      }
-    }
-    if (batch) {
-      canvas.drawPicture(pictureRecorder.endRecording());
+  void paintDanmaku(ui.Canvas canvas, ui.Size size, DanmakuItem item) {
+    final elapsed = tick - (item.drawTick ??= tick);
+    final content = item.content as SpecialDanmakuContentItem;
+    if (0 <= elapsed && elapsed < content.duration) {
+      _paintSpecialDanmaku(canvas, item, content, size, elapsed);
+    } else {
+      item.expired = true;
     }
   }
 
-  void _paintSpecialDanmaku(
-      Canvas canvas, SpecialDanmakuContentItem item, Size size, int elapsed) {
+  @pragma("vm:prefer-inline")
+  void _paintSpecialDanmaku(Canvas canvas, DanmakuItem dm,
+      SpecialDanmakuContentItem item, Size size, int elapsed) {
     // 透明度动画
-    late final alpha = item.alphaTween?.transform(elapsed / item.duration) ??
-        item.color.opacity;
-    final color =
-        item.alphaTween == null ? item.color : item.color.withOpacity(alpha);
-    // 文本
-    if (color != item.painterCache?.text?.style?.color) {
-      item.painterCache!.text = TextSpan(
-        text: item.text,
-        style: TextStyle(
-          color: color,
-          fontSize: item.fontSize,
-          fontWeight: FontWeight.values[fontWeight],
-          shadows: item.hasStroke
-              ? [Shadow(color: Colors.black.withOpacity(alpha), blurRadius: 2)]
-              : null,
-        ),
-      );
-      item.painterCache!.layout();
-    }
+    final color = item.alphaTween == null
+        ? item.color
+        : item.color.withValues(
+            alpha: item.alphaTween!.transform(
+            elapsed / item.duration,
+          ));
 
-    // 路径动画 TODO
-
-    // else 位移动画
-    late double dx, dy;
+    // 位移动画
+    double dx, dy;
     if (elapsed > item.translationStartDelay) {
-      late double translateProgress = item.easingType.transform(min(1.0,
+      late final translateProgress = item.easingType.transform(min(1.0,
           (elapsed - item.translationStartDelay) / item.translationDuration));
 
       double getOffset(Tween<double> tween) => tween is ConstantTween
@@ -86,20 +60,42 @@ class SpecialDanmakuPainter extends CustomPainter {
       dx = item.translateXTween.begin! * size.width;
       dy = item.translateYTween.begin! * size.height;
     }
+    dx += item.rect.left;
+    dy += item.rect.top;
 
-    if (item.matrix != null) {
-      canvas.save();
-      canvas.translate(dx, dy);
-      canvas.transform(item.matrix!.storage);
-      item.painterCache!.paint(canvas, Offset.zero);
-      canvas.restore();
-    } else {
-      item.painterCache!.paint(canvas, Offset(dx, dy));
-    }
+    paintImg(
+      canvas,
+      dm.image ??= DmUtils.recordSpecialDanmakuImg(
+        content: item,
+        fontWeight: fontWeight,
+        strokeWidth: strokeWidth,
+        devicePixelRatio: devicePixelRatio,
+      ),
+      dx,
+      dy,
+      _paint..color = color,
+    );
   }
 
-  @override
-  bool shouldRepaint(covariant SpecialDanmakuPainter oldDelegate) {
-    return true;
+  void paintImg(
+    ui.Canvas canvas,
+    ui.Image image,
+    double dx,
+    double dy,
+    Paint paint,
+  ) {
+    if (devicePixelRatio == 1.0) {
+      canvas.drawImage(image, Offset(dx, dy), paint);
+    } else {
+      final src =
+          Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
+      final dst = Rect.fromLTWH(
+        dx,
+        dy,
+        image.width / devicePixelRatio,
+        image.height / devicePixelRatio,
+      );
+      canvas.drawImageRect(image, src, dst, paint);
+    }
   }
 }

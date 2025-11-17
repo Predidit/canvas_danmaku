@@ -1,122 +1,60 @@
-import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
-import 'models/danmaku_item.dart';
-import '/utils/utils.dart';
 
-class ScrollDanmakuPainter extends CustomPainter {
-  final double progress;
-  final List<DanmakuItem> scrollDanmakuItems;
-  final int danmakuDurationInSeconds;
-  final double fontSize;
-  final int fontWeight;
-  final bool showStroke;
-  final double danmakuHeight;
-  final bool running;
-  final int tick;
-  final int batchThreshold;
+import 'package:canvas_danmaku/base_danmaku_painter.dart';
+import 'package:canvas_danmaku/models/danmaku_item.dart';
+import 'package:flutter/material.dart';
 
-  final double totalDuration;
-  final Paint selfSendPaint = Paint()
+final class ScrollDanmakuPainter extends BaseDanmakuPainter {
+  final double durationInMilliseconds;
+
+  late final Paint selfSendPaint = Paint()
     ..style = PaintingStyle.stroke
-    ..strokeWidth = 1.5
+    ..strokeWidth = strokeWidth
     ..color = Colors.green;
 
-  ScrollDanmakuPainter(
-    this.progress,
-    this.scrollDanmakuItems,
-    this.danmakuDurationInSeconds,
-    this.fontSize,
-    this.fontWeight,
-    this.showStroke,
-    this.danmakuHeight,
-    this.running,
-    this.tick, {
-    this.batchThreshold = 10, // 默认值为10，可以自行调整
-  }) : totalDuration = danmakuDurationInSeconds * 1000;
+  ScrollDanmakuPainter({
+    required super.length,
+    required super.danmakuItems,
+    required this.durationInMilliseconds,
+    required super.fontSize,
+    required super.fontWeight,
+    required super.strokeWidth,
+    required super.devicePixelRatio,
+    required super.running,
+    required super.tick,
+    super.batchThreshold,
+  });
 
   @override
-  void paint(Canvas canvas, Size size) {
-    final startPosition = size.width;
+  void paintDanmaku(ui.Canvas canvas, ui.Size size, DanmakuItem item) {
+    item.drawParagraphIfNeeded(
+      fontSize,
+      fontWeight,
+      strokeWidth,
+      devicePixelRatio,
+    );
+    if (!item.suspend) {
+      final startPosition = size.width;
+      final endPosition = -item.width;
+      final distance = startPosition - endPosition;
+      item.xPosition +=
+          (((item.drawTick ??= tick) - tick) / durationInMilliseconds) *
+              distance;
 
-    if (scrollDanmakuItems.length > batchThreshold) {
-      // 弹幕数量超过阈值时使用批量绘制
-      final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
-      final Canvas pictureCanvas = Canvas(pictureRecorder);
-
-      for (var item in scrollDanmakuItems) {
-        item.lastDrawTick ??= item.creationTime;
-        final endPosition = -item.width;
-        final distance = startPosition - endPosition;
-        item.xPosition = item.xPosition +
-            (((item.lastDrawTick! - tick) / totalDuration) * distance);
-
-        if (item.xPosition < -item.width || item.xPosition > size.width) {
-          continue;
-        }
-
-        item.paragraph ??= Utils.generateParagraph(
-            item.content, size.width, fontSize, fontWeight);
-
-        if (showStroke) {
-          item.strokeParagraph ??= Utils.generateStrokeParagraph(
-              item.content, size.width, fontSize, fontWeight);
-          pictureCanvas.drawParagraph(
-              item.strokeParagraph!, Offset(item.xPosition, item.yPosition));
-        }
-
-        if (item.content.selfSend) {
-          pictureCanvas.drawRect(
-              Offset(item.xPosition, item.yPosition).translate(-2, 2) &
-                  (Size(item.width, item.height) + const Offset(4, 0)),
-              selfSendPaint);
-        }
-
-        pictureCanvas.drawParagraph(
-            item.paragraph!, Offset(item.xPosition, item.yPosition));
-        item.lastDrawTick = tick;
-      }
-
-      final ui.Picture picture = pictureRecorder.endRecording();
-      canvas.drawPicture(picture);
-    } else {
-      // 弹幕数量较少时直接绘制 (节约创建 canvas 的开销)
-      for (var item in scrollDanmakuItems) {
-        item.lastDrawTick ??= item.creationTime;
-        final endPosition = -item.width;
-        final distance = startPosition - endPosition;
-        item.xPosition = item.xPosition +
-            (((item.lastDrawTick! - tick) / totalDuration) * distance);
-
-        if (item.xPosition < -item.width || item.xPosition > size.width) {
-          continue;
-        }
-
-        item.paragraph ??= Utils.generateParagraph(
-            item.content, size.width, fontSize, fontWeight);
-
-        if (showStroke) {
-          item.strokeParagraph ??= Utils.generateStrokeParagraph(
-              item.content, size.width, fontSize, fontWeight);
-          canvas.drawParagraph(
-              item.strokeParagraph!, Offset(item.xPosition, item.yPosition));
-        }
-
-        if (item.content.selfSend) {
-          canvas.drawRect(
-              Offset(item.xPosition, item.yPosition).translate(-2, 2) &
-                  (Size(item.width, item.height) + const Offset(4, 0)),
-              selfSendPaint);
-        }
-
-        canvas.drawParagraph(
-            item.paragraph!, Offset(item.xPosition, item.yPosition));
-        item.lastDrawTick = tick;
+      if (item.xPosition < endPosition || item.xPosition > startPosition) {
+        item.expired = true;
+        return;
       }
     }
-  }
 
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return true;
+    BaseDanmakuPainter.paintImg(
+      canvas,
+      item,
+      item.xPosition,
+      item.yPosition,
+      devicePixelRatio,
+    );
+
+    item.drawTick = tick;
   }
 }
