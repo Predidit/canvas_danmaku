@@ -125,6 +125,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
           style: TextStyle(
             fontSize: _option.fontSize,
             height: _option.lineHeight,
+            fontFamily: _option.fontFamily,
           ),
         ),
         textDirection: TextDirection.ltr,
@@ -149,6 +150,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
       content: content,
       fontSize: _option.fontSize,
       fontWeight: _option.fontWeight,
+      fontFamily: _option.fontFamily,
     );
 
     final danmakuWidth = (content.selfSend
@@ -170,6 +172,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
           fontWeight: _option.fontWeight,
           strokeWidth: _option.strokeWidth,
           devicePixelRatio: devicePixelRatio,
+          fontFamily: _option.fontFamily,
         ));
 
     for (var i = 0; i < _trackYPositions.length; i++) {
@@ -260,6 +263,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
                 fontWeight: _option.fontWeight,
                 strokeWidth: _option.strokeWidth,
                 devicePixelRatio: devicePixelRatio,
+                fontFamily: _option.fontFamily,
               )),
         );
         if (_running) {
@@ -315,10 +319,12 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
     }
 
     final fontSizeChanged = option.fontSize != _option.fontSize;
+    final fontFamilyChanged = option.fontFamily != _option.fontFamily;
 
     final clearScroll = option.hideScroll && !_option.hideScroll;
 
     final clearParagraph = fontSizeChanged ||
+        fontFamilyChanged ||
         option.fontWeight != _option.fontWeight ||
         option.strokeWidth != _option.strokeWidth;
 
