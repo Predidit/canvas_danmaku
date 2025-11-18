@@ -1,3 +1,7 @@
+## 0.3.1
+
+- Support danmaku font family option.
+
 ## 0.3.0
 
 - Support danaku stroke weight option.
