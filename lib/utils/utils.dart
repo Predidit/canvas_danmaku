@@ -191,7 +191,7 @@ abstract final class DmUtils {
 
       final imgLongestSide = rect.size.longestSide * devicePixelRatio;
       if (imgLongestSide > maxRasterizeSize) {
-        // force resize
+        // 强制缩小尺寸，避免超过引擎可栅格化上限
         adjustDevicePixelRatio = maxRasterizeSize / imgLongestSide;
       }
       canvas

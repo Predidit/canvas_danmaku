@@ -27,14 +27,10 @@ final class StaticDanmakuPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     for (var item in danmakuItems) {
+      if (item.image == null) continue;
+
       item
         ..drawTick ??= tick
-        ..drawParagraphIfNeeded(
-          fontSize,
-          fontWeight,
-          strokeWidth,
-          devicePixelRatio,
-        )
         ..xPosition = (size.width - item.width) / 2;
 
       BaseDanmakuPainter.paintImg(

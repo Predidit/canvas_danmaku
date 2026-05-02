@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:math';
 
 import 'package:canvas_danmaku/danmaku_controller.dart';
@@ -39,6 +40,10 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
   /// 滚动弹幕
   final _scrollDanmakuItems = <DanmakuItem<T>>[];
 
+  /// 分帧处理栅格化和资源释放，避免单帧耗时尖峰。
+  final _pendingRasterItems = Queue<DanmakuItem<T>>();
+  final _pendingDisposeItems = Queue<DanmakuItem<T>>();
+
   /// 静态弹幕
   final _staticDanmakuItems = ListValueNotifier(<DanmakuItem<T>>[]);
 
@@ -54,11 +59,16 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
   /// 弹幕轨道位置
   late List<double> _trackYPositions;
 
+  late List<DanmakuItem<T>?> _scrollTrackTails;
+
   late final _random = Random();
 
   late final Ticker _ticker;
   late final ValueNotifier<int> _notifier;
   late int _lastTick = 0;
+
+  static const int _maxRasterizePerFrame = 2;
+  static const int _maxDisposePerFrame = 8;
 
   /// 运行状态
   bool _running = true;
@@ -99,19 +109,24 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
     if (devicePixelRatio != this.devicePixelRatio) {
       this.devicePixelRatio = devicePixelRatio;
       for (var item in _scrollDanmakuItems) {
-        item.dispose();
+        _disposeImageNow(item);
+        _enqueueRaster(item);
       }
       for (var item in _staticDanmakuItems.value) {
-        item.dispose();
+        _disposeImageNow(item);
+        _enqueueRaster(item);
       }
       for (var item in _specialDanmakuItems) {
-        item.dispose();
+        _disposeImageNow(item);
+        _enqueueRaster(item);
       }
     }
   }
 
   int _time = 0;
   void _tick(Duration elapsed) {
+    _drainRasterQueue();
+    _drainDisposeQueue();
     _notifier.value = elapsed.inMilliseconds + _lastTick;
     if (_time++ > 10) {
       _time = 0;
@@ -136,6 +151,10 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
     _running = false;
     _ticker.dispose();
     _clearDanmakus();
+    while (_pendingDisposeItems.isNotEmpty) {
+      _pendingDisposeItems.removeFirst().dispose();
+    }
+    _pendingRasterItems.clear();
     _staticDanmakuItems.dispose();
     super.dispose();
   }
@@ -159,29 +178,23 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
         _option.strokeWidth;
     final danmakuHeight = paragraph.height + _option.strokeWidth;
 
-    DanmakuItem<T> getItem(double yPos) => DanmakuItem<T>(
+    DanmakuItem<T> getItem(double yPos, int trackIndex) => DanmakuItem<T>(
         yPosition: yPos,
         xPosition: _viewWidth,
+        trackIndex: trackIndex,
         width: danmakuWidth,
         height: danmakuHeight,
-        content: content,
-        image: DmUtils.recordDanmakuImage(
-          contentParagraph: paragraph,
-          content: content,
-          fontSize: _option.fontSize,
-          fontWeight: _option.fontWeight,
-          strokeWidth: _option.strokeWidth,
-          devicePixelRatio: devicePixelRatio,
-          fontFamily: _option.fontFamily,
-        ));
+        content: content);
 
     for (var i = 0; i < _trackYPositions.length; i++) {
       final yPosition = _trackYPositions[i];
 
       if (added = canAdd(yPosition, danmakuWidth)) {
-        final item = getItem(yPosition);
+        final item = getItem(yPosition, i);
+        _enqueueRaster(item);
         if (content.type == DanmakuItemType.scroll) {
           _scrollDanmakuItems.add(item);
+          _scrollTrackTails[i] = item;
         } else {
           if (_running) {
             _staticDanmakuItems.add(item);
@@ -196,15 +209,20 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
           i == _trackYPositions.length - 1) {
         if (content.selfSend) {
           added = true;
-          _scrollDanmakuItems.add(getItem(_trackYPositions[0]));
+          final item = getItem(_trackYPositions[0], 0);
+          _enqueueRaster(item);
+          _scrollDanmakuItems.add(item);
+          _scrollTrackTails[0] = item;
           break;
         }
 
         if (_option.massiveMode) {
           added = true;
-          _scrollDanmakuItems.add(getItem(
-            _trackYPositions[_random.nextInt(_trackYPositions.length)],
-          ));
+          final trackIndex = _random.nextInt(_trackYPositions.length);
+          final item = getItem(_trackYPositions[trackIndex], trackIndex);
+          _enqueueRaster(item);
+          _scrollDanmakuItems.add(item);
+          _scrollTrackTails[trackIndex] = item;
           break;
         }
       }
@@ -254,17 +272,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
       case DanmakuItemType.special:
         if (_option.hideSpecial) return;
         _specialDanmakuItems.add(
-          DanmakuItem<T>(
-              width: 0,
-              height: 0,
-              content: content,
-              image: DmUtils.recordSpecialDanmakuImg(
-                content: content as SpecialDanmakuContentItem,
-                fontWeight: _option.fontWeight,
-                strokeWidth: _option.strokeWidth,
-                devicePixelRatio: devicePixelRatio,
-                fontFamily: _option.fontFamily,
-              )),
+          _enqueueRaster(DanmakuItem<T>(width: 0, height: 0, content: content)),
         );
         if (_running) {
           if (!_ticker.isActive) {
@@ -300,10 +308,9 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
     if (!mounted) return;
     _clearDanmakus();
     if (_ticker.isActive) {
-      // SchedulerBinding.instance.addPostFrameCallback(
-      //   (_) => _ticker.stop(),
-      // );
+      return;
     } else {
+      _drainDisposeQueue(limit: _pendingDisposeItems.length);
       _notifier.refresh();
     }
   }
@@ -311,13 +318,6 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
   /// 更新弹幕设置
   void _updateOption(DanmakuOption option) {
     final lineHeightChanged = option.lineHeight != _option.lineHeight;
-    if (lineHeightChanged) {
-      _option = option;
-      _danmakuHeight = _textPainter.height;
-      _calcTracks();
-      return;
-    }
-
     final fontSizeChanged = option.fontSize != _option.fontSize;
     final fontFamilyChanged = option.fontFamily != _option.fontFamily;
 
@@ -337,9 +337,10 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
     /// 需要隐藏弹幕时清理已有弹幕
     if (clearScroll) {
       for (var e in _scrollDanmakuItems) {
-        e.dispose();
+        _disposeLater(e);
       }
       _scrollDanmakuItems.clear();
+      _clearScrollTrackTails();
     }
 
     final clearTop = option.hideTop && !_option.hideTop;
@@ -350,39 +351,45 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
             (clearTop && e.content.type == DanmakuItemType.top) ||
                 (clearBottom && e.content.type == DanmakuItemType.bottom);
         if (needRemove) {
-          e.dispose();
+          _disposeLater(e);
         }
         return needRemove;
       });
     }
     if (option.hideSpecial && !_option.hideSpecial) {
       for (var e in _specialDanmakuItems) {
-        e.dispose();
+        _disposeLater(e);
       }
       _specialDanmakuItems.clear();
     }
 
     /// 清理已经存在的 Paragraph 缓存
     if (clearParagraph) {
-      DmUtils.updateSelfSendPaint(_option.strokeWidth);
+      DmUtils.updateSelfSendPaint(option.strokeWidth);
       for (var item in _scrollDanmakuItems) {
-        item.dispose();
+        _disposeImageNow(item);
+        _enqueueRaster(item);
       }
       for (var item in _staticDanmakuItems.value) {
-        item.dispose();
+        _disposeImageNow(item);
+        _enqueueRaster(item);
       }
       for (var item in _specialDanmakuItems) {
-        item.dispose();
+        _disposeImageNow(item);
+        _enqueueRaster(item);
       }
     }
 
     final areaChanged = option.area != _option.area;
     final safeAreaChanged = option.safeArea != _option.safeArea;
     _option = option;
-    if (fontSizeChanged) {
+    if (fontSizeChanged || lineHeightChanged) {
       _danmakuHeight = _textPainter.height;
     }
-    if (fontSizeChanged || areaChanged || safeAreaChanged) {
+    if (fontSizeChanged ||
+        lineHeightChanged ||
+        areaChanged ||
+        safeAreaChanged) {
       _calcTracks();
     }
 
@@ -396,35 +403,36 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
 
   void _clearDanmakus() {
     for (var e in _scrollDanmakuItems) {
-      e.dispose();
+      _disposeLater(e);
     }
     _scrollDanmakuItems.clear();
+    _clearScrollTrackTails();
     for (var e in _staticDanmakuItems.value) {
-      e.dispose();
+      _disposeLater(e);
     }
     _staticDanmakuItems.clear();
     for (var e in _specialDanmakuItems) {
-      e.dispose();
+      _disposeLater(e);
     }
     _specialDanmakuItems.clear();
   }
 
   /// 确定滚动弹幕是否可以添加
   bool _scrollCanAddToTrack(double yPosition, double newDanmakuWidth) {
-    for (DanmakuItem item in _scrollDanmakuItems) {
-      if (item.yPosition == yPosition) {
-        final existingEndPosition = item.xPosition + item.width;
-        // 首先保证进入屏幕时不发生重叠，其次保证知道移出屏幕前不与速度慢的弹幕(弹幕宽度较小)发生重叠
-        if (_viewWidth - existingEndPosition < 0) {
-          return false;
-        }
-        if (item.width < newDanmakuWidth) {
-          if ((1 -
-                  ((_viewWidth - item.xPosition) / (item.width + _viewWidth))) >
-              ((_viewWidth) / (_viewWidth + newDanmakuWidth))) {
-            return false;
-          }
-        }
+    final trackIndex = _trackIndexForY(yPosition);
+    final item = _scrollTrackTails[trackIndex];
+    if (item == null || item.expired) {
+      return true;
+    }
+    final existingEndPosition = item.xPosition + item.width;
+    // 首先保证进入屏幕时不发生重叠，其次保证知道移出屏幕前不与速度慢的弹幕(弹幕宽度较小)发生重叠
+    if (_viewWidth - existingEndPosition < 0) {
+      return false;
+    }
+    if (item.width < newDanmakuWidth) {
+      if ((1 - ((_viewWidth - item.xPosition) / (item.width + _viewWidth))) >
+          ((_viewWidth) / (_viewWidth + newDanmakuWidth))) {
+        return false;
       }
     }
     return true;
@@ -455,13 +463,30 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
   @pragma("vm:prefer-inline")
   void _lazyTick(int tick) {
     // 移除屏幕外滚动弹幕
-    _scrollDanmakuItems.removeWhere((item) => item.needRemove(item.expired));
+    _scrollDanmakuItems.removeWhere((item) {
+      if (!item.expired) return false;
+      if (item.trackIndex >= 0 && _scrollTrackTails[item.trackIndex] == item) {
+        _scrollTrackTails[item.trackIndex] = null;
+      }
+      _disposeLater(item);
+      return true;
+    });
     // 移除静态弹幕
-    _staticDanmakuItems.removeWhere((item) => item.needRemove(!item.suspend &&
-        item.drawTick != null &&
-        (tick - item.drawTick!) >= _option.staticDurationInMilliseconds));
+    _staticDanmakuItems.removeWhere((item) {
+      final shouldRemove = !item.suspend &&
+          item.drawTick != null &&
+          (tick - item.drawTick!) >= _option.staticDurationInMilliseconds;
+      if (shouldRemove) {
+        _disposeLater(item);
+      }
+      return shouldRemove;
+    });
     // 移除高级弹幕
-    _specialDanmakuItems.removeWhere((item) => item.needRemove(item.expired));
+    _specialDanmakuItems.removeWhere((item) {
+      if (!item.expired) return false;
+      _disposeLater(item);
+      return true;
+    });
     // 暂停动画
     if (_scrollDanmakuItems.isEmpty &&
         _specialDanmakuItems.isEmpty &&
@@ -483,6 +508,94 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
     _trackYPositions = List<double>.generate(
         _trackCount, (i) => i * _danmakuHeight,
         growable: false);
+    _scrollTrackTails = List<DanmakuItem<T>?>.filled(_trackCount, null);
+    for (final item in _scrollDanmakuItems) {
+      final trackIndex = _trackIndexForY(item.yPosition);
+      item.trackIndex = trackIndex;
+      _scrollTrackTails[trackIndex] = item;
+    }
+  }
+
+  DanmakuItem<T> _enqueueRaster(DanmakuItem<T> item) {
+    if (!item.rasterQueued && item.image == null) {
+      item.rasterQueued = true;
+      _pendingRasterItems.add(item);
+    }
+    return item;
+  }
+
+  void _drainRasterQueue() {
+    var remaining = _maxRasterizePerFrame;
+    while (remaining > 0 && _pendingRasterItems.isNotEmpty) {
+      final item = _pendingRasterItems.removeFirst();
+      // ignore: cascade_invocations
+      item.rasterQueued = false;
+      final shouldSkip =
+          item.expired || item.disposeQueued || item.image != null;
+      if (shouldSkip) {
+        continue;
+      }
+      _rasterizeItem(item);
+      remaining--;
+    }
+  }
+
+  void _rasterizeItem(DanmakuItem<T> item) {
+    final content = item.content;
+    if (content is SpecialDanmakuContentItem) {
+      item.image = DmUtils.recordSpecialDanmakuImg(
+        content: content as SpecialDanmakuContentItem<dynamic>,
+        fontWeight: _option.fontWeight,
+        strokeWidth: _option.strokeWidth,
+        devicePixelRatio: devicePixelRatio,
+        fontFamily: _option.fontFamily,
+      );
+    } else {
+      item.drawParagraphIfNeeded(
+        _option.fontSize,
+        _option.fontWeight,
+        _option.strokeWidth,
+        devicePixelRatio,
+        _option.fontFamily,
+      );
+    }
+  }
+
+  void _disposeLater(DanmakuItem<T> item) {
+    item.expired = true;
+    if (!item.disposeQueued) {
+      item.disposeQueued = true;
+      _pendingDisposeItems.add(item);
+    }
+  }
+
+  void _drainDisposeQueue({int limit = _maxDisposePerFrame}) {
+    var remaining = limit;
+    while (remaining > 0 && _pendingDisposeItems.isNotEmpty) {
+      final item = _pendingDisposeItems.removeFirst();
+      // ignore: cascade_invocations
+      item
+        ..disposeQueued = false
+        ..dispose();
+      remaining--;
+    }
+  }
+
+  void _disposeImageNow(DanmakuItem<T> item) {
+    item
+      ..image?.dispose()
+      ..image = null;
+  }
+
+  int _trackIndexForY(double yPosition) {
+    if (_trackCount <= 1) return 0;
+    return (yPosition / _danmakuHeight).round().clamp(0, _trackCount - 1);
+  }
+
+  void _clearScrollTrackTails() {
+    for (var i = 0; i < _scrollTrackTails.length; i++) {
+      _scrollTrackTails[i] = null;
+    }
   }
 
   @override

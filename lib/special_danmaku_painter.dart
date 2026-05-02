@@ -4,7 +4,6 @@ import 'dart:ui' as ui;
 import 'package:canvas_danmaku/base_danmaku_painter.dart';
 import 'package:canvas_danmaku/models/danmaku_content_item.dart';
 import 'package:canvas_danmaku/models/danmaku_item.dart';
-import 'package:canvas_danmaku/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 final class SpecialDanmakuPainter extends BaseDanmakuPainter {
@@ -17,13 +16,14 @@ final class SpecialDanmakuPainter extends BaseDanmakuPainter {
     required super.devicePixelRatio,
     required super.running,
     required super.tick,
-    super.batchThreshold,
   });
 
   static final _paint = Paint();
 
   @override
   void paintDanmaku(ui.Canvas canvas, ui.Size size, DanmakuItem item) {
+    if (item.image == null) return;
+
     final elapsed = tick - (item.drawTick ??= tick);
     final content = item.content as SpecialDanmakuContentItem;
     if (0 <= elapsed && elapsed < content.duration) {
@@ -65,12 +65,7 @@ final class SpecialDanmakuPainter extends BaseDanmakuPainter {
 
     paintImg(
       canvas,
-      dm.image ??= DmUtils.recordSpecialDanmakuImg(
-        content: item,
-        fontWeight: fontWeight,
-        strokeWidth: strokeWidth,
-        devicePixelRatio: devicePixelRatio,
-      ),
+      dm.image!,
       dx,
       dy,
       _paint..color = color,

@@ -1,5 +1,3 @@
-import 'dart:ui' as ui;
-
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:flutter/material.dart';
 
@@ -11,7 +9,6 @@ abstract base class BaseDanmakuPainter extends CustomPainter {
   final double strokeWidth;
   final double devicePixelRatio;
   final bool running;
-  final int batchThreshold;
   final int tick;
 
   static final Paint _paint = Paint();
@@ -25,7 +22,6 @@ abstract base class BaseDanmakuPainter extends CustomPainter {
     required this.devicePixelRatio,
     required this.running,
     required this.tick,
-    this.batchThreshold = 10, // 默认值为10，可以自行调整
   });
 
   static void paintImg(
@@ -48,18 +44,6 @@ abstract base class BaseDanmakuPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final ui.PictureRecorder? pictureRecorder;
-    final Canvas pictureCanvas;
-    final length = danmakuItems.length;
-
-    if (length > batchThreshold) {
-      pictureRecorder = ui.PictureRecorder();
-      pictureCanvas = Canvas(pictureRecorder);
-    } else {
-      pictureRecorder = null;
-      pictureCanvas = canvas;
-    }
-
     DanmakuItem? suspend;
     for (var i in danmakuItems) {
       if (i.expired) continue;
@@ -69,17 +53,11 @@ abstract base class BaseDanmakuPainter extends CustomPainter {
         continue;
       }
 
-      paintDanmaku(pictureCanvas, size, i);
+      paintDanmaku(canvas, size, i);
     }
 
     if (suspend case final suspend?) {
-      paintDanmaku(pictureCanvas, size, suspend);
-    }
-
-    if (pictureRecorder != null) {
-      final ui.Picture picture = pictureRecorder.endRecording();
-      canvas.drawPicture(picture);
-      picture.dispose();
+      paintDanmaku(canvas, size, suspend);
     }
   }
 

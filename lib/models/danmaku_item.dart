@@ -25,6 +25,12 @@ class DanmakuItem<T> {
   /// 弹幕布局缓存
   ui.Image? image;
 
+  int trackIndex = -1;
+
+  bool rasterQueued = false;
+
+  bool disposeQueued = false;
+
   bool expired = false;
 
   bool suspend = false;
@@ -48,6 +54,7 @@ class DanmakuItem<T> {
     required this.width,
     this.xPosition = 0,
     this.yPosition = 0,
+    this.trackIndex = -1,
     this.image,
     this.drawTick,
   });
@@ -57,12 +64,14 @@ class DanmakuItem<T> {
     int fontWeight,
     double strokeWidth,
     double devicePixelRatio,
+    String? fontFamily,
   ) {
     if (image == null) {
       final paragraph = DmUtils.generateParagraph(
         content: content,
         fontSize: fontSize,
         fontWeight: fontWeight,
+        fontFamily: fontFamily,
       );
       image = DmUtils.recordDanmakuImage(
         contentParagraph: paragraph,
@@ -71,6 +80,7 @@ class DanmakuItem<T> {
         fontWeight: fontWeight,
         strokeWidth: strokeWidth,
         devicePixelRatio: devicePixelRatio,
+        fontFamily: fontFamily,
       );
       width = paragraph.maxIntrinsicWidth +
           strokeWidth +
