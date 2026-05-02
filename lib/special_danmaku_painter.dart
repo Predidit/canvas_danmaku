@@ -35,7 +35,7 @@ final class SpecialDanmakuPainter extends BaseDanmakuPainter {
 
   @pragma("vm:prefer-inline")
   void _paintSpecialDanmaku(Canvas canvas, DanmakuItem dm,
-      SpecialDanmakuContentItem item, Size size, int elapsed) {
+      SpecialDanmakuContentItem item, Size size, double elapsed) {
     // 透明度动画
     final color = item.alphaTween == null
         ? item.color

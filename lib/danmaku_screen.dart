@@ -64,8 +64,8 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
   late final _random = Random();
 
   late final Ticker _ticker;
-  late final ValueNotifier<int> _notifier;
-  late int _lastTick = 0;
+  late final ValueNotifier<double> _notifier;
+  late double _lastTick = 0;
 
   static const int _maxRasterizePerFrame = 2;
   static const int _maxDisposePerFrame = 8;
@@ -127,7 +127,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
   void _tick(Duration elapsed) {
     _drainRasterQueue();
     _drainDisposeQueue();
-    _notifier.value = elapsed.inMilliseconds + _lastTick;
+    _notifier.value = elapsed.inMicroseconds / 1000.0 + _lastTick;
     if (_time++ > 10) {
       _time = 0;
       _lazyTick(_notifier.value);
@@ -178,13 +178,24 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
         _option.strokeWidth;
     final danmakuHeight = paragraph.height + _option.strokeWidth;
 
-    DanmakuItem<T> getItem(double yPos, int trackIndex) => DanmakuItem<T>(
+    DanmakuItem<T> getItem(double yPos, int trackIndex) {
+      final scrollPixelsPerMillisecond = content.type == DanmakuItemType.scroll
+          ? (_viewWidth + danmakuWidth) / _option.durationInMilliseconds
+          : 0.0;
+      return DanmakuItem<T>(
         yPosition: yPos,
         xPosition: _viewWidth,
         trackIndex: trackIndex,
         width: danmakuWidth,
         height: danmakuHeight,
-        content: content);
+        drawTick:
+            content.type == DanmakuItemType.scroll ? null : _notifier.value,
+        scrollStartTick: _notifier.value,
+        scrollStartX: _viewWidth,
+        scrollPixelsPerMillisecond: scrollPixelsPerMillisecond,
+        content: content,
+      );
+    }
 
     for (var i = 0; i < _trackYPositions.length; i++) {
       final yPosition = _trackYPositions[i];
@@ -363,7 +374,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
       _specialDanmakuItems.clear();
     }
 
-    /// 清理已经存在的 Paragraph 缓存
+    /// 清理已经存在的栅格化图片缓存
     if (clearParagraph) {
       DmUtils.updateSelfSendPaint(option.strokeWidth);
       for (var item in _scrollDanmakuItems) {
@@ -461,7 +472,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
   }
 
   @pragma("vm:prefer-inline")
-  void _lazyTick(int tick) {
+  void _lazyTick(double tick) {
     // 移除屏幕外滚动弹幕
     _scrollDanmakuItems.removeWhere((item) {
       if (!item.expired) return false;
@@ -625,8 +636,6 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
                           painter: ScrollDanmakuPainter(
                             length: _scrollDanmakuItems.length,
                             danmakuItems: _scrollDanmakuItems,
-                            durationInMilliseconds:
-                                _option.durationInMilliseconds,
                             fontSize: _option.fontSize,
                             fontWeight: _option.fontWeight,
                             strokeWidth: _option.strokeWidth,

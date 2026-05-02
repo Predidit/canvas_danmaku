@@ -11,7 +11,7 @@ final class StaticDanmakuPainter extends CustomPainter {
   final int fontWeight;
   final double strokeWidth;
   final double devicePixelRatio;
-  final int tick;
+  final double tick;
 
   StaticDanmakuPainter({
     required this.length,

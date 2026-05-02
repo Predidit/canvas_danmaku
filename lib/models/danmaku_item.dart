@@ -19,10 +19,19 @@ class DanmakuItem<T> {
   /// 弹幕竖直方向位置
   double yPosition;
 
-  /// 上次绘制时间
-  int? drawTick;
+  /// 静态和高级弹幕的起始绘制时间。
+  double? drawTick;
 
-  /// 弹幕布局缓存
+  /// 滚动弹幕创建时的动画时间，位置由它和冻结速度直接计算。
+  double scrollStartTick;
+
+  /// 滚动弹幕创建时的起始横坐标。
+  double scrollStartX;
+
+  /// 滚动弹幕创建时冻结的移动速度。
+  double scrollPixelsPerMillisecond;
+
+  /// 弹幕栅格化图片缓存。
   ui.Image? image;
 
   int trackIndex = -1;
@@ -34,14 +43,6 @@ class DanmakuItem<T> {
   bool expired = false;
 
   bool suspend = false;
-
-  @pragma("vm:prefer-inline")
-  bool needRemove(bool needRemove) {
-    if (needRemove) {
-      dispose();
-    }
-    return needRemove;
-  }
 
   void dispose() {
     image?.dispose();
@@ -57,6 +58,9 @@ class DanmakuItem<T> {
     this.trackIndex = -1,
     this.image,
     this.drawTick,
+    this.scrollStartTick = 0,
+    this.scrollStartX = 0,
+    this.scrollPixelsPerMillisecond = 0,
   });
 
   void drawParagraphIfNeeded(

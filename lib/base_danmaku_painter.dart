@@ -9,7 +9,7 @@ abstract base class BaseDanmakuPainter extends CustomPainter {
   final double strokeWidth;
   final double devicePixelRatio;
   final bool running;
-  final int tick;
+  final double tick;
 
   static final Paint _paint = Paint();
 

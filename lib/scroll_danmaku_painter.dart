@@ -4,12 +4,9 @@ import 'package:canvas_danmaku/base_danmaku_painter.dart';
 import 'package:canvas_danmaku/models/danmaku_item.dart';
 
 final class ScrollDanmakuPainter extends BaseDanmakuPainter {
-  final double durationInMilliseconds;
-
   ScrollDanmakuPainter({
     required super.length,
     required super.danmakuItems,
-    required this.durationInMilliseconds,
     required super.fontSize,
     required super.fontWeight,
     required super.strokeWidth,
@@ -23,14 +20,11 @@ final class ScrollDanmakuPainter extends BaseDanmakuPainter {
     if (item.image == null) return;
 
     if (!item.suspend) {
-      final startPosition = size.width;
       final endPosition = -item.width;
-      final distance = startPosition - endPosition;
-      item.xPosition +=
-          (((item.drawTick ??= tick) - tick) / durationInMilliseconds) *
-              distance;
+      item.xPosition = item.scrollStartX -
+          (tick - item.scrollStartTick) * item.scrollPixelsPerMillisecond;
 
-      if (item.xPosition < endPosition || item.xPosition > startPosition) {
+      if (item.xPosition < endPosition || item.xPosition > size.width) {
         item.expired = true;
         return;
       }
@@ -43,7 +37,5 @@ final class ScrollDanmakuPainter extends BaseDanmakuPainter {
       item.yPosition,
       devicePixelRatio,
     );
-
-    item.drawTick = tick;
   }
 }
