@@ -22,13 +22,13 @@ class DanmakuItem<T> {
   /// 静态和高级弹幕的起始绘制时间。
   double? drawTick;
 
-  /// 滚动弹幕创建时的动画时间，位置由它和冻结速度直接计算。
+  /// 滚动弹幕位置计算的基准动画时间。
   double scrollStartTick;
 
-  /// 滚动弹幕创建时的起始横坐标。
+  /// 滚动弹幕位置计算的基准横坐标。
   double scrollStartX;
 
-  /// 滚动弹幕创建时冻结的移动速度。
+  /// 滚动弹幕当前使用的移动速度。
   double scrollPixelsPerMillisecond;
 
   /// 弹幕栅格化图片缓存。

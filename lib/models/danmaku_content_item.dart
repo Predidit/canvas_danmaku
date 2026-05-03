@@ -56,7 +56,6 @@ class SpecialDanmakuContentItem<T> extends DanmakuContentItem<T> {
 
   final double rotateZ;
   final Matrix4? matrix;
-  // final PathMetric? motionPathMetric;
 
   final Curve easingType;
 
@@ -80,7 +79,6 @@ class SpecialDanmakuContentItem<T> extends DanmakuContentItem<T> {
     this.alphaTween,
     this.rotateZ = 0,
     this.matrix,
-    // this.motionPathMetric,
     int? translationDuration,
     this.translationStartDelay = 0,
     super.count,
@@ -127,14 +125,7 @@ class SpecialDanmakuContentItem<T> extends DanmakuContentItem<T> {
     final translationDuration = _parseInt(list[9]);
     final translationStartDelay = _parseInt(list[10]);
     final hasStroke = list[11] == 1;
-    // 字体
-    // list[12];
     final easingType = list[13] == 1 ? Curves.easeInCubic : Curves.linear;
-    // TODO 路径动画
-    // List<Path> path;
-    // if (list.length > 15) {
-    //   list[14];
-    // }
     return SpecialDanmakuContentItem(
       text,
       duration: duration,
@@ -148,7 +139,6 @@ class SpecialDanmakuContentItem<T> extends DanmakuContentItem<T> {
       translationStartDelay: translationStartDelay,
       rotateZ: rotateZ,
       matrix: matrix,
-      // motionPathMetric: null,
       easingType: easingType,
       extra: extra,
     );

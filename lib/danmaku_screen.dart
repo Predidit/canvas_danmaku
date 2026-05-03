@@ -338,12 +338,12 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
 
     final clearScroll = option.hideScroll && !_option.hideScroll;
 
-    final clearParagraph = fontSizeChanged ||
+    final clearRasterCache = fontSizeChanged ||
         fontFamilyChanged ||
         option.fontWeight != _option.fontWeight ||
         option.strokeWidth != _option.strokeWidth;
 
-    final needRestart = _ticker.isActive && clearScroll && clearParagraph;
+    final needRestart = _ticker.isActive && clearScroll && clearRasterCache;
     if (needRestart) {
       _lastTick = _notifier.value;
       _ticker.stop();
@@ -377,7 +377,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
       _specialDanmakuItems.clear();
     }
 
-    if (clearParagraph) {
+    if (clearRasterCache) {
       DmUtils.updateSelfSendPaint(option.strokeWidth);
       for (var item in _scrollDanmakuItems) {
         _disposeImageNow(item, updateScrollMetrics: true);
@@ -482,7 +482,9 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
     // 移除屏幕外滚动弹幕
     _scrollDanmakuItems.removeWhere((item) {
       if (!item.expired) return false;
-      if (item.trackIndex >= 0 && _scrollTrackTails[item.trackIndex] == item) {
+      if (item.trackIndex >= 0 &&
+          item.trackIndex < _scrollTrackTails.length &&
+          _scrollTrackTails[item.trackIndex] == item) {
         _scrollTrackTails[item.trackIndex] = null;
       }
       _disposeLater(item);
