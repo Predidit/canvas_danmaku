@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:flutter/material.dart';
 
@@ -12,6 +14,22 @@ abstract base class BaseDanmakuPainter extends CustomPainter {
   final double tick;
 
   static final Paint _paint = Paint();
+
+  static double snapToPhysicalPixel(double value, double devicePixelRatio) {
+    if (devicePixelRatio <= 0) return value;
+    return (value * devicePixelRatio).roundToDouble() / devicePixelRatio;
+  }
+
+  static Offset snapOffsetToPhysicalPixel(
+    double dx,
+    double dy,
+    double devicePixelRatio,
+  ) {
+    return Offset(
+      snapToPhysicalPixel(dx, devicePixelRatio),
+      snapToPhysicalPixel(dy, devicePixelRatio),
+    );
+  }
 
   const BaseDanmakuPainter({
     required this.length,
@@ -31,14 +49,38 @@ abstract base class BaseDanmakuPainter extends CustomPainter {
     double dy,
     double devicePixelRatio,
   ) {
-    final img = item.image!;
+    paintImage(
+      canvas,
+      item.image!,
+      dx,
+      dy,
+      item.width,
+      item.height,
+      devicePixelRatio,
+      _paint,
+    );
+  }
+
+  static void paintImage(
+    Canvas canvas,
+    ui.Image image,
+    double dx,
+    double dy,
+    double width,
+    double height,
+    double devicePixelRatio,
+    Paint paint,
+  ) {
+    // Rasterized text shimmers when sampled from fractional physical pixels.
+    // Keep animation state continuous, and only snap the final draw position.
+    final offset = snapOffsetToPhysicalPixel(dx, dy, devicePixelRatio);
     if (devicePixelRatio == 1.0) {
-      canvas.drawImage(img, Offset(dx, dy), _paint);
+      canvas.drawImage(image, offset, paint);
     } else {
       final src =
-          Rect.fromLTWH(0, 0, img.width.toDouble(), img.height.toDouble());
-      final dst = Rect.fromLTWH(dx, dy, item.width, item.height);
-      canvas.drawImageRect(img, src, dst, _paint);
+          Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
+      final dst = Rect.fromLTWH(offset.dx, offset.dy, width, height);
+      canvas.drawImageRect(image, src, dst, paint);
     }
   }
 

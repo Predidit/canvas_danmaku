@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 final class StaticDanmakuPainter extends CustomPainter {
   final int length;
   final List<DanmakuItem> danmakuItems;
-  final double staticDurationInMilliseconds;
   final double fontSize;
   final int fontWeight;
   final double strokeWidth;
@@ -16,7 +15,6 @@ final class StaticDanmakuPainter extends CustomPainter {
   StaticDanmakuPainter({
     required this.length,
     required this.danmakuItems,
-    required this.staticDurationInMilliseconds,
     required this.fontSize,
     required this.fontWeight,
     required this.strokeWidth,

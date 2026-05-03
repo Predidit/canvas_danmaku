@@ -345,7 +345,6 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
       _ticker.stop();
     }
 
-    /// 需要隐藏弹幕时清理已有弹幕
     if (clearScroll) {
       for (var e in _scrollDanmakuItems) {
         _disposeLater(e);
@@ -374,7 +373,6 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
       _specialDanmakuItems.clear();
     }
 
-    /// 清理已经存在的栅格化图片缓存
     if (clearParagraph) {
       DmUtils.updateSelfSendPaint(option.strokeWidth);
       for (var item in _scrollDanmakuItems) {
@@ -436,7 +434,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
       return true;
     }
     final existingEndPosition = item.xPosition + item.width;
-    // 首先保证进入屏幕时不发生重叠，其次保证知道移出屏幕前不与速度慢的弹幕(弹幕宽度较小)发生重叠
+    // 首先保证进入屏幕时不发生重叠，其次保证直到移出屏幕前不与速度慢的弹幕(弹幕宽度较小)发生重叠
     if (_viewWidth - existingEndPosition < 0) {
       return false;
     }
@@ -498,7 +496,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
       _disposeLater(item);
       return true;
     });
-    // 暂停动画
+    // 没有待绘制内容时停止 ticker。
     if (_scrollDanmakuItems.isEmpty &&
         _specialDanmakuItems.isEmpty &&
         _staticDanmakuItems.value.isEmpty &&
@@ -613,7 +611,6 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        /// 计算视图宽度
         _viewWidth = constraints.maxWidth;
         final viewHeight = constraints.maxHeight;
         if (_viewHeight != viewHeight) {
@@ -657,8 +654,6 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
                           painter: StaticDanmakuPainter(
                             length: value.length,
                             danmakuItems: value,
-                            staticDurationInMilliseconds:
-                                _option.staticDurationInMilliseconds,
                             fontSize: _option.fontSize,
                             fontWeight: _option.fontWeight,
                             strokeWidth: _option.strokeWidth,
@@ -674,7 +669,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
                   RepaintBoundary.wrap(
                     IgnorePointer(
                         child: ValueListenableBuilder(
-                      valueListenable: _notifier, // 与滚动弹幕共用控制器
+                      valueListenable: _notifier,
                       builder: (context, value, child) {
                         return CustomPaint(
                           willChange: _running,

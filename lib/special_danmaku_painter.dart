@@ -36,7 +36,6 @@ final class SpecialDanmakuPainter extends BaseDanmakuPainter {
   @pragma("vm:prefer-inline")
   void _paintSpecialDanmaku(Canvas canvas, DanmakuItem dm,
       SpecialDanmakuContentItem item, Size size, double elapsed) {
-    // 透明度动画
     final color = item.alphaTween == null
         ? item.color
         : item.color.withValues(
@@ -44,7 +43,6 @@ final class SpecialDanmakuPainter extends BaseDanmakuPainter {
             elapsed / item.duration,
           ));
 
-    // 位移动画
     double dx, dy;
     if (elapsed > item.translationStartDelay) {
       late final translateProgress = item.easingType.transform(min(1.0,
@@ -79,18 +77,15 @@ final class SpecialDanmakuPainter extends BaseDanmakuPainter {
     double dy,
     Paint paint,
   ) {
-    if (devicePixelRatio == 1.0) {
-      canvas.drawImage(image, Offset(dx, dy), paint);
-    } else {
-      final src =
-          Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
-      final dst = Rect.fromLTWH(
-        dx,
-        dy,
-        image.width / devicePixelRatio,
-        image.height / devicePixelRatio,
-      );
-      canvas.drawImageRect(image, src, dst, paint);
-    }
+    BaseDanmakuPainter.paintImage(
+      canvas,
+      image,
+      dx,
+      dy,
+      image.width / devicePixelRatio,
+      image.height / devicePixelRatio,
+      devicePixelRatio,
+      paint,
+    );
   }
 }
