@@ -11,10 +11,25 @@ abstract base class BaseDanmakuPainter extends CustomPainter {
   final double strokeWidth;
   final double devicePixelRatio;
   final bool running;
-  final int batchThreshold;
-  final int tick;
+  final double tick;
 
   static final Paint _paint = Paint();
+
+  static double snapToPhysicalPixel(double value, double devicePixelRatio) {
+    if (devicePixelRatio <= 0) return value;
+    return (value * devicePixelRatio).roundToDouble() / devicePixelRatio;
+  }
+
+  static Offset snapOffsetToPhysicalPixel(
+    double dx,
+    double dy,
+    double devicePixelRatio,
+  ) {
+    return Offset(
+      snapToPhysicalPixel(dx, devicePixelRatio),
+      snapToPhysicalPixel(dy, devicePixelRatio),
+    );
+  }
 
   const BaseDanmakuPainter({
     required this.length,
@@ -25,7 +40,6 @@ abstract base class BaseDanmakuPainter extends CustomPainter {
     required this.devicePixelRatio,
     required this.running,
     required this.tick,
-    this.batchThreshold = 10, // 默认值为10，可以自行调整
   });
 
   static void paintImg(
@@ -35,31 +49,43 @@ abstract base class BaseDanmakuPainter extends CustomPainter {
     double dy,
     double devicePixelRatio,
   ) {
-    final img = item.image!;
+    paintImage(
+      canvas,
+      item.image!,
+      dx,
+      dy,
+      item.width,
+      item.height,
+      devicePixelRatio,
+      _paint,
+    );
+  }
+
+  static void paintImage(
+    Canvas canvas,
+    ui.Image image,
+    double dx,
+    double dy,
+    double width,
+    double height,
+    double devicePixelRatio,
+    Paint paint,
+  ) {
+    // Rasterized text shimmers when sampled from fractional physical pixels.
+    // Keep animation state continuous, and only snap the final draw position.
+    final offset = snapOffsetToPhysicalPixel(dx, dy, devicePixelRatio);
     if (devicePixelRatio == 1.0) {
-      canvas.drawImage(img, Offset(dx, dy), _paint);
+      canvas.drawImage(image, offset, paint);
     } else {
       final src =
-          Rect.fromLTWH(0, 0, img.width.toDouble(), img.height.toDouble());
-      final dst = Rect.fromLTWH(dx, dy, item.width, item.height);
-      canvas.drawImageRect(img, src, dst, _paint);
+          Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
+      final dst = Rect.fromLTWH(offset.dx, offset.dy, width, height);
+      canvas.drawImageRect(image, src, dst, paint);
     }
   }
 
   @override
   void paint(Canvas canvas, Size size) {
-    final ui.PictureRecorder? pictureRecorder;
-    final Canvas pictureCanvas;
-    final length = danmakuItems.length;
-
-    if (length > batchThreshold) {
-      pictureRecorder = ui.PictureRecorder();
-      pictureCanvas = Canvas(pictureRecorder);
-    } else {
-      pictureRecorder = null;
-      pictureCanvas = canvas;
-    }
-
     DanmakuItem? suspend;
     for (var i in danmakuItems) {
       if (i.expired) continue;
@@ -69,17 +95,11 @@ abstract base class BaseDanmakuPainter extends CustomPainter {
         continue;
       }
 
-      paintDanmaku(pictureCanvas, size, i);
+      paintDanmaku(canvas, size, i);
     }
 
     if (suspend case final suspend?) {
-      paintDanmaku(pictureCanvas, size, suspend);
-    }
-
-    if (pictureRecorder != null) {
-      final ui.Picture picture = pictureRecorder.endRecording();
-      canvas.drawPicture(picture);
-      picture.dispose();
+      paintDanmaku(canvas, size, suspend);
     }
   }
 

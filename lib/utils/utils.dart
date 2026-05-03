@@ -5,20 +5,7 @@ import 'package:canvas_danmaku/models/danmaku_content_item.dart';
 import 'package:flutter/material.dart';
 
 abstract final class DmUtils {
-  static final Random random = Random();
-
   static const maxRasterizeSize = 8192.0;
-
-  static String generateRandomString(int length) {
-    const characters = '0123456789abcdefghijklmnopqrstuvwxyz';
-
-    return String.fromCharCodes(
-      Iterable.generate(
-        length,
-        (_) => characters.codeUnitAt(random.nextInt(characters.length)),
-      ),
-    );
-  }
 
   static final Paint _selfSendPaint = Paint()
     ..style = PaintingStyle.stroke
@@ -191,7 +178,7 @@ abstract final class DmUtils {
 
       final imgLongestSide = rect.size.longestSide * devicePixelRatio;
       if (imgLongestSide > maxRasterizeSize) {
-        // force resize
+        // 强制缩小尺寸，避免超过引擎可栅格化上限
         adjustDevicePixelRatio = maxRasterizeSize / imgLongestSide;
       }
       canvas

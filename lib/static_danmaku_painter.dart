@@ -6,35 +6,31 @@ import 'package:flutter/material.dart';
 final class StaticDanmakuPainter extends CustomPainter {
   final int length;
   final List<DanmakuItem> danmakuItems;
-  final double staticDurationInMilliseconds;
   final double fontSize;
   final int fontWeight;
   final double strokeWidth;
   final double devicePixelRatio;
-  final int tick;
+  final int paintRevision;
+  final double tick;
 
   StaticDanmakuPainter({
     required this.length,
     required this.danmakuItems,
-    required this.staticDurationInMilliseconds,
     required this.fontSize,
     required this.fontWeight,
     required this.strokeWidth,
     required this.devicePixelRatio,
+    required this.paintRevision,
     required this.tick,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     for (var item in danmakuItems) {
+      if (item.image == null) continue;
+
       item
         ..drawTick ??= tick
-        ..drawParagraphIfNeeded(
-          fontSize,
-          fontWeight,
-          strokeWidth,
-          devicePixelRatio,
-        )
         ..xPosition = (size.width - item.width) / 2;
 
       BaseDanmakuPainter.paintImg(
@@ -55,5 +51,6 @@ final class StaticDanmakuPainter extends CustomPainter {
       oldDelegate.fontSize != fontSize ||
       oldDelegate.fontWeight != fontWeight ||
       oldDelegate.strokeWidth != strokeWidth ||
-      oldDelegate.devicePixelRatio != devicePixelRatio;
+      oldDelegate.devicePixelRatio != devicePixelRatio ||
+      oldDelegate.paintRevision != paintRevision;
 }

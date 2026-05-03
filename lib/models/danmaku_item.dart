@@ -19,23 +19,32 @@ class DanmakuItem<T> {
   /// 弹幕竖直方向位置
   double yPosition;
 
-  /// 上次绘制时间
-  int? drawTick;
+  /// 静态和高级弹幕的起始绘制时间。
+  double? drawTick;
 
-  /// 弹幕布局缓存
+  /// 滚动弹幕位置计算的基准动画时间。
+  double scrollStartTick;
+
+  /// 滚动弹幕位置计算的基准横坐标。
+  double scrollStartX;
+
+  /// 滚动弹幕当前使用的移动速度。
+  double scrollPixelsPerMillisecond;
+
+  /// 弹幕栅格化图片缓存。
   ui.Image? image;
+
+  int trackIndex = -1;
+
+  bool rasterQueued = false;
+
+  bool disposeQueued = false;
+
+  bool updateScrollMetricsAfterRaster = false;
 
   bool expired = false;
 
   bool suspend = false;
-
-  @pragma("vm:prefer-inline")
-  bool needRemove(bool needRemove) {
-    if (needRemove) {
-      dispose();
-    }
-    return needRemove;
-  }
 
   void dispose() {
     image?.dispose();
@@ -48,8 +57,12 @@ class DanmakuItem<T> {
     required this.width,
     this.xPosition = 0,
     this.yPosition = 0,
+    this.trackIndex = -1,
     this.image,
     this.drawTick,
+    this.scrollStartTick = 0,
+    this.scrollStartX = 0,
+    this.scrollPixelsPerMillisecond = 0,
   });
 
   void drawParagraphIfNeeded(
@@ -57,12 +70,14 @@ class DanmakuItem<T> {
     int fontWeight,
     double strokeWidth,
     double devicePixelRatio,
+    String? fontFamily,
   ) {
     if (image == null) {
       final paragraph = DmUtils.generateParagraph(
         content: content,
         fontSize: fontSize,
         fontWeight: fontWeight,
+        fontFamily: fontFamily,
       );
       image = DmUtils.recordDanmakuImage(
         contentParagraph: paragraph,
@@ -71,6 +86,7 @@ class DanmakuItem<T> {
         fontWeight: fontWeight,
         strokeWidth: strokeWidth,
         devicePixelRatio: devicePixelRatio,
+        fontFamily: fontFamily,
       );
       width = paragraph.maxIntrinsicWidth +
           strokeWidth +
@@ -78,6 +94,20 @@ class DanmakuItem<T> {
       height = paragraph.height + strokeWidth;
       paragraph.dispose();
     }
+  }
+
+  void updateScrollMetrics({
+    required double tick,
+    required double xPosition,
+    required double viewWidth,
+    required double durationInMilliseconds,
+  }) {
+    scrollStartTick = tick;
+    scrollStartX = xPosition;
+    this.xPosition = xPosition;
+    scrollPixelsPerMillisecond = durationInMilliseconds <= 0
+        ? 0
+        : (viewWidth + width) / durationInMilliseconds;
   }
 
   @override
