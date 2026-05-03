@@ -17,8 +17,6 @@ final class ScrollDanmakuPainter extends BaseDanmakuPainter {
 
   @override
   void paintDanmaku(ui.Canvas canvas, ui.Size size, DanmakuItem item) {
-    if (item.image == null) return;
-
     if (!item.suspend) {
       final endPosition = -item.width;
       item.xPosition = item.scrollStartX -
@@ -29,6 +27,8 @@ final class ScrollDanmakuPainter extends BaseDanmakuPainter {
         return;
       }
     }
+
+    if (item.image == null) return;
 
     BaseDanmakuPainter.paintImg(
       canvas,

@@ -40,6 +40,8 @@ class DanmakuItem<T> {
 
   bool disposeQueued = false;
 
+  bool updateScrollMetricsAfterRaster = false;
+
   bool expired = false;
 
   bool suspend = false;

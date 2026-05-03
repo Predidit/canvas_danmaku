@@ -66,6 +66,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
   late final Ticker _ticker;
   late final ValueNotifier<double> _notifier;
   late double _lastTick = 0;
+  int _staticPaintRevision = 0;
 
   static const int _maxRasterizePerFrame = 2;
   static const int _maxDisposePerFrame = 8;
@@ -119,6 +120,10 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
       for (var item in _specialDanmakuItems) {
         _disposeImageNow(item);
         _enqueueRaster(item);
+      }
+      if (!_ticker.isActive) {
+        _drainRasterQueue(limit: _pendingRasterItems.length);
+        _notifier.refresh();
       }
     }
   }
@@ -375,7 +380,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
     if (clearParagraph) {
       DmUtils.updateSelfSendPaint(option.strokeWidth);
       for (var item in _scrollDanmakuItems) {
-        _disposeImageNow(item);
+        _disposeImageNow(item, updateScrollMetrics: true);
         _enqueueRaster(item);
       }
       for (var item in _staticDanmakuItems.value) {
@@ -405,6 +410,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
       _ticker.start();
     } else {
       if (!_ticker.isActive) {
+        _drainRasterQueue(limit: _pendingRasterItems.length);
         _drainDisposeQueue(limit: _pendingDisposeItems.length);
       }
       _notifier.refresh();
@@ -540,8 +546,8 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
     return item;
   }
 
-  void _drainRasterQueue() {
-    var remaining = _maxRasterizePerFrame;
+  void _drainRasterQueue({int limit = _maxRasterizePerFrame}) {
+    var remaining = limit;
     var refreshStatic = false;
     while (remaining > 0 && _pendingRasterItems.isNotEmpty) {
       final item = _pendingRasterItems.removeFirst();
@@ -560,6 +566,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
       }
     }
     if (refreshStatic) {
+      _staticPaintRevision++;
       _staticDanmakuItems.refresh();
     }
   }
@@ -583,13 +590,16 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
         devicePixelRatio,
         _option.fontFamily,
       );
-      if (item.content.type == DanmakuItemType.scroll) {
-        item.updateScrollMetrics(
-          tick: _notifier.value,
-          xPosition: previousXPosition,
-          viewWidth: _viewWidth,
-          durationInMilliseconds: _option.durationInMilliseconds,
-        );
+      if (item.content.type == DanmakuItemType.scroll &&
+          item.updateScrollMetricsAfterRaster) {
+        item
+          ..updateScrollMetrics(
+            tick: _notifier.value,
+            xPosition: previousXPosition,
+            viewWidth: _viewWidth,
+            durationInMilliseconds: _option.durationInMilliseconds,
+          )
+          ..updateScrollMetricsAfterRaster = false;
       }
     }
   }
@@ -614,7 +624,13 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
     }
   }
 
-  void _disposeImageNow(DanmakuItem<T> item) {
+  void _disposeImageNow(
+    DanmakuItem<T> item, {
+    bool updateScrollMetrics = false,
+  }) {
+    if (updateScrollMetrics && item.content.type == DanmakuItemType.scroll) {
+      item.updateScrollMetricsAfterRaster = true;
+    }
     item
       ..image?.dispose()
       ..image = null;
@@ -682,6 +698,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
                             fontWeight: _option.fontWeight,
                             strokeWidth: _option.strokeWidth,
                             devicePixelRatio: devicePixelRatio,
+                            paintRevision: _staticPaintRevision,
                             tick: _notifier.value,
                           ),
                           size: Size.infinite,

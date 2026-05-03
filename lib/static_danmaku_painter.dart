@@ -10,6 +10,7 @@ final class StaticDanmakuPainter extends CustomPainter {
   final int fontWeight;
   final double strokeWidth;
   final double devicePixelRatio;
+  final int paintRevision;
   final double tick;
 
   StaticDanmakuPainter({
@@ -19,6 +20,7 @@ final class StaticDanmakuPainter extends CustomPainter {
     required this.fontWeight,
     required this.strokeWidth,
     required this.devicePixelRatio,
+    required this.paintRevision,
     required this.tick,
   });
 
@@ -49,5 +51,6 @@ final class StaticDanmakuPainter extends CustomPainter {
       oldDelegate.fontSize != fontSize ||
       oldDelegate.fontWeight != fontWeight ||
       oldDelegate.strokeWidth != strokeWidth ||
-      oldDelegate.devicePixelRatio != devicePixelRatio;
+      oldDelegate.devicePixelRatio != devicePixelRatio ||
+      oldDelegate.paintRevision != paintRevision;
 }
