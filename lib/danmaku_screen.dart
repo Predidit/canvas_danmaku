@@ -188,8 +188,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
         trackIndex: trackIndex,
         width: danmakuWidth,
         height: danmakuHeight,
-        drawTick:
-            content.type == DanmakuItemType.scroll ? null : _notifier.value,
+        drawTick: null,
         scrollStartTick: _notifier.value,
         scrollStartX: _viewWidth,
         scrollPixelsPerMillisecond: scrollPixelsPerMillisecond,
@@ -405,6 +404,9 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
     if (needRestart) {
       _ticker.start();
     } else {
+      if (!_ticker.isActive) {
+        _drainDisposeQueue(limit: _pendingDisposeItems.length);
+      }
       _notifier.refresh();
       _staticDanmakuItems.refresh();
     }
@@ -500,6 +502,8 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
     if (_scrollDanmakuItems.isEmpty &&
         _specialDanmakuItems.isEmpty &&
         _staticDanmakuItems.value.isEmpty &&
+        _pendingRasterItems.isEmpty &&
+        _pendingDisposeItems.isEmpty &&
         _ticker.isActive) {
       _lastTick = tick;
       _ticker.stop();
@@ -507,17 +511,20 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
   }
 
   void _calcTracks() {
-    _trackCount = (_viewHeight * _option.area / _danmakuHeight).floor();
+    _trackCount = max(0, (_viewHeight * _option.area / _danmakuHeight).floor());
 
     /// 为字幕留出余量
     if (_option.safeArea && _option.area == 1.0) {
-      _trackCount = _trackCount - 1;
+      _trackCount = max(0, _trackCount - 1);
     }
 
     _trackYPositions = List<double>.generate(
         _trackCount, (i) => i * _danmakuHeight,
         growable: false);
     _scrollTrackTails = List<DanmakuItem<T>?>.filled(_trackCount, null);
+    if (_trackCount == 0) {
+      return;
+    }
     for (final item in _scrollDanmakuItems) {
       final trackIndex = _trackIndexForY(item.yPosition);
       item.trackIndex = trackIndex;
@@ -537,6 +544,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
     var remaining = _maxRasterizePerFrame;
     while (remaining > 0 && _pendingRasterItems.isNotEmpty) {
       final item = _pendingRasterItems.removeFirst();
+      remaining--;
       // ignore: cascade_invocations
       item.rasterQueued = false;
       final shouldSkip =
@@ -545,7 +553,6 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
         continue;
       }
       _rasterizeItem(item);
-      remaining--;
     }
   }
 
