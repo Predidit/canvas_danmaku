@@ -59,7 +59,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
   /// 弹幕轨道位置
   late List<double> _trackYPositions;
 
-  late List<DanmakuItem<T>?> _scrollTrackTails;
+  List<DanmakuItem<T>?> _scrollTrackTails = [];
 
   late final _random = Random();
 
@@ -542,6 +542,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
 
   void _drainRasterQueue() {
     var remaining = _maxRasterizePerFrame;
+    var refreshStatic = false;
     while (remaining > 0 && _pendingRasterItems.isNotEmpty) {
       final item = _pendingRasterItems.removeFirst();
       remaining--;
@@ -553,6 +554,13 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
         continue;
       }
       _rasterizeItem(item);
+      if (item.content.type == DanmakuItemType.top ||
+          item.content.type == DanmakuItemType.bottom) {
+        refreshStatic = true;
+      }
+    }
+    if (refreshStatic) {
+      _staticDanmakuItems.refresh();
     }
   }
 
@@ -567,6 +575,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
         fontFamily: _option.fontFamily,
       );
     } else {
+      final previousXPosition = item.xPosition;
       item.drawParagraphIfNeeded(
         _option.fontSize,
         _option.fontWeight,
@@ -574,6 +583,14 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
         devicePixelRatio,
         _option.fontFamily,
       );
+      if (item.content.type == DanmakuItemType.scroll) {
+        item.updateScrollMetrics(
+          tick: _notifier.value,
+          xPosition: previousXPosition,
+          viewWidth: _viewWidth,
+          durationInMilliseconds: _option.durationInMilliseconds,
+        );
+      }
     }
   }
 

@@ -94,6 +94,20 @@ class DanmakuItem<T> {
     }
   }
 
+  void updateScrollMetrics({
+    required double tick,
+    required double xPosition,
+    required double viewWidth,
+    required double durationInMilliseconds,
+  }) {
+    scrollStartTick = tick;
+    scrollStartX = xPosition;
+    this.xPosition = xPosition;
+    scrollPixelsPerMillisecond = durationInMilliseconds <= 0
+        ? 0
+        : (viewWidth + width) / durationInMilliseconds;
+  }
+
   @override
   String toString() {
     return 'DanmakuItem(content=$content, xPos=$xPosition, yPos=$yPosition, size=${ui.Size(width, height)}, drawTick=$drawTick)';
