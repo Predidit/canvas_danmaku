@@ -16,9 +16,6 @@ class DanmakuItem<T> {
   /// 弹幕水平方向位置
   double xPosition;
 
-  /// 弹幕竖直方向位置
-  double yPosition;
-
   /// 上次绘制时间
   int? drawTick;
 
@@ -47,7 +44,6 @@ class DanmakuItem<T> {
     required this.height,
     required this.width,
     this.xPosition = 0,
-    this.yPosition = 0,
     this.image,
     this.drawTick,
   });
@@ -56,7 +52,6 @@ class DanmakuItem<T> {
     double fontSize,
     int fontWeight,
     double strokeWidth,
-    double devicePixelRatio,
   ) {
     if (image == null) {
       final paragraph = DmUtils.generateParagraph(
@@ -70,7 +65,6 @@ class DanmakuItem<T> {
         fontSize: fontSize,
         fontWeight: fontWeight,
         strokeWidth: strokeWidth,
-        devicePixelRatio: devicePixelRatio,
       );
       width = paragraph.maxIntrinsicWidth +
           strokeWidth +
@@ -82,6 +76,6 @@ class DanmakuItem<T> {
 
   @override
   String toString() {
-    return 'DanmakuItem(content=$content, xPos=$xPosition, yPos=$yPosition, size=${ui.Size(width, height)}, drawTick=$drawTick)';
+    return 'DanmakuItem(content=$content, xPos=$xPosition, size=${ui.Size(width, height)}, drawTick=$drawTick)';
   }
 }

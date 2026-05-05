@@ -8,13 +8,14 @@ import 'package:canvas_danmaku/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 final class SpecialDanmakuPainter extends BaseDanmakuPainter {
+  List<DanmakuItem> danmakuItems;
+
   SpecialDanmakuPainter({
     required super.length,
-    required super.danmakuItems,
+    required this.danmakuItems,
     required super.fontSize,
     required super.fontWeight,
     required super.strokeWidth,
-    required super.devicePixelRatio,
     required super.running,
     required super.tick,
     super.batchThreshold,
@@ -22,7 +23,6 @@ final class SpecialDanmakuPainter extends BaseDanmakuPainter {
 
   static final _paint = Paint();
 
-  @override
   void paintDanmaku(ui.Canvas canvas, ui.Size size, DanmakuItem item) {
     final elapsed = tick - (item.drawTick ??= tick);
     final content = item.content as SpecialDanmakuContentItem;
@@ -69,10 +69,11 @@ final class SpecialDanmakuPainter extends BaseDanmakuPainter {
         content: item,
         fontWeight: fontWeight,
         strokeWidth: strokeWidth,
-        devicePixelRatio: devicePixelRatio,
       ),
       dx,
       dy,
+      item.rect.width,
+      item.rect.height,
       _paint..color = color,
     );
   }
@@ -82,20 +83,43 @@ final class SpecialDanmakuPainter extends BaseDanmakuPainter {
     ui.Image image,
     double dx,
     double dy,
+    double imgW,
+    double imgH,
     Paint paint,
   ) {
-    if (devicePixelRatio == 1.0) {
+    if (image.width == imgW.ceil()) {
       canvas.drawImage(image, Offset(dx, dy), paint);
     } else {
       final src =
           Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
-      final dst = Rect.fromLTWH(
-        dx,
-        dy,
-        image.width / devicePixelRatio,
-        image.height / devicePixelRatio,
-      );
+      final dst = Rect.fromLTWH(dx, dy, imgW, imgH);
       canvas.drawImageRect(image, src, dst, paint);
+    }
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final ui.PictureRecorder? pictureRecorder;
+    final Canvas pictureCanvas;
+    final length = danmakuItems.length;
+
+    if (length > batchThreshold) {
+      pictureRecorder = ui.PictureRecorder();
+      pictureCanvas = Canvas(pictureRecorder);
+    } else {
+      pictureRecorder = null;
+      pictureCanvas = canvas;
+    }
+    for (var i in danmakuItems) {
+      if (i.expired) continue;
+
+      paintDanmaku(pictureCanvas, size, i);
+    }
+
+    if (pictureRecorder != null) {
+      final ui.Picture picture = pictureRecorder.endRecording();
+      canvas.drawPicture(picture);
+      picture.dispose();
     }
   }
 }

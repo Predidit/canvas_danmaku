@@ -1,3 +1,5 @@
+import 'package:canvas_danmaku/canvas_danmaku.dart';
+
 class DanmakuOption {
   /// 默认的字体大小
   final double fontSize;
@@ -33,19 +35,33 @@ class DanmakuOption {
   /// 隐藏滚动弹幕
   final bool hideScroll;
 
+  /// 隐藏高级弹幕
   final bool hideSpecial;
 
   /// 弹幕描边
   final double strokeWidth;
 
+  /// 滚动弹幕速度不随内容长度变化
+  final bool scrollFixedVelocity;
+
   /// 海量弹幕模式 (弹幕轨道占满时进行叠加)
   final bool massiveMode;
+
+  /// 静态弹幕无法添加或宽度超出显示区域时作为滚动弹幕添加
+  final bool static2Scroll;
 
   /// 为字幕预留空间
   final bool safeArea;
 
   /// 弹幕行高
   final double lineHeight;
+
+  bool hideWhat(DanmakuItemType type) => switch (type) {
+        DanmakuItemType.scroll => hideScroll,
+        DanmakuItemType.top => hideTop,
+        DanmakuItemType.bottom => hideBottom,
+        DanmakuItemType.special => hideSpecial,
+      };
 
   const DanmakuOption({
     this.fontSize = 16,
@@ -60,7 +76,9 @@ class DanmakuOption {
     this.hideTop = false,
     this.hideSpecial = false,
     this.strokeWidth = 1.5,
+    this.scrollFixedVelocity = false,
     this.massiveMode = false,
+    this.static2Scroll = false,
     this.safeArea = true,
     this.lineHeight = 1.6,
   })  : durationInMilliseconds = duration * 1000,
@@ -79,7 +97,9 @@ class DanmakuOption {
     bool? hideScroll,
     bool? hideSpecial,
     double? strokeWidth,
+    bool? scrollFixedVelocity,
     bool? massiveMode,
+    bool? static2Scroll,
     bool? safeArea,
     double? lineHeight,
   }) {
@@ -96,7 +116,9 @@ class DanmakuOption {
       hideScroll: hideScroll ?? this.hideScroll,
       hideSpecial: hideSpecial ?? this.hideSpecial,
       strokeWidth: strokeWidth ?? this.strokeWidth,
+      scrollFixedVelocity: scrollFixedVelocity ?? this.scrollFixedVelocity,
       massiveMode: massiveMode ?? this.massiveMode,
+      static2Scroll: static2Scroll ?? this.static2Scroll,
       safeArea: safeArea ?? this.safeArea,
       lineHeight: lineHeight ?? this.lineHeight,
     );
