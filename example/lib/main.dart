@@ -60,6 +60,9 @@ class _HomePageState extends State<HomePage> {
   /// 弹幕字号
   double _fontSize = (Platform.isIOS || Platform.isAndroid) ? 16 : 25;
 
+  /// 弹幕显示区域
+  double _area = 1.0;
+
   /// 弹幕粗细
   int _fontWeight = 4;
 
@@ -72,10 +75,14 @@ class _HomePageState extends State<HomePage> {
   /// 隐藏底部弹幕
   bool _hideBottom = false;
 
+  /// 隐藏高级弹幕
   bool _hideSpecial = false;
 
   /// 为字幕预留空间
   bool _safeArea = true;
+
+  /// 静态弹幕无法添加时作为滚动弹幕添加
+  bool _static2Scroll = false;
 
   late final dmPadding = EdgeInsets.zero;
   //  EdgeInsets.fromLTRB(
@@ -262,6 +269,54 @@ class _HomePageState extends State<HomePage> {
                   },
                 ),
                 TextButton(
+                  child: const Text('Big'),
+                  onPressed: () {
+                    final color = getRandomColor();
+                    _controller!.addDanmaku(
+                      SpecialDanmakuContentItem(
+                        '测试',
+                        duration: 4000,
+                        color: color,
+                        fontSize: 128,
+                        translateXTween: ConstantTween(0),
+                        translateYTween: ConstantTween(0),
+                        alphaTween: Tween<double>(begin: 1, end: 0),
+                        easingType: Curves.linear,
+                        hasStroke: true,
+                        extra: _random.nextInt(2147483647),
+                      ),
+                    );
+                    _controller!.addDanmaku(
+                      SpecialDanmakuContentItem(
+                        '测试' * 200,
+                        duration: 4000,
+                        color: color,
+                        fontSize: 128,
+                        translateXTween: ConstantTween(0),
+                        translateYTween: ConstantTween(0),
+                        alphaTween: Tween<double>(begin: 1, end: 0),
+                        easingType: Curves.linear,
+                        hasStroke: true,
+                        extra: _random.nextInt(2147483647),
+                      ),
+                    );
+                    _controller!.addDanmaku(
+                      SpecialDanmakuContentItem(
+                        '测试\n' * 200,
+                        duration: 4000,
+                        color: color,
+                        fontSize: 128,
+                        translateXTween: ConstantTween(0),
+                        translateYTween: ConstantTween(0),
+                        alphaTween: Tween<double>(begin: 1, end: 0),
+                        easingType: Curves.linear,
+                        hasStroke: true,
+                        extra: _random.nextInt(2147483647),
+                      ),
+                    );
+                  },
+                ),
+                TextButton(
                   child: const Text('DanMu'),
                   onPressed: () async {
                     String data = await rootBundle.loadString('assets/dm.json');
@@ -306,6 +361,46 @@ class _HomePageState extends State<HomePage> {
                           DanmakuItemType.scroll,
                         ][_random.nextInt(3)],
                         selfSend: true,
+                        extra: _random.nextInt(2147483647),
+                      ),
+                    );
+                  },
+                ),
+                TextButton(
+                  child: const Text('LongTop'),
+                  onPressed: () {
+                    _controller?.addDanmaku(
+                      DanmakuContentItem(
+                        "这是一条超长顶部弹幕。" * 10,
+                        color: getRandomColor(),
+                        // color: Colors.white,
+                        // isColorful: true,
+                        type: DanmakuItemType.top,
+                        extra: _random.nextInt(2147483647),
+                      ),
+                    );
+                  },
+                ),
+                TextButton(
+                  child: const Text('LongShort'),
+                  onPressed: () {
+                    _controller?.addDanmaku(
+                      DanmakuContentItem(
+                        "这是一条超长滚动弹幕。" * 10,
+                        color: getRandomColor(),
+                        // color: Colors.white,
+                        // isColorful: true,
+                        type: DanmakuItemType.scroll,
+                        extra: _random.nextInt(2147483647),
+                      ),
+                    );
+                    _controller?.addDanmaku(
+                      DanmakuContentItem(
+                        "这是一条短滚动弹幕",
+                        color: getRandomColor(),
+                        // color: Colors.white,
+                        // isColorful: true,
+                        type: DanmakuItemType.scroll,
                         extra: _random.nextInt(2147483647),
                       ),
                     );
@@ -363,23 +458,33 @@ class _HomePageState extends State<HomePage> {
                 },
                 child: ColoredBox(
                   color: Colors.grey,
-                  child: DanmakuScreen<int>(
-                    key: _danmuKey,
-                    createdController: (e) {
-                      _controller = e;
-                    },
-                    option: DanmakuOption(
-                      fontSize: _fontSize,
-                      fontWeight: _fontWeight,
-                      duration: _duration,
-                      staticDuration: _staticDuration,
-                      strokeWidth: _strokeWidth,
-                      massiveMode: _massiveMode,
-                      hideScroll: _hideScroll,
-                      hideTop: _hideTop,
-                      hideBottom: _hideBottom,
-                      safeArea: _safeArea,
-                      lineHeight: _lineHeight,
+                  child: AnimatedOpacity(
+                    opacity: _opacity,
+                    duration: const Duration(milliseconds: 100),
+                    child: LayoutBuilder(
+                      builder: (_, constrains) {
+                        return DanmakuScreen<int>(
+                          key: _danmuKey,
+                          createdController: (e) {
+                            _controller = e;
+                          },
+                          option: DanmakuOption(
+                            fontSize: _fontSize,
+                            fontWeight: _fontWeight,
+                            duration: _duration,
+                            staticDuration: _staticDuration,
+                            strokeWidth: _strokeWidth,
+                            massiveMode: _massiveMode,
+                            static2Scroll: _static2Scroll,
+                            hideScroll: _hideScroll,
+                            hideTop: _hideTop,
+                            hideBottom: _hideBottom,
+                            safeArea: _safeArea,
+                            lineHeight: _lineHeight,
+                          ),
+                          size: constrains.biggest,
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -520,6 +625,31 @@ class _HomePageState extends State<HomePage> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Text("Area : $_area"),
+                      Slider(
+                        value: _area,
+                        min: 0.1,
+                        max: 1.0,
+                        divisions: 9,
+                        onChanged: (e) {
+                          if (_controller != null) {
+                            _area = e.toPrecision(1);
+                            _controller!.updateOption(
+                              _controller!.option.copyWith(area: _area),
+                            );
+                            (context as Element).markNeedsBuild();
+                          }
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ),
+              Builder(
+                builder: (context) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text("Scroll Duration : $_duration"),
                       Slider(
                         value: _duration.toDouble(),
@@ -570,6 +700,22 @@ class _HomePageState extends State<HomePage> {
               Builder(
                 builder: (context) {
                   return SwitchListTile(
+                    title: const Text('scrollFixedVelocity'),
+                    value: _controller!.option.scrollFixedVelocity,
+                    onChanged: (e) {
+                      if (_controller != null) {
+                        _controller!.updateOption(
+                          _controller!.option.copyWith(scrollFixedVelocity: e),
+                        );
+                        (context as Element).markNeedsBuild();
+                      }
+                    },
+                  );
+                },
+              ),
+              Builder(
+                builder: (context) {
+                  return SwitchListTile(
                     title: const Text('MassiveMode'),
                     value: _massiveMode,
                     onChanged: (e) {
@@ -577,6 +723,23 @@ class _HomePageState extends State<HomePage> {
                         _massiveMode = e;
                         _controller!.updateOption(
                           _controller!.option.copyWith(massiveMode: e),
+                        );
+                        (context as Element).markNeedsBuild();
+                      }
+                    },
+                  );
+                },
+              ),
+              Builder(
+                builder: (context) {
+                  return SwitchListTile(
+                    title: const Text('Static2Scroll'),
+                    value: _static2Scroll,
+                    onChanged: (e) {
+                      if (_controller != null) {
+                        _static2Scroll = e;
+                        _controller!.updateOption(
+                          _controller!.option.copyWith(static2Scroll: e),
                         );
                         (context as Element).markNeedsBuild();
                       }
@@ -695,7 +858,7 @@ class _HomePageState extends State<HomePage> {
     int index = 0;
     final length = danmakus.length;
     _timer = Timer.periodic(const Duration(milliseconds: 200), (_) {
-      if (index > length || _controller == null) {
+      if (index >= length || _controller == null) {
         _stopTimer();
         return;
       }
@@ -757,7 +920,7 @@ class _HomePageState extends State<HomePage> {
     int index = 0;
     final length = items.length;
     _timer = Timer.periodic(const Duration(milliseconds: 200), (_) {
-      if (index > length || _controller == null) {
+      if (index >= length || _controller == null) {
         _stopTimer();
         return;
       }
@@ -833,4 +996,11 @@ class TrianglePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(TrianglePainter oldDelegate) => color != oldDelegate.color;
+}
+
+extension on double {
+  double toPrecision(int fractionDigits) {
+    final mod = pow(10, fractionDigits).toDouble();
+    return (this * mod).roundToDouble() / mod;
+  }
 }

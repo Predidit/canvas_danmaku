@@ -174,7 +174,7 @@ class SpecialDanmakuContentItem<T> extends DanmakuContentItem<T> {
     double? start = convert(rawStart);
     double? end = convert(rawEnd);
 
-    if (start == null && end == null) return (0, 0);
+    if (start == null && end == null) return const (0, 0);
     start ??= end;
     end ??= start;
 
@@ -185,14 +185,14 @@ class SpecialDanmakuContentItem<T> extends DanmakuContentItem<T> {
         int() => digit,
         double() => digit.toInt(),
         String() => int.tryParse(digit) ?? 0,
-        _ => throw UnimplementedError()
+        _ => 0
       };
 
   static double _parseDouble(dynamic digit) => switch (digit) {
         int() => digit.toDouble(),
         double() => digit,
         String() => double.tryParse(digit) ?? 0,
-        _ => throw UnimplementedError()
+        _ => 0
       };
 
   static Tween<T> _makeTween<T>(T start, T end) {
