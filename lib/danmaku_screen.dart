@@ -34,7 +34,8 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
   double devicePixelRatio = 1;
 
   /// 弹幕配置
-  DanmakuOption _option = const DanmakuOption();
+  late final ValueNotifier<DanmakuOption> _optionNotifier;
+  DanmakuOption get _option => _optionNotifier.value;
 
   /// 滚动弹幕
   final _scrollDanmakuItems = <DanmakuItem<T>>[];
@@ -67,7 +68,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
   @override
   void initState() {
     super.initState();
-    _option = widget.option;
+    _optionNotifier = ValueNotifier(widget.option);
     DmUtils.updateSelfSendPaint(_option.strokeWidth);
 
     _danmakuHeight = _textPainter.height;
@@ -75,6 +76,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
     _ticker = createTicker(_tick);
     _notifier = ValueNotifier(0);
     _opacityNotifier = ValueNotifier(_option.opacity);
+    _optionNotifier.addListener(_syncOpacity);
 
     widget.createdController(DanmakuController<T>(
       addDanmaku: _addDanmaku,
@@ -138,7 +140,9 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
     _running = false;
     _ticker.dispose();
     _clearDanmakus();
+    _optionNotifier.removeListener(_syncOpacity);
     _opacityNotifier.dispose();
+    _optionNotifier.dispose();
     _staticDanmakuItems.dispose();
     super.dispose();
   }
@@ -313,16 +317,11 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
 
   /// 更新弹幕设置
   void _updateOption(DanmakuOption option) {
-    final opacityChanged = option.opacity != _option.opacity;
-
     final lineHeightChanged = option.lineHeight != _option.lineHeight;
     if (lineHeightChanged) {
-      _option = option;
+      _optionNotifier.value = option;
       _danmakuHeight = _textPainter.height;
       _calcTracks();
-      if (opacityChanged) {
-        _opacityNotifier.value = option.opacity;
-      }
       return;
     }
 
@@ -404,10 +403,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
         massiveModeChanged ||
         areaChanged ||
         safeAreaChanged;
-    _option = option;
-    if (opacityChanged) {
-      _opacityNotifier.value = option.opacity;
-    }
+    _optionNotifier.value = option;
     if (fontSizeChanged) {
       _danmakuHeight = _textPainter.height;
     }
@@ -420,6 +416,13 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
     } else if (nonOpacityOptionChanged) {
       _notifier.refresh();
       _staticDanmakuItems.refresh();
+    }
+  }
+
+  void _syncOpacity() {
+    final opacity = _option.opacity;
+    if (opacity != _opacityNotifier.value) {
+      _opacityNotifier.value = opacity;
     }
   }
 
