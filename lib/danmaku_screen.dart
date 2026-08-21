@@ -34,7 +34,8 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
   double devicePixelRatio = 1;
 
   /// 弹幕配置
-  DanmakuOption _option = const DanmakuOption();
+  late final ValueNotifier<DanmakuOption> _optionNotifier;
+  DanmakuOption get _option => _optionNotifier.value;
 
   /// 滚动弹幕
   final _scrollDanmakuItems = <DanmakuItem<T>>[];
@@ -57,7 +58,8 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
   late final _random = Random();
 
   late final Ticker _ticker;
-  late final ValueNotifier<int> _notifier;
+  late final ValueNotifier<int> _tickNotifier;
+  late final ValueNotifier<double> _opacityNotifier;
   late int _lastTick = 0;
 
   /// 运行状态
@@ -66,13 +68,15 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
   @override
   void initState() {
     super.initState();
-    _option = widget.option;
+    _optionNotifier = ValueNotifier(widget.option);
     DmUtils.updateSelfSendPaint(_option.strokeWidth);
 
     _danmakuHeight = _textPainter.height;
 
     _ticker = createTicker(_tick);
-    _notifier = ValueNotifier(0);
+    _tickNotifier = ValueNotifier(0);
+    _opacityNotifier = ValueNotifier(_option.opacity);
+    _optionNotifier.addListener(_syncOpacity);
 
     widget.createdController(DanmakuController<T>(
       addDanmaku: _addDanmaku,
@@ -112,10 +116,10 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
 
   int _time = 0;
   void _tick(Duration elapsed) {
-    _notifier.value = elapsed.inMilliseconds + _lastTick;
+    _tickNotifier.value = elapsed.inMilliseconds + _lastTick;
     if (_time++ > 10) {
       _time = 0;
-      _lazyTick(_notifier.value);
+      _lazyTick(_tickNotifier.value);
     }
   }
 
@@ -136,6 +140,10 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
     _running = false;
     _ticker.dispose();
     _clearDanmakus();
+    _tickNotifier.dispose();
+    _optionNotifier.removeListener(_syncOpacity);
+    _opacityNotifier.dispose();
+    _optionNotifier.dispose();
     _staticDanmakuItems.dispose();
     super.dispose();
   }
@@ -280,7 +288,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
     if (!mounted) return;
     _running = false;
     if (_ticker.isActive) {
-      _lastTick = _notifier.value;
+      _lastTick = _tickNotifier.value;
       _ticker.stop();
     }
   }
@@ -304,7 +312,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
       //   (_) => _ticker.stop(),
       // );
     } else {
-      _notifier.refresh();
+      _tickNotifier.refresh();
     }
   }
 
@@ -312,7 +320,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
   void _updateOption(DanmakuOption option) {
     final lineHeightChanged = option.lineHeight != _option.lineHeight;
     if (lineHeightChanged) {
-      _option = option;
+      _optionNotifier.value = option;
       _danmakuHeight = _textPainter.height;
       _calcTracks();
       return;
@@ -330,7 +338,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
 
     final needRestart = _ticker.isActive && clearScroll && clearParagraph;
     if (needRestart) {
-      _lastTick = _notifier.value;
+      _lastTick = _tickNotifier.value;
       _ticker.stop();
     }
 
@@ -344,6 +352,14 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
 
     final clearTop = option.hideTop && !_option.hideTop;
     final clearBottom = option.hideBottom && !_option.hideBottom;
+    final hideTopChanged = option.hideTop != _option.hideTop;
+    final hideBottomChanged = option.hideBottom != _option.hideBottom;
+    final hideScrollChanged = option.hideScroll != _option.hideScroll;
+    final hideSpecialChanged = option.hideSpecial != _option.hideSpecial;
+    final durationChanged = option.duration != _option.duration;
+    final staticDurationChanged =
+        option.staticDuration != _option.staticDuration;
+    final massiveModeChanged = option.massiveMode != _option.massiveMode;
     if (clearTop || clearBottom) {
       _staticDanmakuItems.removeWhere((e) {
         final needRemove =
@@ -378,7 +394,17 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
 
     final areaChanged = option.area != _option.area;
     final safeAreaChanged = option.safeArea != _option.safeArea;
-    _option = option;
+    final nonOpacityOptionChanged = clearParagraph ||
+        hideTopChanged ||
+        hideBottomChanged ||
+        hideScrollChanged ||
+        hideSpecialChanged ||
+        durationChanged ||
+        staticDurationChanged ||
+        massiveModeChanged ||
+        areaChanged ||
+        safeAreaChanged;
+    _optionNotifier.value = option;
     if (fontSizeChanged) {
       _danmakuHeight = _textPainter.height;
     }
@@ -388,9 +414,16 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
 
     if (needRestart) {
       _ticker.start();
-    } else {
-      _notifier.refresh();
+    } else if (nonOpacityOptionChanged) {
+      _tickNotifier.refresh();
       _staticDanmakuItems.refresh();
+    }
+  }
+
+  void _syncOpacity() {
+    final opacity = _option.opacity;
+    if (opacity != _opacityNotifier.value) {
+      _opacityNotifier.value = opacity;
     }
   }
 
@@ -498,14 +531,17 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
         }
 
         return ClipRect(
-          child: Opacity(
-            opacity: _option.opacity,
+          child: ValueListenableBuilder<double>(
+            valueListenable: _opacityNotifier,
+            builder: (context, opacity, child) {
+              return Opacity(opacity: opacity, child: child);
+            },
             child: IgnorePointer(
               child: Stack(
                 children: [
                   RepaintBoundary.wrap(
                     ValueListenableBuilder(
-                      valueListenable: _notifier,
+                      valueListenable: _tickNotifier,
                       builder: (context, value, child) {
                         return CustomPaint(
                           willChange: _running,
@@ -541,7 +577,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
                             fontWeight: _option.fontWeight,
                             strokeWidth: _option.strokeWidth,
                             devicePixelRatio: devicePixelRatio,
-                            tick: _notifier.value,
+                            tick: _tickNotifier.value,
                           ),
                           size: Size.infinite,
                         );
@@ -552,7 +588,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
                   RepaintBoundary.wrap(
                     IgnorePointer(
                         child: ValueListenableBuilder(
-                      valueListenable: _notifier, // 与滚动弹幕共用控制器
+                      valueListenable: _tickNotifier, // 与滚动弹幕共用控制器
                       builder: (context, value, child) {
                         return CustomPaint(
                           willChange: _running,

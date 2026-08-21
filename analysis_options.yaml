@@ -58,5 +58,14 @@ linter:
     - use_null_aware_elements
     - unnecessary_lambdas
     - use_is_even_rather_than_modulo
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options
