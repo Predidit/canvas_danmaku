@@ -1,3 +1,7 @@
+## 0.3.2
+
+- Fix opacity change.
+
 ## 0.3.1
 
 - Support danmaku font family option.
