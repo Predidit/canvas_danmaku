@@ -58,6 +58,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
 
   late final Ticker _ticker;
   late final ValueNotifier<int> _notifier;
+  late final ValueNotifier<double> _opacityNotifier;
   late int _lastTick = 0;
 
   /// 运行状态
@@ -73,6 +74,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
 
     _ticker = createTicker(_tick);
     _notifier = ValueNotifier(0);
+    _opacityNotifier = ValueNotifier(_option.opacity);
 
     widget.createdController(DanmakuController<T>(
       addDanmaku: _addDanmaku,
@@ -136,6 +138,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
     _running = false;
     _ticker.dispose();
     _clearDanmakus();
+    _opacityNotifier.dispose();
     _staticDanmakuItems.dispose();
     super.dispose();
   }
@@ -310,11 +313,16 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
 
   /// 更新弹幕设置
   void _updateOption(DanmakuOption option) {
+    final opacityChanged = option.opacity != _option.opacity;
+
     final lineHeightChanged = option.lineHeight != _option.lineHeight;
     if (lineHeightChanged) {
       _option = option;
       _danmakuHeight = _textPainter.height;
       _calcTracks();
+      if (opacityChanged) {
+        _opacityNotifier.value = option.opacity;
+      }
       return;
     }
 
@@ -344,6 +352,14 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
 
     final clearTop = option.hideTop && !_option.hideTop;
     final clearBottom = option.hideBottom && !_option.hideBottom;
+    final hideTopChanged = option.hideTop != _option.hideTop;
+    final hideBottomChanged = option.hideBottom != _option.hideBottom;
+    final hideScrollChanged = option.hideScroll != _option.hideScroll;
+    final hideSpecialChanged = option.hideSpecial != _option.hideSpecial;
+    final durationChanged = option.duration != _option.duration;
+    final staticDurationChanged =
+        option.staticDuration != _option.staticDuration;
+    final massiveModeChanged = option.massiveMode != _option.massiveMode;
     if (clearTop || clearBottom) {
       _staticDanmakuItems.removeWhere((e) {
         final needRemove =
@@ -378,7 +394,20 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
 
     final areaChanged = option.area != _option.area;
     final safeAreaChanged = option.safeArea != _option.safeArea;
+    final nonOpacityOptionChanged = clearParagraph ||
+        hideTopChanged ||
+        hideBottomChanged ||
+        hideScrollChanged ||
+        hideSpecialChanged ||
+        durationChanged ||
+        staticDurationChanged ||
+        massiveModeChanged ||
+        areaChanged ||
+        safeAreaChanged;
     _option = option;
+    if (opacityChanged) {
+      _opacityNotifier.value = option.opacity;
+    }
     if (fontSizeChanged) {
       _danmakuHeight = _textPainter.height;
     }
@@ -388,7 +417,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
 
     if (needRestart) {
       _ticker.start();
-    } else {
+    } else if (nonOpacityOptionChanged) {
       _notifier.refresh();
       _staticDanmakuItems.refresh();
     }
@@ -498,8 +527,11 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
         }
 
         return ClipRect(
-          child: Opacity(
-            opacity: _option.opacity,
+          child: ValueListenableBuilder<double>(
+            valueListenable: _opacityNotifier,
+            builder: (context, opacity, child) {
+              return Opacity(opacity: opacity, child: child);
+            },
             child: IgnorePointer(
               child: Stack(
                 children: [
