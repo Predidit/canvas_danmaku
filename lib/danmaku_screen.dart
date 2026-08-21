@@ -58,7 +58,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
   late final _random = Random();
 
   late final Ticker _ticker;
-  late final ValueNotifier<int> _notifier;
+  late final ValueNotifier<int> _tickNotifier;
   late final ValueNotifier<double> _opacityNotifier;
   late int _lastTick = 0;
 
@@ -74,7 +74,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
     _danmakuHeight = _textPainter.height;
 
     _ticker = createTicker(_tick);
-    _notifier = ValueNotifier(0);
+    _tickNotifier = ValueNotifier(0);
     _opacityNotifier = ValueNotifier(_option.opacity);
     _optionNotifier.addListener(_syncOpacity);
 
@@ -116,10 +116,10 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
 
   int _time = 0;
   void _tick(Duration elapsed) {
-    _notifier.value = elapsed.inMilliseconds + _lastTick;
+    _tickNotifier.value = elapsed.inMilliseconds + _lastTick;
     if (_time++ > 10) {
       _time = 0;
-      _lazyTick(_notifier.value);
+      _lazyTick(_tickNotifier.value);
     }
   }
 
@@ -140,6 +140,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
     _running = false;
     _ticker.dispose();
     _clearDanmakus();
+    _tickNotifier.dispose();
     _optionNotifier.removeListener(_syncOpacity);
     _opacityNotifier.dispose();
     _optionNotifier.dispose();
@@ -287,7 +288,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
     if (!mounted) return;
     _running = false;
     if (_ticker.isActive) {
-      _lastTick = _notifier.value;
+      _lastTick = _tickNotifier.value;
       _ticker.stop();
     }
   }
@@ -311,7 +312,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
       //   (_) => _ticker.stop(),
       // );
     } else {
-      _notifier.refresh();
+      _tickNotifier.refresh();
     }
   }
 
@@ -337,7 +338,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
 
     final needRestart = _ticker.isActive && clearScroll && clearParagraph;
     if (needRestart) {
-      _lastTick = _notifier.value;
+      _lastTick = _tickNotifier.value;
       _ticker.stop();
     }
 
@@ -414,7 +415,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
     if (needRestart) {
       _ticker.start();
     } else if (nonOpacityOptionChanged) {
-      _notifier.refresh();
+      _tickNotifier.refresh();
       _staticDanmakuItems.refresh();
     }
   }
@@ -540,7 +541,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
                 children: [
                   RepaintBoundary.wrap(
                     ValueListenableBuilder(
-                      valueListenable: _notifier,
+                      valueListenable: _tickNotifier,
                       builder: (context, value, child) {
                         return CustomPaint(
                           willChange: _running,
@@ -576,7 +577,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
                             fontWeight: _option.fontWeight,
                             strokeWidth: _option.strokeWidth,
                             devicePixelRatio: devicePixelRatio,
-                            tick: _notifier.value,
+                            tick: _tickNotifier.value,
                           ),
                           size: Size.infinite,
                         );
@@ -587,7 +588,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
                   RepaintBoundary.wrap(
                     IgnorePointer(
                         child: ValueListenableBuilder(
-                      valueListenable: _notifier, // 与滚动弹幕共用控制器
+                      valueListenable: _tickNotifier, // 与滚动弹幕共用控制器
                       builder: (context, value, child) {
                         return CustomPaint(
                           willChange: _running,
