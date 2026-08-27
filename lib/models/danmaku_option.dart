@@ -14,15 +14,15 @@ class DanmakuOption {
   /// 滚动弹幕运行时间，秒
   final double duration;
 
-  /// 滚动弹幕的最高速度，单位为 logical pixels / second。
+  /// 滚动弹幕允许的最大逻辑速度，单位为 logical pixels / second。
   ///
-  /// 宽屏时由 [duration] 推导出的速度可能过高；该上限避免弹幕因视图
-  /// 宽度增加而产生过大的逐帧位移。
+  /// 实际速度还会受到穿屏时长、显示刷新率、设备像素比以及
+  /// [maxScrollDistancePerFrame] 的共同限制。
   final double maxScrollSpeed;
 
-  /// 在显示器单次刷新中允许移动的最大物理像素数。
+  /// 按显示器标称刷新率计算的单次刷新最大物理位移。
   ///
-  /// 结合显示器刷新率与设备像素比，换算为恒定的安全滚动速度。
+  /// 该值用于换算滚动速度上限，不会对长帧造成的实际位移进行逐帧截断。
   final double maxScrollDistancePerFrame;
 
   /// 弹幕透明度
