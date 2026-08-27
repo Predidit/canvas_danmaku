@@ -9,7 +9,6 @@ final class ScrollDanmakuPainter extends BaseDanmakuPainter {
   final double durationInMilliseconds;
   final double maxScrollSpeed;
   final double maxScrollDistancePerFrame;
-  final double displayRefreshRate;
 
   late final Paint selfSendPaint = Paint()
     ..style = PaintingStyle.stroke
@@ -22,7 +21,6 @@ final class ScrollDanmakuPainter extends BaseDanmakuPainter {
     required this.durationInMilliseconds,
     required this.maxScrollSpeed,
     required this.maxScrollDistancePerFrame,
-    required this.displayRefreshRate,
     required super.fontSize,
     required super.fontWeight,
     required super.strokeWidth,
@@ -47,10 +45,11 @@ final class ScrollDanmakuPainter extends BaseDanmakuPainter {
       final previousTick = item.drawTick ??= tick;
       final elapsedMilliseconds = tick - previousTick;
       final intendedSpeed = distance * 1000 / durationInMilliseconds;
-      final smoothSpeed =
-          maxScrollDistancePerFrame * displayRefreshRate / devicePixelRatio;
-      final speed = min(intendedSpeed, min(maxScrollSpeed, smoothSpeed));
-      final distanceThisFrame = speed * elapsedMilliseconds / 1000;
+      final speed = min(intendedSpeed, maxScrollSpeed);
+      final distanceThisFrame = min(
+        speed * elapsedMilliseconds / 1000,
+        maxScrollDistancePerFrame,
+      );
       item.xPosition -= distanceThisFrame;
 
       if (item.xPosition < endPosition || item.xPosition > startPosition) {

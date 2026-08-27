@@ -20,9 +20,9 @@ class DanmakuOption {
   /// 宽度增加而产生过大的逐帧位移。
   final double maxScrollSpeed;
 
-  /// 在显示器单次刷新中允许移动的最大物理像素数。
+  /// 单帧允许移动的最大逻辑像素数。
   ///
-  /// 结合显示器刷新率与设备像素比，换算为恒定的安全滚动速度。
+  /// 限制长帧时的位移跳跃，优先保证视觉连续性。
   final double maxScrollDistancePerFrame;
 
   /// 弹幕透明度
@@ -65,7 +65,7 @@ class DanmakuOption {
     this.area = 1.0,
     this.duration = 10,
     this.maxScrollSpeed = 480,
-    this.maxScrollDistancePerFrame = 4,
+    this.maxScrollDistancePerFrame = 8,
     this.staticDuration = 5,
     this.opacity = 1.0,
     this.hideBottom = false,
