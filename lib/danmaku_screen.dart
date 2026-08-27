@@ -466,15 +466,6 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
 
   /// 确定滚动弹幕是否可以添加
   bool _scrollCanAddToTrack(double yPosition, double newDanmakuWidth) {
-    final newSpeed = calculateScrollSpeed(
-      viewportWidth: _viewWidth,
-      itemWidth: newDanmakuWidth,
-      durationInMilliseconds: _option.durationInMilliseconds,
-      maxScrollSpeed: _option.maxScrollSpeed,
-      displayRefreshRate: _displayRefreshRate,
-      devicePixelRatio: devicePixelRatio,
-    );
-
     for (DanmakuItem item in _scrollDanmakuItems) {
       if (item.yPosition == yPosition) {
         final existingEndPosition = item.xPosition + item.width;
@@ -482,13 +473,18 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
         if (_viewWidth - existingEndPosition < 0) {
           return false;
         }
-        if (item.suspend && existingEndPosition > 0) {
-          return false;
-        }
         if (item.width < newDanmakuWidth) {
           final existingSpeed = calculateScrollSpeed(
             viewportWidth: _viewWidth,
             itemWidth: item.width,
+            durationInMilliseconds: _option.durationInMilliseconds,
+            maxScrollSpeed: _option.maxScrollSpeed,
+            displayRefreshRate: _displayRefreshRate,
+            devicePixelRatio: devicePixelRatio,
+          );
+          final newSpeed = calculateScrollSpeed(
+            viewportWidth: _viewWidth,
+            itemWidth: newDanmakuWidth,
             durationInMilliseconds: _option.durationInMilliseconds,
             maxScrollSpeed: _option.maxScrollSpeed,
             displayRefreshRate: _displayRefreshRate,
