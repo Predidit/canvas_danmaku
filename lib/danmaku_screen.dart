@@ -479,7 +479,6 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
             itemWidth: item.width,
             durationInMilliseconds: _option.durationInMilliseconds,
             maxScrollSpeed: _option.maxScrollSpeed,
-            maxScrollDistancePerFrame: _option.maxScrollDistancePerFrame,
             displayRefreshRate: _displayRefreshRate,
             devicePixelRatio: devicePixelRatio,
           );
@@ -488,7 +487,6 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
             itemWidth: newDanmakuWidth,
             durationInMilliseconds: _option.durationInMilliseconds,
             maxScrollSpeed: _option.maxScrollSpeed,
-            maxScrollDistancePerFrame: _option.maxScrollDistancePerFrame,
             displayRefreshRate: _displayRefreshRate,
             devicePixelRatio: devicePixelRatio,
           );
@@ -593,8 +591,6 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
                             durationInMilliseconds:
                                 _option.durationInMilliseconds,
                             maxScrollSpeed: _option.maxScrollSpeed,
-                            maxScrollDistancePerFrame:
-                                _option.maxScrollDistancePerFrame,
                             displayRefreshRate: _displayRefreshRate,
                             fontSize: _option.fontSize,
                             fontWeight: _option.fontWeight,

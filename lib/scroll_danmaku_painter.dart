@@ -8,7 +8,6 @@ import 'package:canvas_danmaku/utils/scroll_speed.dart';
 final class ScrollDanmakuPainter extends BaseDanmakuPainter {
   final double durationInMilliseconds;
   final double maxScrollSpeed;
-  final double maxScrollDistancePerFrame;
   final double displayRefreshRate;
 
   late final Paint selfSendPaint = Paint()
@@ -21,7 +20,6 @@ final class ScrollDanmakuPainter extends BaseDanmakuPainter {
     required super.danmakuItems,
     required this.durationInMilliseconds,
     required this.maxScrollSpeed,
-    required this.maxScrollDistancePerFrame,
     required this.displayRefreshRate,
     required super.fontSize,
     required super.fontWeight,
@@ -50,7 +48,6 @@ final class ScrollDanmakuPainter extends BaseDanmakuPainter {
         itemWidth: item.width,
         durationInMilliseconds: durationInMilliseconds,
         maxScrollSpeed: maxScrollSpeed,
-        maxScrollDistancePerFrame: maxScrollDistancePerFrame,
         displayRefreshRate: displayRefreshRate,
         devicePixelRatio: devicePixelRatio,
       );
