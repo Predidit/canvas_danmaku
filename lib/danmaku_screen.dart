@@ -32,6 +32,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
   double _viewWidth = 0;
   double _viewHeight = 0;
   double devicePixelRatio = 1;
+  double _displayRefreshRate = 60;
 
   /// 弹幕配置
   late final ValueNotifier<DanmakuOption> _optionNotifier;
@@ -100,6 +101,10 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
   void didChangeDependencies() {
     super.didChangeDependencies();
     final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
+    final refreshRate = View.of(context).display.refreshRate;
+    if (refreshRate > 0) {
+      _displayRefreshRate = refreshRate;
+    }
     if (devicePixelRatio != this.devicePixelRatio) {
       this.devicePixelRatio = devicePixelRatio;
       for (var item in _scrollDanmakuItems) {
@@ -553,6 +558,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
                             maxScrollSpeed: _option.maxScrollSpeed,
                             maxScrollDistancePerFrame:
                                 _option.maxScrollDistancePerFrame,
+                            displayRefreshRate: _displayRefreshRate,
                             fontSize: _option.fontSize,
                             fontWeight: _option.fontWeight,
                             strokeWidth: _option.strokeWidth,
