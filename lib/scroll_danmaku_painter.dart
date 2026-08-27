@@ -1,4 +1,3 @@
-import 'dart:math' show min;
 import 'dart:ui' as ui;
 
 import 'package:canvas_danmaku/base_danmaku_painter.dart';
@@ -7,8 +6,6 @@ import 'package:flutter/material.dart';
 
 final class ScrollDanmakuPainter extends BaseDanmakuPainter {
   final double durationInMilliseconds;
-  final double maxScrollSpeed;
-  final double maxScrollDistancePerFrame;
 
   late final Paint selfSendPaint = Paint()
     ..style = PaintingStyle.stroke
@@ -19,8 +16,6 @@ final class ScrollDanmakuPainter extends BaseDanmakuPainter {
     required super.length,
     required super.danmakuItems,
     required this.durationInMilliseconds,
-    required this.maxScrollSpeed,
-    required this.maxScrollDistancePerFrame,
     required super.fontSize,
     required super.fontWeight,
     required super.strokeWidth,
@@ -42,15 +37,9 @@ final class ScrollDanmakuPainter extends BaseDanmakuPainter {
       final startPosition = size.width;
       final endPosition = -item.width;
       final distance = startPosition - endPosition;
-      final previousTick = item.drawTick ??= tick;
-      final elapsedMilliseconds = tick - previousTick;
-      final intendedSpeed = distance * 1000 / durationInMilliseconds;
-      final speed = min(intendedSpeed, maxScrollSpeed);
-      final distanceThisFrame = min(
-        speed * elapsedMilliseconds / 1000,
-        maxScrollDistancePerFrame,
-      );
-      item.xPosition -= distanceThisFrame;
+      item.xPosition +=
+          (((item.drawTick ??= tick) - tick) / durationInMilliseconds) *
+              distance;
 
       if (item.xPosition < endPosition || item.xPosition > startPosition) {
         item.expired = true;

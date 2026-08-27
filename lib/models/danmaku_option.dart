@@ -14,17 +14,6 @@ class DanmakuOption {
   /// 滚动弹幕运行时间，秒
   final double duration;
 
-  /// 滚动弹幕的最高速度，单位为 logical pixels / second。
-  ///
-  /// 宽屏时由 [duration] 推导出的速度可能过高；该上限避免弹幕因视图
-  /// 宽度增加而产生过大的逐帧位移。
-  final double maxScrollSpeed;
-
-  /// 单帧允许移动的最大逻辑像素数。
-  ///
-  /// 限制长帧时的位移跳跃，优先保证视觉连续性。
-  final double maxScrollDistancePerFrame;
-
   /// 弹幕透明度
   final double opacity;
 
@@ -64,8 +53,6 @@ class DanmakuOption {
     this.fontFamily,
     this.area = 1.0,
     this.duration = 10,
-    this.maxScrollSpeed = 480,
-    this.maxScrollDistancePerFrame = 8,
     this.staticDuration = 5,
     this.opacity = 1.0,
     this.hideBottom = false,
@@ -76,10 +63,7 @@ class DanmakuOption {
     this.massiveMode = false,
     this.safeArea = true,
     this.lineHeight = 1.6,
-  })  : assert(duration > 0),
-        assert(maxScrollSpeed > 0),
-        assert(maxScrollDistancePerFrame > 0),
-        durationInMilliseconds = duration * 1000,
+  })  : durationInMilliseconds = duration * 1000,
         staticDurationInMilliseconds = staticDuration * 1000;
 
   DanmakuOption copyWith({
@@ -88,8 +72,6 @@ class DanmakuOption {
     String? fontFamily,
     double? area,
     double? duration,
-    double? maxScrollSpeed,
-    double? maxScrollDistancePerFrame,
     double? staticDuration,
     double? opacity,
     bool? hideTop,
@@ -107,9 +89,6 @@ class DanmakuOption {
       fontWeight: fontWeight ?? this.fontWeight,
       fontFamily: fontFamily ?? this.fontFamily,
       duration: duration ?? this.duration,
-      maxScrollSpeed: maxScrollSpeed ?? this.maxScrollSpeed,
-      maxScrollDistancePerFrame:
-          maxScrollDistancePerFrame ?? this.maxScrollDistancePerFrame,
       staticDuration: staticDuration ?? this.staticDuration,
       opacity: opacity ?? this.opacity,
       hideTop: hideTop ?? this.hideTop,

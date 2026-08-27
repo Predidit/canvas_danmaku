@@ -14,7 +14,7 @@ abstract base class BaseDanmakuPainter extends CustomPainter {
   final int batchThreshold;
   final int tick;
 
-  static final Paint _paint = Paint()..filterQuality = FilterQuality.low;
+  static final Paint _paint = Paint();
 
   const BaseDanmakuPainter({
     required this.length,

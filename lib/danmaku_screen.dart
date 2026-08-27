@@ -550,9 +550,6 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
                             danmakuItems: _scrollDanmakuItems,
                             durationInMilliseconds:
                                 _option.durationInMilliseconds,
-                            maxScrollSpeed: _option.maxScrollSpeed,
-                            maxScrollDistancePerFrame:
-                                _option.maxScrollDistancePerFrame,
                             fontSize: _option.fontSize,
                             fontWeight: _option.fontWeight,
                             strokeWidth: _option.strokeWidth,
