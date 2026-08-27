@@ -16,8 +16,14 @@ class DanmakuOption {
 
   /// 滚动弹幕允许的最大逻辑速度，单位为 logical pixels / second。
   ///
-  /// 实际速度还会受到穿屏时长、显示刷新率和设备像素比的共同限制。
+  /// 实际速度还会受到穿屏时长、显示刷新率、设备像素比以及
+  /// [maxScrollDistancePerFrame] 的共同限制。
   final double maxScrollSpeed;
+
+  /// 按显示器标称刷新率计算的单次刷新最大物理位移。
+  ///
+  /// 该值用于换算滚动速度上限，不会对长帧造成的实际位移进行逐帧截断。
+  final double maxScrollDistancePerFrame;
 
   /// 弹幕透明度
   final double opacity;
@@ -59,6 +65,7 @@ class DanmakuOption {
     this.area = 1.0,
     this.duration = 10,
     this.maxScrollSpeed = 480,
+    this.maxScrollDistancePerFrame = 4,
     this.staticDuration = 5,
     this.opacity = 1.0,
     this.hideBottom = false,
@@ -71,6 +78,7 @@ class DanmakuOption {
     this.lineHeight = 1.6,
   })  : assert(duration > 0),
         assert(maxScrollSpeed > 0),
+        assert(maxScrollDistancePerFrame > 0),
         durationInMilliseconds = duration * 1000,
         staticDurationInMilliseconds = staticDuration * 1000;
 
@@ -81,6 +89,7 @@ class DanmakuOption {
     double? area,
     double? duration,
     double? maxScrollSpeed,
+    double? maxScrollDistancePerFrame,
     double? staticDuration,
     double? opacity,
     bool? hideTop,
@@ -99,6 +108,8 @@ class DanmakuOption {
       fontFamily: fontFamily ?? this.fontFamily,
       duration: duration ?? this.duration,
       maxScrollSpeed: maxScrollSpeed ?? this.maxScrollSpeed,
+      maxScrollDistancePerFrame:
+          maxScrollDistancePerFrame ?? this.maxScrollDistancePerFrame,
       staticDuration: staticDuration ?? this.staticDuration,
       opacity: opacity ?? this.opacity,
       hideTop: hideTop ?? this.hideTop,
