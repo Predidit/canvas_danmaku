@@ -11,12 +11,12 @@ class DanmakuOption {
   /// 显示区域，0.1-1.0
   final double area;
 
-  /// 滚动弹幕运行时间，秒
+  /// 滚动弹幕的目标穿屏时间，秒；限速后实际穿屏时间可能更长
   final double duration;
 
   /// 滚动弹幕允许的最大逻辑速度，单位为 logical pixels / second。
   ///
-  /// 实际速度还会受到穿屏时长、显示刷新率和设备像素比的共同限制。
+  /// 实际速度还会受到显示刷新率和设备像素比的共同限制。
   final double maxScrollSpeed;
 
   /// 弹幕透明度
