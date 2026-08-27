@@ -1,9 +1,9 @@
+import 'dart:math' show min;
 import 'dart:ui' as ui;
 
 import 'package:canvas_danmaku/base_danmaku_painter.dart';
 import 'package:canvas_danmaku/models/danmaku_item.dart';
 import 'package:flutter/material.dart';
-import 'package:canvas_danmaku/utils/scroll_speed.dart';
 
 final class ScrollDanmakuPainter extends BaseDanmakuPainter {
   final double durationInMilliseconds;
@@ -43,17 +43,13 @@ final class ScrollDanmakuPainter extends BaseDanmakuPainter {
     if (!item.suspend) {
       final startPosition = size.width;
       final endPosition = -item.width;
+      final distance = startPosition - endPosition;
       final previousTick = item.drawTick ??= tick;
       final elapsedMilliseconds = tick - previousTick;
-      final speed = calculateScrollSpeed(
-        viewportWidth: startPosition,
-        itemWidth: item.width,
-        durationInMilliseconds: durationInMilliseconds,
-        maxScrollSpeed: maxScrollSpeed,
-        maxScrollDistancePerFrame: maxScrollDistancePerFrame,
-        displayRefreshRate: displayRefreshRate,
-        devicePixelRatio: devicePixelRatio,
-      );
+      final intendedSpeed = distance * 1000 / durationInMilliseconds;
+      final smoothSpeed =
+          maxScrollDistancePerFrame * displayRefreshRate / devicePixelRatio;
+      final speed = min(intendedSpeed, min(maxScrollSpeed, smoothSpeed));
       final distanceThisFrame = speed * elapsedMilliseconds / 1000;
       item.xPosition -= distanceThisFrame;
 

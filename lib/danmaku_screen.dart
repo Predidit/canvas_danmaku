@@ -8,7 +8,6 @@ import 'package:canvas_danmaku/scroll_danmaku_painter.dart';
 import 'package:canvas_danmaku/special_danmaku_painter.dart';
 import 'package:canvas_danmaku/static_danmaku_painter.dart';
 import 'package:canvas_danmaku/utils/utils.dart';
-import 'package:canvas_danmaku/utils/scroll_speed.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -28,7 +27,7 @@ class DanmakuScreen<T> extends StatefulWidget {
 }
 
 class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
-    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+    with SingleTickerProviderStateMixin {
   /// 视图宽度
   double _viewWidth = 0;
   double _viewHeight = 0;
@@ -70,7 +69,6 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     _optionNotifier = ValueNotifier(widget.option);
     DmUtils.updateSelfSendPaint(_option.strokeWidth);
 
@@ -103,7 +101,10 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
   void didChangeDependencies() {
     super.didChangeDependencies();
     final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
-    _updateDisplayRefreshRate();
+    final refreshRate = View.of(context).display.refreshRate;
+    if (refreshRate > 0) {
+      _displayRefreshRate = refreshRate;
+    }
     if (devicePixelRatio != this.devicePixelRatio) {
       this.devicePixelRatio = devicePixelRatio;
       for (var item in _scrollDanmakuItems) {
@@ -115,23 +116,6 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
       for (var item in _specialDanmakuItems) {
         item.dispose();
       }
-    }
-  }
-
-  void _updateDisplayRefreshRate() {
-    final refreshRate = View.maybeOf(context)?.display.refreshRate;
-    if (refreshRate != null && refreshRate > 0) {
-      _displayRefreshRate = refreshRate;
-    }
-  }
-
-  @override
-  void didChangeMetrics() {
-    if (!mounted) return;
-    final oldRefreshRate = _displayRefreshRate;
-    _updateDisplayRefreshRate();
-    if (_displayRefreshRate != oldRefreshRate) {
-      setState(() {});
     }
   }
 
@@ -159,7 +143,6 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
   @override
   void dispose() {
     _running = false;
-    WidgetsBinding.instance.removeObserver(this);
     _ticker.dispose();
     _clearDanmakus();
     _tickNotifier.dispose();
@@ -474,29 +457,9 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
           return false;
         }
         if (item.width < newDanmakuWidth) {
-          final existingSpeed = calculateScrollSpeed(
-            viewportWidth: _viewWidth,
-            itemWidth: item.width,
-            durationInMilliseconds: _option.durationInMilliseconds,
-            maxScrollSpeed: _option.maxScrollSpeed,
-            maxScrollDistancePerFrame: _option.maxScrollDistancePerFrame,
-            displayRefreshRate: _displayRefreshRate,
-            devicePixelRatio: devicePixelRatio,
-          );
-          final newSpeed = calculateScrollSpeed(
-            viewportWidth: _viewWidth,
-            itemWidth: newDanmakuWidth,
-            durationInMilliseconds: _option.durationInMilliseconds,
-            maxScrollSpeed: _option.maxScrollSpeed,
-            maxScrollDistancePerFrame: _option.maxScrollDistancePerFrame,
-            displayRefreshRate: _displayRefreshRate,
-            devicePixelRatio: devicePixelRatio,
-          );
-          final gap = _viewWidth - existingEndPosition;
-          final relativeSpeed = newSpeed - existingSpeed;
-          if (relativeSpeed > 0 &&
-              gap * existingSpeed <
-                  (item.xPosition + item.width) * relativeSpeed) {
+          if ((1 -
+                  ((_viewWidth - item.xPosition) / (item.width + _viewWidth))) >
+              ((_viewWidth) / (_viewWidth + newDanmakuWidth))) {
             return false;
           }
         }
