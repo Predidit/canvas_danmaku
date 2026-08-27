@@ -1,3 +1,7 @@
+## 0.3.3
+
+- Optimize danmaku drawing performance.
+
 ## 0.3.2
 
 - Fix opacity change.
