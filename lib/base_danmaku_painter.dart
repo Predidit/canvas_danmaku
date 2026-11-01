@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:canvas_danmaku/canvas_danmaku.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 abstract base class BaseDanmakuPainter extends CustomPainter {
@@ -13,8 +14,8 @@ abstract base class BaseDanmakuPainter extends CustomPainter {
   final bool running;
   final int batchThreshold;
 
-  /// 动画时间使用微秒
-  final int tickInMicroseconds;
+  /// 微秒时钟直接驱动重绘，避免每帧重建组件和绘制器。
+  final ValueListenable<int> frameTime;
 
   static final Paint _paint = Paint()..filterQuality = FilterQuality.low;
 
@@ -26,9 +27,9 @@ abstract base class BaseDanmakuPainter extends CustomPainter {
     required this.strokeWidth,
     required this.devicePixelRatio,
     required this.running,
-    required this.tickInMicroseconds,
+    required this.frameTime,
     this.batchThreshold = 10, // 默认值为10，可以自行调整
-  });
+  }) : super(repaint: frameTime);
 
   static void paintImg(
     Canvas canvas,

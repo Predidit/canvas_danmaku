@@ -21,13 +21,13 @@ final class ScrollDanmakuPainter extends BaseDanmakuPainter {
     required super.strokeWidth,
     required super.devicePixelRatio,
     required super.running,
-    required super.tickInMicroseconds,
+    required super.frameTime,
     super.batchThreshold,
   });
 
   @override
   void paintDanmaku(ui.Canvas canvas, ui.Size size, DanmakuItem item) {
-    final time = tickInMicroseconds;
+    final time = frameTime.value;
     item.drawParagraphIfNeeded(
       fontSize,
       fontWeight,

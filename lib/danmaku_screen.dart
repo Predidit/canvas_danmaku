@@ -116,7 +116,13 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
 
   int _time = 0;
   void _tick(Duration elapsed) {
-    _tickNotifier.value = elapsed.inMicroseconds + _lastTick;
+    final time = elapsed.inMicroseconds + _lastTick;
+    if (time == _tickNotifier.value) {
+      // 首帧和空闲后重启时，时间可能不变，但新增弹幕仍需绘制。
+      _tickNotifier.refresh();
+    } else {
+      _tickNotifier.value = time;
+    }
     if (_time++ > 10) {
       _time = 0;
       _lazyTick(_tickNotifier.value);
@@ -542,7 +548,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
                 children: [
                   RepaintBoundary.wrap(
                     ValueListenableBuilder(
-                      valueListenable: _tickNotifier,
+                      valueListenable: _optionNotifier,
                       builder: (context, value, child) {
                         return CustomPaint(
                           willChange: _running,
@@ -556,7 +562,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
                             strokeWidth: _option.strokeWidth,
                             devicePixelRatio: devicePixelRatio,
                             running: _running,
-                            tickInMicroseconds: value,
+                            frameTime: _tickNotifier,
                           ),
                           size: Size.infinite,
                         );
@@ -589,7 +595,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
                   RepaintBoundary.wrap(
                     IgnorePointer(
                         child: ValueListenableBuilder(
-                      valueListenable: _tickNotifier, // 与滚动弹幕共用控制器
+                      valueListenable: _optionNotifier,
                       builder: (context, value, child) {
                         return CustomPaint(
                           willChange: _running,
@@ -601,7 +607,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
                             strokeWidth: _option.strokeWidth,
                             devicePixelRatio: devicePixelRatio,
                             running: _running,
-                            tickInMicroseconds: value,
+                            frameTime: _tickNotifier,
                           ),
                           size: Size.infinite,
                         );
