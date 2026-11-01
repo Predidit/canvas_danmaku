@@ -116,7 +116,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
 
   int _time = 0;
   void _tick(Duration elapsed) {
-    _tickNotifier.value = elapsed.inMilliseconds + _lastTick;
+    _tickNotifier.value = elapsed.inMicroseconds + _lastTick;
     if (_time++ > 10) {
       _time = 0;
       _lazyTick(_tickNotifier.value);
@@ -486,13 +486,14 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
   }
 
   @pragma("vm:prefer-inline")
-  void _lazyTick(int tick) {
+  void _lazyTick(int tickInMicroseconds) {
     // 移除屏幕外滚动弹幕
     _scrollDanmakuItems.removeWhere((item) => item.needRemove(item.expired));
     // 移除静态弹幕
     _staticDanmakuItems.removeWhere((item) => item.needRemove(!item.suspend &&
-        item.drawTick != null &&
-        (tick - item.drawTick!) >= _option.staticDurationInMilliseconds));
+        item.drawTimeInMicroseconds != null &&
+        (tickInMicroseconds - item.drawTimeInMicroseconds!) >=
+            _option.staticDurationInMicroseconds));
     // 移除高级弹幕
     _specialDanmakuItems.removeWhere((item) => item.needRemove(item.expired));
     // 暂停动画
@@ -500,7 +501,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
         _specialDanmakuItems.isEmpty &&
         _staticDanmakuItems.value.isEmpty &&
         _ticker.isActive) {
-      _lastTick = tick;
+      _lastTick = tickInMicroseconds;
       _ticker.stop();
     }
   }
@@ -548,14 +549,14 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
                           painter: ScrollDanmakuPainter(
                             length: _scrollDanmakuItems.length,
                             danmakuItems: _scrollDanmakuItems,
-                            durationInMilliseconds:
-                                _option.durationInMilliseconds,
+                            durationInMicroseconds:
+                                _option.durationInMicroseconds,
                             fontSize: _option.fontSize,
                             fontWeight: _option.fontWeight,
                             strokeWidth: _option.strokeWidth,
                             devicePixelRatio: devicePixelRatio,
                             running: _running,
-                            tick: value,
+                            tickInMicroseconds: value,
                           ),
                           size: Size.infinite,
                         );
@@ -577,7 +578,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
                             fontWeight: _option.fontWeight,
                             strokeWidth: _option.strokeWidth,
                             devicePixelRatio: devicePixelRatio,
-                            tick: _tickNotifier.value,
+                            tickInMicroseconds: _tickNotifier.value,
                           ),
                           size: Size.infinite,
                         );
@@ -600,7 +601,7 @@ class _DanmakuScreenState<T> extends State<DanmakuScreen<T>>
                             strokeWidth: _option.strokeWidth,
                             devicePixelRatio: devicePixelRatio,
                             running: _running,
-                            tick: value,
+                            tickInMicroseconds: value,
                           ),
                           size: Size.infinite,
                         );

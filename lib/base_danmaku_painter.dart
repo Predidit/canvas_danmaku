@@ -12,7 +12,9 @@ abstract base class BaseDanmakuPainter extends CustomPainter {
   final double devicePixelRatio;
   final bool running;
   final int batchThreshold;
-  final int tick;
+
+  /// 动画时间使用微秒
+  final int tickInMicroseconds;
 
   static final Paint _paint = Paint()..filterQuality = FilterQuality.low;
 
@@ -24,7 +26,7 @@ abstract base class BaseDanmakuPainter extends CustomPainter {
     required this.strokeWidth,
     required this.devicePixelRatio,
     required this.running,
-    required this.tick,
+    required this.tickInMicroseconds,
     this.batchThreshold = 10, // 默认值为10，可以自行调整
   });
 

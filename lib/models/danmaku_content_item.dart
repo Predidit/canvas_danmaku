@@ -43,7 +43,12 @@ class DanmakuContentItem<T> {
 }
 
 class SpecialDanmakuContentItem<T> extends DanmakuContentItem<T> {
+  /// 弹幕持续时间，毫秒。
   final int duration;
+
+  /// 弹幕持续时间，微秒。
+  int get durationInMicroseconds =>
+      duration * Duration.microsecondsPerMillisecond;
 
   final double fontSize; // 从弹幕内容外解析
   final bool hasStroke;
@@ -51,8 +56,19 @@ class SpecialDanmakuContentItem<T> extends DanmakuContentItem<T> {
 
   final Tween<double> translateXTween; // 相对坐标
   final Tween<double> translateYTween; // 相对坐标
+  /// 位移动画时长，毫秒。
   final int translationDuration;
+
+  /// 位移动画开始前的延迟，毫秒。
   final int translationStartDelay;
+
+  /// 位移动画时长，微秒。
+  int get translationDurationInMicroseconds =>
+      translationDuration * Duration.microsecondsPerMillisecond;
+
+  /// 位移动画开始前的延迟，微秒。
+  int get translationStartDelayInMicroseconds =>
+      translationStartDelay * Duration.microsecondsPerMillisecond;
 
   final double rotateZ;
   final Matrix4? matrix;

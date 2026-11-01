@@ -19,8 +19,8 @@ class DanmakuItem<T> {
   /// 弹幕竖直方向位置
   double yPosition;
 
-  /// 上次绘制时间
-  int? drawTick;
+  /// 上次绘制时间（微秒）
+  int? drawTimeInMicroseconds;
 
   /// 弹幕布局缓存
   ui.Image? image;
@@ -49,7 +49,6 @@ class DanmakuItem<T> {
     this.xPosition = 0,
     this.yPosition = 0,
     this.image,
-    this.drawTick,
   });
 
   void drawParagraphIfNeeded(
@@ -82,6 +81,6 @@ class DanmakuItem<T> {
 
   @override
   String toString() {
-    return 'DanmakuItem(content=$content, xPos=$xPosition, yPos=$yPosition, size=${ui.Size(width, height)}, drawTick=$drawTick)';
+    return 'DanmakuItem(content=$content, xPos=$xPosition, yPos=$yPosition, size=${ui.Size(width, height)}, drawTimeInMicroseconds=$drawTimeInMicroseconds)';
   }
 }
