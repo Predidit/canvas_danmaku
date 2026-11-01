@@ -11,7 +11,7 @@ final class StaticDanmakuPainter extends CustomPainter {
   final int fontWeight;
   final double strokeWidth;
   final double devicePixelRatio;
-  final int tick;
+  final int tickInMicroseconds;
 
   StaticDanmakuPainter({
     required this.length,
@@ -21,14 +21,14 @@ final class StaticDanmakuPainter extends CustomPainter {
     required this.fontWeight,
     required this.strokeWidth,
     required this.devicePixelRatio,
-    required this.tick,
+    required this.tickInMicroseconds,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     for (var item in danmakuItems) {
       item
-        ..drawTick ??= tick
+        ..drawTimeInMicroseconds ??= tickInMicroseconds
         ..drawParagraphIfNeeded(
           fontSize,
           fontWeight,

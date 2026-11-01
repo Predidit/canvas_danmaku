@@ -5,7 +5,7 @@ import 'package:canvas_danmaku/models/danmaku_item.dart';
 import 'package:flutter/material.dart';
 
 final class ScrollDanmakuPainter extends BaseDanmakuPainter {
-  final double durationInMilliseconds;
+  final double durationInMicroseconds;
 
   late final Paint selfSendPaint = Paint()
     ..style = PaintingStyle.stroke
@@ -15,18 +15,19 @@ final class ScrollDanmakuPainter extends BaseDanmakuPainter {
   ScrollDanmakuPainter({
     required super.length,
     required super.danmakuItems,
-    required this.durationInMilliseconds,
+    required this.durationInMicroseconds,
     required super.fontSize,
     required super.fontWeight,
     required super.strokeWidth,
     required super.devicePixelRatio,
     required super.running,
-    required super.tick,
+    required super.frameTime,
     super.batchThreshold,
   });
 
   @override
   void paintDanmaku(ui.Canvas canvas, ui.Size size, DanmakuItem item) {
+    final time = frameTime.value;
     item.drawParagraphIfNeeded(
       fontSize,
       fontWeight,
@@ -37,9 +38,9 @@ final class ScrollDanmakuPainter extends BaseDanmakuPainter {
       final startPosition = size.width;
       final endPosition = -item.width;
       final distance = startPosition - endPosition;
-      item.xPosition +=
-          (((item.drawTick ??= tick) - tick) / durationInMilliseconds) *
-              distance;
+      final previousTime = item.drawTimeInMicroseconds ?? time;
+      item.xPosition -=
+          (time - previousTime) / durationInMicroseconds * distance;
 
       if (item.xPosition < endPosition || item.xPosition > startPosition) {
         item.expired = true;
@@ -55,6 +56,6 @@ final class ScrollDanmakuPainter extends BaseDanmakuPainter {
       devicePixelRatio,
     );
 
-    item.drawTick = tick;
+    item.drawTimeInMicroseconds = time;
   }
 }
