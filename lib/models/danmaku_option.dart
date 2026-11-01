@@ -19,10 +19,18 @@ class DanmakuOption {
 
   final double durationInMilliseconds;
 
+  /// 滚动弹幕运行时间，微秒。
+  double get durationInMicroseconds =>
+      durationInMilliseconds * Duration.microsecondsPerMillisecond;
+
   /// 静态弹幕运行时间，秒
   final double staticDuration;
 
   final double staticDurationInMilliseconds;
+
+  /// 静态弹幕运行时间，微秒。
+  double get staticDurationInMicroseconds =>
+      staticDurationInMilliseconds * Duration.microsecondsPerMillisecond;
 
   /// 隐藏顶部弹幕
   final bool hideTop;

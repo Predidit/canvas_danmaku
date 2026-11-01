@@ -16,7 +16,7 @@ final class SpecialDanmakuPainter extends BaseDanmakuPainter {
     required super.strokeWidth,
     required super.devicePixelRatio,
     required super.running,
-    required super.tick,
+    required super.frameTime,
     super.batchThreshold,
   });
 
@@ -24,9 +24,10 @@ final class SpecialDanmakuPainter extends BaseDanmakuPainter {
 
   @override
   void paintDanmaku(ui.Canvas canvas, ui.Size size, DanmakuItem item) {
-    final elapsed = tick - (item.drawTick ??= tick);
+    final time = frameTime.value;
+    final elapsed = time - (item.drawTimeInMicroseconds ??= time);
     final content = item.content as SpecialDanmakuContentItem;
-    if (0 <= elapsed && elapsed < content.duration) {
+    if (0 <= elapsed && elapsed < content.durationInMicroseconds) {
       _paintSpecialDanmaku(canvas, item, content, size, elapsed);
     } else {
       item.expired = true;
@@ -41,14 +42,17 @@ final class SpecialDanmakuPainter extends BaseDanmakuPainter {
         ? item.color
         : item.color.withValues(
             alpha: item.alphaTween!.transform(
-            elapsed / item.duration,
+            elapsed / item.durationInMicroseconds,
           ));
 
     // 位移动画
     double dx, dy;
-    if (elapsed > item.translationStartDelay) {
-      late final translateProgress = item.easingType.transform(min(1.0,
-          (elapsed - item.translationStartDelay) / item.translationDuration));
+    final translationStartDelay = item.translationStartDelayInMicroseconds;
+    if (elapsed > translationStartDelay) {
+      late final translateProgress = item.easingType.transform(min(
+          1.0,
+          (elapsed - translationStartDelay) /
+              item.translationDurationInMicroseconds));
 
       double getOffset(Tween<double> tween) => tween is ConstantTween
           ? tween.begin!
