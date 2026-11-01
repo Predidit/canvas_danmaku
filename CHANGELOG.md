@@ -1,3 +1,7 @@
+## 0.3.4
+
+- Update example Android build configuration for newer Flutter SDKs.
+
 ## 0.3.3
 
 - Optimize danmaku drawing performance.
